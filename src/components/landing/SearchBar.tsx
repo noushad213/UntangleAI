@@ -179,7 +179,7 @@ export function SearchBar({
           ) : (
             <div className={styles.emptyState}>
               <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                <Sparkles size={16} style={{ color: 'var(--color-brand-500)' }} />
+                <Search size={16} style={{ color: 'var(--color-brand-500)' }} />
                 <strong>Synthesizing Custom Roadmap</strong>
               </div>
               <span>No pre-cached template for "{query}". Press Enter to generate a tailored roadmap.</span>
