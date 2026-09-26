@@ -1,0 +1,38 @@
+.mainContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface-secondary);
+}
+
+.contentArea {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.bottomDisclaimer {
+  background: var(--color-surface-primary);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-2) var(--space-6);
+  font-size: var(--type-xs);
+  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  z-index: 20;
+}
+
+.disclaimerText {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.disclaimerLink {
+  color: var(--color-brand-500);
+  text-decoration: underline;
+}
