@@ -34,7 +34,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', overflowX: 'hidden' }}>
       <LandingNav
         theme={theme}
         onToggleTheme={toggleTheme}
