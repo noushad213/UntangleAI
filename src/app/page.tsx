@@ -8,6 +8,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
 
 export default function HomePage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [selectedLang, setSelectedLang] = useState<string>('auto');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('untangle_theme') as 'light' | 'dark' | null;
@@ -34,9 +35,14 @@ export default function HomePage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <LandingNav theme={theme} onToggleTheme={toggleTheme} />
+      <LandingNav
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        selectedLang={selectedLang}
+        onSelectLang={setSelectedLang}
+      />
       <main style={{ flex: 1 }}>
-        <LandingHero />
+        <LandingHero selectedLang={selectedLang} />
         <HowItWorks />
       </main>
       <LandingFooter />
