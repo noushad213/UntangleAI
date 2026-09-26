@@ -70,7 +70,7 @@ export function LandingHero({ selectedLang = 'auto' }: LandingHeroProps) {
         <footer className={styles.bottomBar}>
           <a
             href="tel:1800112026"
-            className={styles.bottomPill}
+            className={`${styles.bottomPill} ${styles.helplinePill}`}
             title="National Government Services Portal helpline"
           >
             <Phone size={13} />
@@ -92,8 +92,8 @@ export function LandingHero({ selectedLang = 'auto' }: LandingHeroProps) {
             </Link>
           </div>
 
-          <Link href="#about-section" className={styles.bottomPill}>
-            <span>view more about roadmaps</span>
+          <Link href="#about-section" className={`${styles.bottomPill} ${styles.explorePill}`}>
+            <span>explore roadmaps</span>
             <span className={styles.toggleDot} />
           </Link>
         </footer>
