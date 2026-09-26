@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { Compass, FileCheck, ArrowRight } from 'lucide-react';
 import styles from './HowItWorks.module.css';
 
 export function HowItWorks() {
@@ -18,7 +19,7 @@ export function HowItWorks() {
         </div>
 
         <div className={styles.cardsStack}>
-          {/* Row 1: Slate Lavender Card on Left, Floating Action on Right */}
+          {/* Row 1: Slate Lavender Card on Left, Elevated Action Companion on Right */}
           <div className={styles.rowOne}>
             <div className={styles.cardPeriwinkle}>
               <div className={styles.cardImageWrapper}>
@@ -45,26 +46,22 @@ export function HowItWorks() {
             </div>
 
             <div className={styles.sideBlock}>
+              <div className={styles.sideBlockBadge}>
+                <Compass size={18} />
+              </div>
+              <h4 className={styles.sideBlockHeading}>Verified Requirements</h4>
               <p className={styles.sideBlockText}>
-                You can view verified prerequisites, documents, and fee schedules on our roadmaps.
+                View verified prerequisites, authorized forms, and statutory fee schedules on every roadmap.
               </p>
               <Link href="/roadmap/pvt-ltd-delhi" className={styles.sidePillBtn}>
-                View roadmaps
+                <span>View roadmaps</span>
+                <ArrowRight size={13} />
               </Link>
             </div>
           </div>
 
-          {/* Row 2: Floating Action on Left, Dark Espresso Card on Right */}
+          {/* Row 2: In DOM order: Primary Card first, Companion Action second (CSS row-reverse for desktop) */}
           <div className={styles.rowTwo}>
-            <div className={styles.sideBlock}>
-              <p className={styles.sideBlockText}>
-                You can track your documentation offline or export interactive checklists directly.
-              </p>
-              <Link href="/roadmap/fssai-food-license" className={styles.sidePillBtn}>
-                View checklists
-              </Link>
-            </div>
-
             <div className={styles.cardEspresso}>
               <div className={styles.cardTextContent}>
                 <h3 className={styles.cardHeading}>
@@ -107,6 +104,20 @@ export function HowItWorks() {
                   loading="lazy"
                 />
               </div>
+            </div>
+
+            <div className={styles.sideBlock}>
+              <div className={styles.sideBlockBadge}>
+                <FileCheck size={18} />
+              </div>
+              <h4 className={styles.sideBlockHeading}>Offline Checklists</h4>
+              <p className={styles.sideBlockText}>
+                Track your documentation offline or export interactive checklists directly before visiting authorities.
+              </p>
+              <Link href="/roadmap/fssai-food-license" className={styles.sidePillBtn}>
+                <span>View checklists</span>
+                <ArrowRight size={13} />
+              </Link>
             </div>
           </div>
         </div>
