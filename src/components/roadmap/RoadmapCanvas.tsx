@@ -13,7 +13,6 @@ import {
   useNodesState,
   useEdgesState,
 } from '@xyflow/react';
-import { Sparkles } from 'lucide-react';
 import { CivicProcess, ProcessStep, StepStatus } from '@/types/roadmap';
 import { StepNode, StepNodeData } from './nodes/StepNode';
 import { CustomEdge } from './edges/CustomEdge';
