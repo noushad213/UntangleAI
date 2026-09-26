@@ -2,10 +2,15 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MoreHorizontal, Sparkles, Phone, Building2, Car, Utensils, ArrowDown } from 'lucide-react';
+import { MoreHorizontal, ArrowRight, Phone, Building2, Car, Utensils, ArrowDown } from 'lucide-react';
+import { HeroQueryInput } from './HeroQueryInput';
 import styles from './LandingHero.module.css';
 
-export function LandingHero() {
+interface LandingHeroProps {
+  selectedLang?: string;
+}
+
+export function LandingHero({ selectedLang = 'auto' }: LandingHeroProps) {
   return (
     <section className={styles.heroContainer} aria-label="Hero showcase">
       {/* Background panoramic landscape image that scales fluidly */}
@@ -37,9 +42,9 @@ export function LandingHero() {
             <span className={styles.brandSubtitle}>Civic Process Navigator</span>
           </div>
 
-          <Link href="#search-showcase" className={styles.pillActionBtn}>
+          <Link href="#about-section" className={styles.pillActionBtn}>
             <span>Find guidance</span>
-            <Sparkles size={13} className={styles.sparkleIcon} />
+            <ArrowRight size={13} />
           </Link>
         </header>
 
@@ -49,10 +54,11 @@ export function LandingHero() {
             Demystify Public Bureaucracy
           </h1>
 
-          <p className={styles.heroSubtitle}>
-            Turn convoluted government procedures into clear, step-by-step visual roadmaps.
-            Every requirement verified against official portal citations.
-          </p>
+          <h2 className={styles.queryHeading}>
+            Ask your queries
+          </h2>
+
+          <HeroQueryInput selectedLang={selectedLang} />
 
           <Link href="#about-section" className={styles.heroCtaPill}>
             <span>view roadmap selection</span>
@@ -86,7 +92,7 @@ export function LandingHero() {
             </Link>
           </div>
 
-          <Link href="#search-showcase" className={styles.bottomPill}>
+          <Link href="#about-section" className={styles.bottomPill}>
             <span>view more about roadmaps</span>
             <span className={styles.toggleDot} />
           </Link>
