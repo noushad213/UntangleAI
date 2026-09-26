@@ -1,0 +1,97 @@
+.footer {
+  background: var(--color-surface-elevated);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  margin-top: auto;
+}
+
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.brandCol {
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.brandTitle {
+  font-size: var(--type-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.brandDesc {
+  font-size: var(--type-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.sourcesCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.colTitle {
+  font-size: var(--type-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+}
+
+.sourceList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+}
+
+.sourceLink {
+  font-size: var(--type-xs);
+  color: var(--color-text-secondary);
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+.sourceLink:hover {
+  color: var(--color-brand-600);
+}
+
+.disclaimerBanner {
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--type-xs);
+  color: var(--color-text-tertiary);
+  line-height: 1.5;
+}
+
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-4);
+  font-size: var(--type-xs);
+  color: var(--color-text-tertiary);
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
