@@ -160,19 +160,15 @@
   transform: translateY(-1px);
 }
 
-.sparkleIcon {
-  width: 14px;
-  height: 14px;
-  opacity: 0.9;
-}
-
 /* Center Content */
 .centerContent {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin: 50px 0;
+  margin: 32px auto 24px;
+  width: 100%;
+  max-width: 900px;
 }
 
 .heroTitle {
@@ -183,16 +179,17 @@
   line-height: 1.15;
   color: #ffffff;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
-.heroSubtitle {
-  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
-  color: rgba(255, 255, 255, 0.85);
-  max-width: 620px;
-  margin-bottom: 28px;
-  line-height: 1.6;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+.queryHeading {
+  font-family: var(--font-family-sans), sans-serif;
+  font-size: clamp(1.35rem, 2.5vw, 1.95rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+  margin-bottom: 20px;
 }
 
 .heroCtaPill {
