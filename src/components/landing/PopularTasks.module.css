@@ -3,14 +3,14 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
-  margin-top: var(--space-4);
+  margin-top: var(--space-2);
 }
 
 .label {
-  font-size: var(--type-xs);
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--color-text-tertiary);
 }
 
@@ -20,45 +20,48 @@
   justify-content: center;
   gap: var(--space-2);
   flex-wrap: wrap;
-  max-width: 820px;
+  max-width: 700px;
 }
 
 .pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
+  padding: 7px 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-full);
   font-size: var(--type-xs);
   font-weight: 500;
   color: var(--color-text-secondary);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--duration-fast) var(--ease-default);
+  transition: all var(--duration-normal) var(--ease-spring);
   cursor: pointer;
   text-decoration: none;
 }
 
 .pill:hover {
-  border-color: var(--color-brand-500);
+  border-color: var(--color-brand-300);
   color: var(--color-brand-600);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background: var(--color-brand-50);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), var(--shadow-glow-sm);
 }
 
 .pillDisabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: default;
   pointer-events: none;
-  background: var(--color-surface-secondary);
 }
 
 .badgeComingSoon {
-  font-size: 10px;
-  padding: 1px 5px;
-  background: var(--color-surface-tertiary);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: var(--gradient-brand-subtle);
   color: var(--color-text-tertiary);
   border-radius: var(--radius-sm);
-  margin-left: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
