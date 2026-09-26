@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Pune Municipal Corporation",
+    "slug": "pune",
+    "district": "Pune",
+    "allowedDomains": ["punecorporation.org"],
+    "issueCatalog": [
+      { "issueKey": "property_tax_payment", "label": "Property Tax Payment", "keywords": ["property tax", "tax bill", "pay tax"] },
+      { "issueKey": "birth_certificate", "label": "Birth Certificate Application", "keywords": ["birth certificate", "birth registration"] },
+      { "issueKey": "water_connection_new", "label": "New Water Connection", "keywords": ["water connection", "new water"] },
+      { "issueKey": "garbage_complaint", "label": "Garbage Collection Complaint", "keywords": ["garbage", "waste", "trash not collected"] }
+    ]
+  },
+  {
+    "name": "Nagpur Municipal Corporation",
+    "slug": "nagpur",
+    "district": "Nagpur",
+    "allowedDomains": ["nmcnagpur.gov.in"],
+    "issueCatalog": [
+      { "issueKey": "property_tax_payment", "label": "Property Tax Payment", "keywords": ["property tax", "tax bill"] },
+      { "issueKey": "birth_certificate", "label": "Birth Certificate Application", "keywords": ["birth certificate"] },
+      { "issueKey": "trade_license", "label": "Trade License Application", "keywords": ["trade license", "shop license"] }
+    ]
+  },
+  {
+    "name": "Nashik Municipal Corporation",
+    "slug": "nashik",
+    "district": "Nashik",
+    "allowedDomains": ["nmc.gov.in"],
+    "issueCatalog": [
+      { "issueKey": "property_tax_payment", "label": "Property Tax Payment", "keywords": ["property tax"] },
+      { "issueKey": "water_connection_new", "label": "New Water Connection", "keywords": ["water connection"] },
+      { "issueKey": "streetlight_complaint", "label": "Streetlight Repair Complaint", "keywords": ["streetlight", "street light not working"] }
+    ]
+  }
+]
