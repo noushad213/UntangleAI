@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GitFork, Network, Moon, Sun } from 'lucide-react';
 import styles from './LandingNav.module.css';
@@ -11,14 +11,29 @@ interface LandingNavProps {
 }
 
 export function LandingNav({ theme, onToggleTheme }: LandingNavProps) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <nav className={styles.navContainer} role="navigation" aria-label="Main Navigation">
+    <nav
+      className={`${styles.navContainer} ${scrolled ? styles.navScrolled : ''}`}
+      role="navigation"
+      aria-label="Main Navigation"
+    >
       <Link href="/" className={styles.brandGroup}>
         <div className={styles.logoIcon}>
           <GitFork size={18} strokeWidth={2.5} />
         </div>
         <span className={styles.logoText}>
-          Untangle<span className={styles.logoTag}>AI</span>
+          UNTANGLE<span className={styles.logoTag}>AI</span>
         </span>
       </Link>
 
@@ -26,8 +41,11 @@ export function LandingNav({ theme, onToggleTheme }: LandingNavProps) {
         <Link href="/roadmap/pvt-ltd-delhi" className={styles.navLink}>
           Featured Roadmap
         </Link>
-        <Link href="#how-it-works-title" className={styles.navLink}>
-          How It Works
+        <Link href="#about-section" className={styles.navLink}>
+          About Us
+        </Link>
+        <Link href="#search-showcase" className={styles.navLink}>
+          Directory
         </Link>
         <a
           href="https://www.india.gov.in"
@@ -35,7 +53,7 @@ export function LandingNav({ theme, onToggleTheme }: LandingNavProps) {
           rel="noopener noreferrer"
           className={styles.navLink}
         >
-          National Portal of India ↗
+          National Portal ↗
         </a>
       </div>
 
@@ -52,7 +70,7 @@ export function LandingNav({ theme, onToggleTheme }: LandingNavProps) {
 
         <Link href="/roadmap/pvt-ltd-delhi" className={styles.ctaBtn} id="landing-open-canvas-btn">
           <Network size={14} />
-          <span>Open Canvas</span>
+          <span>Interactive Canvas</span>
         </Link>
       </div>
     </nav>
