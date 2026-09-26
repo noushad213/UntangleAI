@@ -38,6 +38,35 @@ export async function GET(request: NextRequest) {
 
   const queryTerms = query.split(/\s+/).filter(Boolean);
 
+  const MULTILINGUAL_ALIASES: Record<string, string[]> = {
+    'fssai-food-license': [
+      'restaurant', 'resturant', 'restro', 'food', 'foscos', 'fssai', 'kitchen', 'dhaba',
+      'cafe', 'catering', 'kholna', 'khana', 'khadya', 'bhojan', 'hotel',
+      'mujhe', 'kholna hai',
+      'रेस्टोरेंट', 'खाना', 'खाद्य', 'खोलना', 'होटल', 'ढाबा',
+      'ریسٹورنٹ', 'کھانا', 'کھولنا', 'ہوٹل',
+      'உணவகம்', 'தொடக்க', 'சாப்பாடு',
+      'রেস্তোরাঁ', 'খাবার'
+    ],
+    'driving-license-delhi': [
+      'driving', 'license', 'licence', 'dl', 'learner', 'parivahan', 'sarathi', 'rto',
+      'gaadi', 'gadi', 'car', 'bike', 'motorcycle', 'renew', 'renewal', 'banwana',
+      'ड्राइविंग', 'लाइसेंस', 'गाड़ी', 'परिवहन', 'सारथी', 'रिन्यू',
+      'ڈرائیونگ', 'لائسنس', 'گاڑی', 'سارتھی',
+      'ஓட்டுநர்', 'உரிமம்',
+      'ড্রাইভিং', 'লাইসেন্স'
+    ],
+    'pvt-ltd-delhi': [
+      'company', 'pvt', 'ltd', 'private', 'limited', 'mca', 'spice', 'incorporation',
+      'business', 'startup', 'firm', 'register', 'registration', 'director',
+      'karobar', 'vyapar', 'dukaan', 'karni',
+      'कंपनी', 'व्यापार', 'कारोबार', 'रजिस्ट्रेशन', 'निगमन',
+      'کمپنی', 'کاروبار', 'تجارت',
+      'நிறுவனம்', 'வணிகம்',
+      'কোম্পানি', 'ব্যবসা'
+    ],
+  };
+
   const matched = MOCK_ROADMAPS.map((p) => {
     let score = 0;
     const titleLower = p.title.toLowerCase();
@@ -45,11 +74,22 @@ export async function GET(request: NextRequest) {
     const catLower = p.category.toLowerCase();
     const locLower = p.location.toLowerCase();
 
-    // Check query terms
+    // Check multilingual aliases for this roadmap
+    const aliases = MULTILINGUAL_ALIASES[p.id] || [];
+    for (const alias of aliases) {
+      if (query.includes(alias.toLowerCase())) {
+        score += 8;
+      }
+    }
+
+    // Check individual query terms
     for (const term of queryTerms) {
       if (titleLower.includes(term)) score += 5;
       if (catLower.includes(term)) score += 3;
       if (descLower.includes(term)) score += 2;
+      for (const alias of aliases) {
+        if (alias.toLowerCase().includes(term)) score += 3;
+      }
       // Also match step titles/keywords
       p.steps.forEach((s) => {
         if (s.title.toLowerCase().includes(term) || (s.shortTitle && s.shortTitle.toLowerCase().includes(term))) {
