@@ -1,13 +1,17 @@
 .heroContainer {
   position: relative;
   width: 100%;
-  min-height: 94vh;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 80px 24px 40px;
+  padding: clamp(84px, 12vh, 108px) clamp(12px, 3vw, 24px) clamp(44px, 7vh, 64px);
   overflow: hidden;
   background-color: #0b0f19;
+  border-bottom-left-radius: clamp(32px, 5vw, 64px);
+  border-bottom-right-radius: clamp(32px, 5vw, 64px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
 }
 
 /* Background image that scales fluidly */
@@ -18,6 +22,8 @@
   height: 100%;
   z-index: 0;
   overflow: hidden;
+  border-bottom-left-radius: clamp(32px, 5vw, 64px);
+  border-bottom-right-radius: clamp(32px, 5vw, 64px);
 }
 
 .heroBgImage {
@@ -45,6 +51,8 @@
     ),
     linear-gradient(to bottom, rgba(11, 15, 25, 0.3) 0%, transparent 20%, transparent 80%, #0b0f19 100%);
   pointer-events: none;
+  border-bottom-left-radius: clamp(32px, 5vw, 64px);
+  border-bottom-right-radius: clamp(32px, 5vw, 64px);
 }
 
 /* Floating Glass Frame */
@@ -53,8 +61,7 @@
   z-index: 2;
   width: 100%;
   max-width: 1180px;
-  min-height: 560px;
-  border-radius: 28px;
+  border-radius: clamp(18px, 3vw, 28px);
   border: 1px solid rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(18px);
@@ -62,7 +69,7 @@
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.28),
     inset 0 1px 1px rgba(255, 255, 255, 0.5),
     inset 0 -1px 1px rgba(0, 0, 0, 0.2);
-  padding: 28px 36px;
+  padding: clamp(20px, 3.5vw, 36px) clamp(14px, 3.5vw, 36px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -86,12 +93,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   width: 100%;
 }
 
 .iconBtn {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.18);
@@ -103,6 +111,7 @@
   color: #ffffff;
   cursor: pointer;
   transition: all 0.25s ease;
+  flex-shrink: 0;
 }
 
 .iconBtn:hover {
@@ -116,43 +125,48 @@
   align-items: center;
   text-align: center;
   user-select: none;
+  min-width: 0;
 }
 
 .brandTitle {
   font-family: var(--font-family-display), serif;
-  font-size: 1.35rem;
+  font-size: clamp(1.05rem, 3vw, 1.35rem);
   font-weight: 700;
-  letter-spacing: 0.38em;
+  letter-spacing: clamp(0.14em, 0.8vw, 0.38em);
   text-transform: uppercase;
   color: #ffffff;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
 }
 
 .brandSubtitle {
-  font-size: 0.65rem;
-  letter-spacing: 0.28em;
+  font-size: clamp(0.55rem, 1.5vw, 0.65rem);
+  letter-spacing: clamp(0.12em, 0.6vw, 0.28em);
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.78);
   margin-top: 2px;
+  white-space: nowrap;
 }
 
 .pillActionBtn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 18px;
+  gap: 6px;
+  padding: 6px clamp(10px, 2vw, 18px);
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: #ffffff;
-  font-size: 0.75rem;
+  font-size: clamp(0.7rem, 1.8vw, 0.75rem);
   font-weight: 500;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.25s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .pillActionBtn:hover {
@@ -166,44 +180,45 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin: 32px auto 24px;
+  margin: clamp(24px, 4vh, 36px) auto clamp(20px, 3vh, 28px);
   width: 100%;
   max-width: 900px;
 }
 
 .heroTitle {
   font-family: var(--font-family-sans), sans-serif;
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-size: clamp(1.65rem, 5vw, 3.6rem);
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.15;
+  line-height: 1.16;
   color: #ffffff;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  word-break: break-word;
 }
 
 .queryHeading {
   font-family: var(--font-family-sans), sans-serif;
-  font-size: clamp(1.35rem, 2.5vw, 1.95rem);
+  font-size: clamp(1.05rem, 3vw, 1.95rem);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: #ffffff;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
-  margin-bottom: 20px;
+  margin-bottom: clamp(14px, 2.5vh, 22px);
 }
 
 .heroCtaPill {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 32px;
+  gap: 8px;
+  padding: clamp(9px, 1.8vw, 12px) clamp(18px, 3.5vw, 32px);
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: #ffffff;
-  font-size: 0.88rem;
+  font-size: clamp(0.78rem, 1.8vw, 0.88rem);
   font-weight: 600;
   letter-spacing: 0.03em;
   text-decoration: none;
@@ -226,7 +241,6 @@
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  flex-wrap: wrap;
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -234,8 +248,8 @@
 .bottomPill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 16px;
+  gap: 7px;
+  padding: 7px 14px;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.14);
@@ -255,16 +269,23 @@
   transform: translateY(-1px);
 }
 
+.helplinePill {
+  flex-shrink: 0;
+}
+
+.explorePill {
+  flex-shrink: 0;
+}
+
 .centerPills {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .toggleDot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #ffffff;
   display: inline-block;
@@ -273,42 +294,74 @@
 
 /* Responsive adjustments */
 @media (max-width: 900px) {
-  .glassFrame {
-    padding: 24px 20px;
-    min-height: auto;
+  .bottomBar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "helpline explore"
+      "pills pills";
+    gap: 10px;
   }
 
-  .bottomBar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
+  .helplinePill {
+    grid-area: helpline;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .explorePill {
+    grid-area: explore;
+    width: 100%;
+    justify-content: center;
   }
 
   .centerPills {
-    justify-content: center;
+    grid-area: pills;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
   }
 
-  .bottomPill {
+  .centerPills .bottomPill {
+    width: 100%;
     justify-content: center;
+    padding: 7px 4px;
+    font-size: clamp(0.68rem, 2vw, 0.75rem);
   }
 }
 
-@media (max-width: 640px) {
-  .heroContainer {
-    padding: 70px 14px 24px;
-    min-height: auto;
-  }
-
-  .brandTitle {
-    font-size: 1.1rem;
-    letter-spacing: 0.25em;
-  }
-
-  .heroTitle {
-    font-size: 1.85rem;
+@media (max-width: 520px) {
+  .iconBtn {
+    display: none;
   }
 
   .topBar {
-    gap: 10px;
+    justify-content: space-between;
+  }
+
+  .brandTitle {
+    letter-spacing: 0.16em;
+  }
+
+  .brandSubtitle {
+    letter-spacing: 0.12em;
   }
 }
+
+@media (max-width: 420px) {
+  .bottomBar {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "helpline"
+      "explore"
+      "pills";
+  }
+
+  .centerPills {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+
