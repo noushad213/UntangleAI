@@ -16,75 +16,75 @@ export interface QueryExample {
 
 export const ALL_QUERY_EXAMPLES: QueryExample[] = [
   {
-    text: 'e.g: i want to open a restaurant',
+    text: 'i want to open a restaurant',
     query: 'i want to open a restaurant',
     lang: 'en',
     targetRoadmap: 'fssai-food-license',
   },
   {
-    text: 'e.g: mujhe restaurant kholna hai',
+    text: 'mujhe restaurant kholna hai',
     query: 'mujhe restaurant kholna hai',
     lang: 'hinglish',
     targetRoadmap: 'fssai-food-license',
   },
   {
-    text: 'e.g: मुझे रेस्टोरेंट खोलना है',
+    text: 'मुझे रेस्टोरेंट खोलना है',
     query: 'मुझे रेस्टोरेंट खोलना है',
     lang: 'hi',
     targetRoadmap: 'fssai-food-license',
   },
   {
-    text: 'e.g: مجھے ریسٹورنٹ کھولنا ہے',
+    text: 'مجھے ریسٹورنٹ کھولنا ہے',
     query: 'مجھے ریسٹورنٹ کھولنا ہے',
     lang: 'ur',
     targetRoadmap: 'fssai-food-license',
     isRtl: true,
   },
   {
-    text: 'e.g: புது உணவகம் தொடங்க வேண்டும்',
+    text: 'புது உணவகம் தொடங்க வேண்டும்',
     query: 'புது உணவகம் தொடங்க வேண்டும்',
     lang: 'ta',
     targetRoadmap: 'fssai-food-license',
   },
   {
-    text: 'e.g: আমি একটি নতুন রেস্তোরাঁ খুলতে চাই',
+    text: 'আমি একটি নতুন রেস্তোরাঁ খুলতে চাই',
     query: 'আমি একটি নতুন রেস্তোরাঁ খুলতে চাই',
     lang: 'bn',
     targetRoadmap: 'fssai-food-license',
   },
   {
-    text: 'e.g: driving license renew kaise karein',
+    text: 'driving license renew kaise karein',
     query: 'driving license renew kaise karein',
     lang: 'hinglish',
     targetRoadmap: 'driving-license-delhi',
   },
   {
-    text: 'e.g: नया ड्राइविंग लाइसेंस कैसे बनवाएं',
+    text: 'नया ड्राइविंग लाइसेंस कैसे बनवाएं',
     query: 'नया ड्राइविंग लाइसेंस कैसे बनवाएं',
     lang: 'hi',
     targetRoadmap: 'driving-license-delhi',
   },
   {
-    text: 'e.g: نیا ڈرائیونگ لائسنس کیسے حاصل کریں',
+    text: 'نیا ڈرائیونگ لائسنس کیسے حاصل کریں',
     query: 'نیا ڈرائیونگ لائسنس کیسے حاصل کریں',
     lang: 'ur',
     targetRoadmap: 'driving-license-delhi',
     isRtl: true,
   },
   {
-    text: 'e.g: pvt ltd company register karni hai',
+    text: 'pvt ltd company register karni hai',
     query: 'pvt ltd company register karni hai',
     lang: 'hinglish',
     targetRoadmap: 'pvt-ltd-delhi',
   },
   {
-    text: 'e.g: प्राइवेट लिमिटेड कंपनी कैसे रजिस्टर करें',
+    text: 'प्राइवेट लिमिटेड कंपनी कैसे रजिस्टर करें',
     query: 'प्राइवेट लिमिटेड कंपनी कैसे रजिस्टर करें',
     lang: 'hi',
     targetRoadmap: 'pvt-ltd-delhi',
   },
   {
-    text: 'e.g: پرائیویٹ لمیٹڈ کمپنی کیسے رجسٹر کریں',
+    text: 'پرائیویٹ لمیٹڈ کمپنی کیسے رجسٹر کریں',
     query: 'پرائیویٹ لمیٹڈ کمپنی کیسے رجسٹر کریں',
     lang: 'ur',
     targetRoadmap: 'pvt-ltd-delhi',
@@ -105,6 +105,7 @@ export function HeroQueryInput({ selectedLang = 'auto' }: HeroQueryInputProps) {
   const [displayText, setDisplayText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -197,20 +198,17 @@ export function HeroQueryInput({ selectedLang = 'auto' }: HeroQueryInputProps) {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // When user clicks the input field:
-  // 1. Stop cycling animation immediately
-  // 2. If empty, populate with current query so user can edit it directly
-  const handleFieldClick = () => {
+  // When user clicks/focuses the input field:
+  // Stop cycling animation immediately to let user type whatever they want
+  const handleFocus = () => {
+    setIsFocused(true);
     setIsPaused(true);
-    if (!query) {
-      const editableText = currentExample.query;
-      setQuery(editableText);
-      // Select the inserted text after a micro-tick so the user can easily replace or edit
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.select();
-        }
-      }, 10);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    if (!query.trim()) {
+      setIsPaused(false);
     }
   };
 
@@ -320,10 +318,11 @@ export function HeroQueryInput({ selectedLang = 'auto' }: HeroQueryInputProps) {
             setQuery(e.target.value);
             setIsPaused(true);
           }}
-          onClick={handleFieldClick}
-          onFocus={handleFieldClick}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onClick={handleFocus}
           onKeyDown={handleKeyDown}
-          placeholder={displayText || currentExample.text}
+          placeholder={isFocused ? '' : (displayText || currentExample.text)}
           autoComplete="off"
           dir={isCurrentRtl ? 'rtl' : 'ltr'}
           aria-label="Civic task search input"
@@ -347,7 +346,7 @@ export function HeroQueryInput({ selectedLang = 'auto' }: HeroQueryInputProps) {
             id="hero-query-submit-btn"
             aria-label="Untangle roadmap"
           >
-            <span>Untangle</span>
+            <span className={styles.submitBtnText}>Untangle</span>
             <ArrowRight size={15} />
           </button>
         </div>
