@@ -9,7 +9,6 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
 export default function HomePage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  // Initialize and sync theme
   useEffect(() => {
     const savedTheme = localStorage.getItem('untangle_theme') as 'light' | 'dark' | null;
     const initialTheme =
@@ -27,7 +26,7 @@ export default function HomePage() {
       try {
         localStorage.setItem('untangle_theme', next);
       } catch {
-        // Fallback
+        // Storage unavailable
       }
       return next;
     });
