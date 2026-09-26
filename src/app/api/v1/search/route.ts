@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MOCK_ROADMAPS } from '@/data/mock-roadmaps';
 
+export const dynamic = 'force-dynamic';
+
 export interface SearchResult {
   id: string;
   title: string;
