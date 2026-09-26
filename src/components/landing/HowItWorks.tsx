@@ -1,74 +1,115 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { GitFork, ShieldCheck, CheckSquare, ArrowRight } from 'lucide-react';
 import styles from './HowItWorks.module.css';
 
 export function HowItWorks() {
-  const steps = [
-    {
-      icon: <GitFork size={22} style={{ color: 'var(--color-brand-600)' }} />,
-      iconBg: 'var(--color-brand-50)',
-      tag: '01. Interactive Graph',
-      title: 'Dependency-Aware Roadmaps',
-      description:
-        'Government portals never tell you what order to do things in. Our visual DAG graph clearly maps prerequisites and unlocks downstream steps as you complete them.',
-      linkText: 'Explore Company Setup Roadmap',
-      href: '/roadmap/pvt-ltd-delhi',
-    },
-    {
-      icon: <ShieldCheck size={22} style={{ color: 'var(--color-success-600)' }} />,
-      iconBg: 'var(--color-success-50)',
-      tag: '02. Official Citations',
-      title: 'Grounded in Official Portals',
-      description:
-        'No hallucinations, outdated forum advice, or broker rumors. Every step includes direct citations and clickable links to official departments (.gov.in / .nic.in).',
-      linkText: 'Inspect Verified Sources',
-      href: '/roadmap/driving-license-delhi',
-    },
-    {
-      icon: <CheckSquare size={22} style={{ color: '#7c3aed' }} />,
-      iconBg: '#f5f3ff',
-      tag: '03. Local Tracking',
-      title: 'Document & Step Checklists',
-      description:
-        'Track paperwork readiness with interactive document checklists. Save your progress locally without creating an account or giving up personal information.',
-      linkText: 'Try Checklist Tracker',
-      href: '/roadmap/fssai-food-license',
-    },
-  ];
+  const [applicantType, setApplicantType] = useState<'team' | 'solo'>('team');
 
   return (
-    <section className={styles.section} aria-labelledby="how-it-works-title">
-      <div className={styles.sectionHeader}>
-        <span className={styles.sectionTag}>Why UntangleAI</span>
-        <h2 id="how-it-works-title" className={styles.sectionTitle}>
-          Navigating bureaucracy should not require a middleman
-        </h2>
-        <p className={styles.sectionDesc}>
-          Most citizens get stuck because of hidden prerequisites, ambiguous fees, and missing documents.
-          UntangleAI solves each point with visual clarity.
-        </p>
-      </div>
+    <section id="about-section" className={styles.sectionContainer} aria-label="About UntangleAI">
+      <div className={styles.contentWrapper}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>About Us</h2>
+          <p className={styles.sectionSubtitle}>
+            Transforming complex public administration into transparent, actionable roadmaps.
+          </p>
+        </div>
 
-      <div className={styles.grid}>
-        {steps.map((s, idx) => (
-          <div key={idx} className={styles.featureCard}>
-            <div className={styles.iconBox} style={{ backgroundColor: s.iconBg }}>
-              {s.icon}
+        <div className={styles.cardsStack}>
+          {/* Row 1: Slate Lavender Card on Left, Floating Action on Right */}
+          <div className={styles.rowOne}>
+            <div className={styles.cardPeriwinkle}>
+              <div className={styles.cardImageWrapper}>
+                <img
+                  src="/images/village_lodge.jpg"
+                  alt="Scenic snow village street with warm ambient lights"
+                  className={styles.cardImage}
+                  loading="lazy"
+                />
+              </div>
+
+              <div className={styles.cardTextContent}>
+                <h3 className={styles.cardHeading}>
+                  Direct Grounding in Official Portals
+                </h3>
+                <p className={styles.cardBody}>
+                  Clear, verified procedural guidance synthesized directly from ministry portals
+                  (.gov.in and .nic.in). No broker commissions, no confusing jargon, zero guesswork.
+                </p>
+                <span className={styles.cardTagline}>
+                  Central & State Jurisdictions
+                </span>
+              </div>
             </div>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
-              {s.tag}
-            </span>
-            <h3 className={styles.cardTitle}>{s.title}</h3>
-            <p className={styles.cardText}>{s.description}</p>
-            <Link href={s.href} className={styles.cardFooter}>
-              <span>{s.linkText}</span>
-              <ArrowRight size={12} />
-            </Link>
+
+            <div className={styles.sideBlock}>
+              <p className={styles.sideBlockText}>
+                You can view verified prerequisites, documents, and fee schedules on our roadmaps.
+              </p>
+              <Link href="/roadmap/pvt-ltd-delhi" className={styles.sidePillBtn}>
+                View roadmaps
+              </Link>
+            </div>
           </div>
-        ))}
+
+          {/* Row 2: Floating Action on Left, Dark Espresso Card on Right */}
+          <div className={styles.rowTwo}>
+            <div className={styles.sideBlock}>
+              <p className={styles.sideBlockText}>
+                You can track your documentation offline or export interactive checklists directly.
+              </p>
+              <Link href="/roadmap/fssai-food-license" className={styles.sidePillBtn}>
+                View checklists
+              </Link>
+            </div>
+
+            <div className={styles.cardEspresso}>
+              <div className={styles.cardTextContent}>
+                <h3 className={styles.cardHeading}>
+                  Personalized for Solo Applicants & Enterprises
+                </h3>
+                <p className={styles.cardBody}>
+                  {applicantType === 'team'
+                    ? 'Incorporate companies, assign multiple directors, obtain commercial food safety permits, and manage tax registrations with full compliance.'
+                    : 'Streamline personal driving license renewals, citizen certificates, and individual permits without redundant documentation.'}
+                </p>
+
+                <div className={styles.segmentedControl} role="tablist" aria-label="Applicant Mode">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={applicantType === 'team'}
+                    className={`${styles.segmentBtn} ${applicantType === 'team' ? styles.segmentBtnActive : ''}`}
+                    onClick={() => setApplicantType('team')}
+                  >
+                    With team
+                  </button>
+                  <span className={styles.segmentDivider}>&lt; Scope &gt;</span>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={applicantType === 'solo'}
+                    className={`${styles.segmentBtn} ${applicantType === 'solo' ? styles.segmentBtnActive : ''}`}
+                    onClick={() => setApplicantType('solo')}
+                  >
+                    Solo applicant
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.cardImageWrapper}>
+                <img
+                  src="/images/ridge_climber.jpg"
+                  alt="Mountaineer walking on snow ridge into sunset clouds"
+                  className={styles.cardImage}
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
