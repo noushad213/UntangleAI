@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, MapPin, ChevronDown, ArrowRight, Sparkles, Clock } from 'lucide-react';
+import { Search, MapPin, ChevronDown, ArrowRight, Clock } from 'lucide-react';
 import { SearchResult } from '@/app/api/v1/search/route';
 import styles from './SearchBar.module.css';
 
