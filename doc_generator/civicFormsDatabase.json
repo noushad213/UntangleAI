@@ -1,0 +1,65 @@
+{
+  "water connection__kothrud, pune": {
+    "requiresForm": true,
+    "serviceTitle": "Official Municipal Application for WATER CONNECTION",
+    "officialPortalLink": "https://www.punecorporation.org/en/citizen-services",
+    "generalPortal": "https://www.punecorporation.org/en/citizen-services",
+    "departmentAssigned": "Hydraulic Engineering & Water Supply Department",
+    "designatedOfficer": "The Executive Engineer (Water Supply)",
+    "statutoryTimeline": "15 Working Days",
+    "estimatedFee": "₹1,500 - ₹3,500 (Scrutiny + Meter Deposit)",
+    "helplinePhone": "1800-1030-222 / 020-25501000 (PMC Care)",
+    "whatsappBot": "+91 88882 51000",
+    "helpdeskDesk": "PMC Citizen Facilitation Counter / Ward Office",
+    "workingHours": "10:30 AM - 05:00 PM (Working Days)",
+    "resolvedCivicOffice": {
+      "officeName": "Pune Municipal Corporation",
+      "administrativeZone": "Karve Nagar Administrative Division",
+      "address": "Kothrud, Karve Nagar, Pune, Pune City Subdistrict, Pune, Maharashtra, 411051, India",
+      "city": "Pune",
+      "suburb": "Karve Nagar",
+      "state": "Maharashtra",
+      "pincode": "411051"
+    },
+    "requiredChecklist": [
+      "Applicant Identity Proof (Self-Attested Copy of Passport / PAN / Voter ID)",
+      "Registered Premise Possession / Title Deed or Registered Lease Agreement",
+      "Internal Plumbing Route Sketch / Plan",
+      "Licensed Plumber Execution Certificate",
+      "Latest Municipal Property Assessment Tax Clearance"
+    ],
+    "printableFormDraft": "================================================================================\n          PUNE MUNICIPAL CORPORATION\n       KARVE NAGAR ADMINISTRATIVE DIVISION\n--------------------------------------------------------------------------------\nOFFICIAL SUBMISSION APPLICATION / COVER LETTER\nSubject Reference: Official Municipal Application for WATER CONNECTION\nLive Official Form Source: https://www.punecorporation.org/en/citizen-services\n================================================================================\n\nDate of Submission : 28 September 2026\nOfficial Counter   : Citizen Facilitation Center (CFC Desk)\nEstimated SLA      : 15 Working Days\nStatutory Fees     : ₹1,500 - ₹3,500 (Scrutiny + Meter Deposit)\n\nTo,\nThe Executive Engineer (Water Supply),\nPune Municipal Corporation,\nKothrud, Karve Nagar, Pune, Pune City Subdistrict, Pune, Maharashtra, 411051, India\n\nSir/Madam,\n\nI, ___________________________________________, residing at \n___________________________________________ (Contact: __________________), \nhereby formally submit our application regarding premises situated at:\nPremise Location: Kothrud, Pune, Suburb: Karve Nagar.\n\nI have enclosed the mandatory documents required as per current municipal regulations:\n\nENCLOSED MANDATORY ATTACHMENTS (Self-Attested Copies):\n--------------------------------------------------------------------------------\n[  ] 1.Applicant Identity Proof (Self-Attested Copy of Passport / PAN / Voter ID)\n[  ] 2.Registered Premise Possession / Title Deed or Registered Lease Agreement\n[  ] 3.Internal Plumbing Route Sketch / Plan\n[  ] 4.Licensed Plumber Execution Certificate\n[  ] 5.Latest Municipal Property Assessment Tax Clearance\n\nSOLEMN UNDERTAKING:\n1. All particulars and enclosed documents are authentic and legally compliant.\n2. I undertake to permit entry to the Municipal Field Inspector for physical site inspection during working hours.\n\nApplicant Signature : _________________________________\nDate                : 28 September 2026\nPlace               : Pune\n================================================================================",
+    "savedAt": "2026-09-27T21:24:50.049Z"
+  },
+  "home loan__panjab": {
+    "requiresForm": false,
+    "serviceTitle": "Official Municipal Application for HOME LOAN",
+    "officialPortalLink": "https://services.india.gov.in",
+    "generalPortal": "https://services.india.gov.in",
+    "departmentAssigned": "Citizen Facilitation Center (CFC) / Public Helpdesk",
+    "designatedOfficer": "The Public Relations Officer / Ward Assistance Desk",
+    "statutoryTimeline": "Immediate on Call / 24-48 Hours at Helpdesk",
+    "estimatedFee": "Free (No fee for inquiry)",
+    "helplinePhone": "1913 (Urban Civic Helpline) / 112",
+    "whatsappBot": "N/A",
+    "helpdeskDesk": "Local Municipal Corporation / Nagar Palika Public Desk",
+    "workingHours": "10:00 AM - 05:00 PM",
+    "resolvedCivicOffice": {
+      "officeName": "City Corporation Municipal Corporation",
+      "administrativeZone": "City Corporation Administrative Division",
+      "address": "Punjab, India",
+      "city": "City Corporation",
+      "suburb": "City Corporation",
+      "state": "Punjab",
+      "pincode": "N/A"
+    },
+    "requiredChecklist": [
+      "Applicant Identity Proof (Self-Attested Copy of Passport / PAN / Voter ID)",
+      "Registered Premise Possession / Title Deed or Registered Lease Agreement",
+      "Detailed Written Representation Note specifying premises context",
+      "Current Municipal Assessment / Utility Bill Reference"
+    ],
+    "printableFormDraft": null,
+    "savedAt": "2026-09-27T21:25:43.676Z"
+  }
+}

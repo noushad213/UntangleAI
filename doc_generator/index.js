@@ -1,0 +1,1 @@
+export { generateCivicDocuments } from "./generatorService.js";
