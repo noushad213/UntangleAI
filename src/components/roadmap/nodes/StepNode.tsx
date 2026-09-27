@@ -4,6 +4,7 @@ import React, { memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Check, Lock, Clock, FileText, Briefcase, KeyRound } from 'lucide-react';
 import { ProcessStep, StepStatus } from '@/types/roadmap';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './StepNode.module.css';
 
 export interface StepNodeData {
@@ -11,11 +12,20 @@ export interface StepNodeData {
   status: StepStatus;
   isCompleted: boolean;
   unmetCount: number;
+  onSelect?: (step: ProcessStep) => void;
 }
 
 function StepNodeComponent({ data, selected }: NodeProps) {
+  const { t } = useLanguage();
   const nodeData = data as unknown as StepNodeData;
   const { step, status, isCompleted, unmetCount } = nodeData;
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      nodeData.onSelect?.(step);
+    }
+  };
 
   const nodeTypeIcon = () => {
     switch (step.nodeType) {
@@ -27,6 +37,19 @@ function StepNodeComponent({ data, selected }: NodeProps) {
         return <KeyRound size={12} />;
       default:
         return null;
+    }
+  };
+
+  const getNodeTypeName = () => {
+    switch (step.nodeType) {
+      case 'action':
+        return t.roadmap.action;
+      case 'document':
+        return t.roadmap.document;
+      case 'prerequisite':
+        return t.roadmap.prerequisite;
+      default:
+        return step.nodeType;
     }
   };
 
@@ -52,6 +75,8 @@ function StepNodeComponent({ data, selected }: NodeProps) {
       tabIndex={0}
       role="button"
       aria-label={`${step.title} (${step.nodeType}, ${status})`}
+      onClick={() => nodeData.onSelect?.(step)}
+      onKeyDown={handleKeyDown}
     >
       <div className={`${styles.accentBar} ${getAccentClass()}`} />
 
@@ -66,7 +91,8 @@ function StepNodeComponent({ data, selected }: NodeProps) {
       <div className={styles.header}>
         <div className={styles.badgeGroup}>
           <span className={`${styles.typeBadge} ${getBadgeClass()}`}>
-            {nodeTypeIcon()} {step.nodeType}
+            {nodeTypeIcon()}
+            <span>{getNodeTypeName()}</span>
           </span>
         </div>
 
@@ -85,7 +111,7 @@ function StepNodeComponent({ data, selected }: NodeProps) {
 
       <div className={styles.footer}>
         {step.timeEstimate && (
-          <span className={styles.metaItem} title="Estimated Processing Time">
+          <span className={styles.metaItem} title={t.roadmap.estimatedTimeline}>
             <Clock size={11} />
             <span>{step.timeEstimate.split(' ')[0]} {step.timeEstimate.split(' ')[1] || ''}</span>
           </span>
@@ -93,11 +119,12 @@ function StepNodeComponent({ data, selected }: NodeProps) {
 
         {status === 'locked' && unmetCount > 0 ? (
           <span className={styles.lockNotice} title={`${unmetCount} prior step(s) required`}>
-            <Lock size={10} /> {unmetCount} prior req.
+            <Lock size={10} />
+            <span>{unmetCount} {t.roadmap.prerequisitesRequired}</span>
           </span>
         ) : (
           <span className={styles.metaItem}>
-            {step.fees ? step.fees.split(' ')[0] : 'Free'}
+            <span>{step.fees ? step.fees.split(' ')[0] : '—'}</span>
           </span>
         )}
       </div>
