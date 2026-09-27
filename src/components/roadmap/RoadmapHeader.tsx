@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   GitFork,
@@ -8,6 +8,7 @@ import {
   Clock,
   IndianRupee,
   Share2,
+  Check,
   RotateCcw,
   Sun,
   Moon,
@@ -15,8 +16,11 @@ import {
   Network,
   ListOrdered,
   Search,
+  Globe,
 } from 'lucide-react';
 import { CivicProcess } from '@/types/roadmap';
+import { useLanguage } from '@/context/LanguageContext';
+import { LanguageCode } from '@/lib/translations';
 import styles from './RoadmapHeader.module.css';
 
 interface RoadmapHeaderProps {
@@ -46,6 +50,23 @@ export function RoadmapHeader({
   theme,
   onToggleTheme,
 }: RoadmapHeaderProps) {
+  const { lang, setLang, t, languages } = useLanguage();
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  const currentLangObj = languages.find((l) => l.code === lang) || languages[0];
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setIsLangOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -54,20 +75,32 @@ export function RoadmapHeader({
           text: `Interactive roadmap for ${currentProcess.title} (${currentProcess.location})`,
           url: window.location.href,
         });
+        return;
       } catch {
         // User cancelled share
+        return;
       }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Roadmap link copied to clipboard!');
     }
+
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500);
+    } catch {
+      // Clipboard unavailable
+    }
+  };
+
+  const handleSelectLang = (code: LanguageCode) => {
+    setLang(code);
+    setIsLangOpen(false);
   };
 
   return (
     <header className={styles.headerContainer} role="banner">
       <div className={styles.topRow}>
         <div className={styles.brandGroup}>
-          <Link href="/" className={styles.logoBadge} title="Back to UntangleAI Search">
+          <Link href="/" className={styles.logoBadge} title={t.roadmap.backToSearch}>
             <div className={styles.logoIcon}>
               <GitFork size={18} strokeWidth={2.5} />
             </div>
@@ -76,9 +109,9 @@ export function RoadmapHeader({
             </span>
           </Link>
 
-          <Link href="/" className={styles.toggleButton} title="New Civic Search" id="nav-search-btn">
+          <Link href="/" className={styles.toggleButton} title={t.roadmap.backToSearch} id="nav-search-btn">
             <Search size={14} />
-            <span>Search</span>
+            <span>{t.roadmap.search}</span>
           </Link>
 
           <div className={styles.processSelectorWrapper}>
@@ -86,7 +119,7 @@ export function RoadmapHeader({
               className={styles.processSelect}
               value={currentProcess.id}
               onChange={(e) => onSelectProcess(e.target.value)}
-              aria-label="Select Civic Process Roadmap"
+              aria-label={t.roadmap.selectRoadmap}
               id="roadmap-process-select"
             >
               {allProcesses.map((p) => (
@@ -100,47 +133,88 @@ export function RoadmapHeader({
         </div>
 
         <div className={styles.actionsGroup}>
+          {/* Language selector in Roadmap Header */}
+          <div className={styles.langWrapper} ref={langMenuRef}>
+            <button
+              type="button"
+              className={styles.langBtn}
+              onClick={() => setIsLangOpen((prev) => !prev)}
+              aria-label={t.nav.selectLanguage}
+              aria-expanded={isLangOpen}
+              id="roadmap-lang-btn"
+            >
+              <Globe size={14} />
+              <span>{currentLangObj.native}</span>
+              <ChevronDown size={12} className={`${styles.caret} ${isLangOpen ? styles.caretOpen : ''}`} />
+            </button>
+
+            {isLangOpen && (
+              <div className={styles.langDropdown} role="menu">
+                <div className={styles.dropdownHeader}>{t.nav.selectLanguage}</div>
+                {languages.map((item) => (
+                  <button
+                    key={item.code}
+                    type="button"
+                    role="menuitem"
+                    className={`${styles.langOption} ${lang === item.code ? styles.langOptionActive : ''}`}
+                    onClick={() => handleSelectLang(item.code)}
+                  >
+                    <span className={styles.langNative}>{item.native}</span>
+                    <span className={styles.langEnglish}>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className={styles.viewToggleGroup} role="group" aria-label="View format toggle">
             <button
               type="button"
               className={`${styles.toggleButton} ${viewMode === 'graph' ? styles.toggleActive : ''}`}
               onClick={() => onToggleViewMode('graph')}
               id="view-toggle-graph"
-              title="Interactive Graph View"
+              title={t.roadmap.canvas}
             >
               <Network size={14} />
-              <span>Canvas</span>
+              <span>{t.roadmap.canvas}</span>
             </button>
             <button
               type="button"
               className={`${styles.toggleButton} ${viewMode === 'list' ? styles.toggleActive : ''}`}
               onClick={() => onToggleViewMode('list')}
               id="view-toggle-list"
-              title="Sequential Step List View"
+              title={t.roadmap.list}
             >
               <ListOrdered size={14} />
-              <span>List</span>
+              <span>{t.roadmap.list}</span>
             </button>
+          </div>
+
+          <div className={styles.shareWrapper}>
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={handleShare}
+              title={isCopied ? t.roadmap.shareSuccess : t.roadmap.shareRoadmap}
+              id="share-roadmap-btn"
+              aria-label={t.roadmap.shareRoadmap}
+            >
+              {isCopied ? <Check size={16} style={{ color: 'var(--color-success-600)' }} /> : <Share2 size={16} />}
+            </button>
+            {isCopied && (
+              <div className={styles.copyToast} role="status">
+                {t.roadmap.shareSuccess}
+              </div>
+            )}
           </div>
 
           <button
             type="button"
             className={styles.iconButton}
-            onClick={handleShare}
-            title="Share this roadmap"
-            id="share-roadmap-btn"
-            aria-label="Share this roadmap"
-          >
-            <Share2 size={16} />
-          </button>
-
-          <button
-            type="button"
-            className={styles.iconButton}
             onClick={onResetProgress}
-            title="Reset completed checklist"
+            title={t.roadmap.resetProgress}
             id="reset-progress-btn"
-            aria-label="Reset completed checklist"
+            aria-label={t.roadmap.resetProgress}
           >
             <RotateCcw size={16} />
           </button>
@@ -149,9 +223,9 @@ export function RoadmapHeader({
             type="button"
             className={styles.iconButton}
             onClick={onToggleTheme}
-            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            title={t.roadmap.toggleTheme}
             id="theme-toggle-btn"
-            aria-label="Toggle dark/light theme"
+            aria-label={t.roadmap.toggleTheme}
           >
             {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
           </button>
@@ -166,11 +240,11 @@ export function RoadmapHeader({
           </span>
           <span className={styles.pill}>
             <Clock size={12} style={{ color: 'var(--color-info-500)' }} />
-            {currentProcess.estimatedTotalTime}
+            <span>{currentProcess.estimatedTotalTime}</span>
           </span>
           <span className={styles.pill}>
             <IndianRupee size={12} style={{ color: 'var(--color-success-500)' }} />
-            {currentProcess.estimatedTotalCost}
+            <span>{currentProcess.estimatedTotalCost}</span>
           </span>
         </div>
 
@@ -182,7 +256,7 @@ export function RoadmapHeader({
             />
           </div>
           <span className={styles.progressText}>
-            {completedCount}/{totalSteps} steps ({progressPercent}%)
+            {completedCount}/{totalSteps} {t.roadmap.stepsProgress} ({progressPercent}%)
           </span>
         </div>
       </div>
