@@ -3,37 +3,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { GitFork, Network, Moon, Sun, Globe, ChevronDown, Menu, X, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+import { NAV_LANGUAGES, LanguageOption, LanguageCode } from '@/lib/translations';
 import styles from './LandingNav.module.css';
 
-export interface LanguageOption {
-  code: string;
-  label: string;
-  native: string;
-}
-
-export const NAV_LANGUAGES: LanguageOption[] = [
-  { code: 'auto', label: 'Multilingual', native: 'All Languages' },
-  { code: 'en', label: 'English', native: 'English' },
-  { code: 'hinglish', label: 'Hinglish', native: 'Hinglish' },
-  { code: 'hi', label: 'Hindi', native: 'हिन्दी' },
-  { code: 'ur', label: 'Urdu', native: 'اردو' },
-  { code: 'ta', label: 'Tamil', native: 'தமிழ்' },
-  { code: 'bn', label: 'Bengali', native: 'বাংলা' },
-];
+export { NAV_LANGUAGES };
+export type { LanguageOption };
 
 interface LandingNavProps {
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
-  selectedLang?: string;
-  onSelectLang?: (code: string) => void;
+  selectedLang?: LanguageCode | string;
+  onSelectLang?: (code: LanguageCode) => void;
 }
 
 export function LandingNav({
   theme,
   onToggleTheme,
-  selectedLang = 'auto',
-  onSelectLang,
+  selectedLang: propSelectedLang,
+  onSelectLang: propOnSelectLang,
 }: LandingNavProps) {
+  const { lang, setLang, t, languages } = useLanguage();
+  const currentLang = (propSelectedLang || lang) as LanguageCode;
+
   const [scrolled, setScrolled] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -87,10 +79,16 @@ export function LandingNav({
   }, []);
 
   const currentLangObj =
-    NAV_LANGUAGES.find((l) => l.code === selectedLang) || NAV_LANGUAGES[0];
+    languages.find((l) => l.code === currentLang) || languages[0];
 
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const handleSelectLanguage = (code: LanguageCode) => {
+    setLang(code);
+    propOnSelectLang?.(code);
+    setIsLangOpen(false);
   };
 
   return (
@@ -116,13 +114,10 @@ export function LandingNav({
             {/* Desktop Center Links */}
             <div className={styles.navLinks}>
               <Link href="/roadmap/pvt-ltd-delhi" className={styles.navLink}>
-                Featured Roadmap
+                {t.nav.featuredRoadmap}
               </Link>
               <Link href="#about-section" className={styles.navLink}>
-                About Us
-              </Link>
-              <Link href="#about-section" className={styles.navLink}>
-                Directory
+                {t.nav.aboutUs}
               </Link>
               <a
                 href="https://www.india.gov.in"
@@ -130,7 +125,7 @@ export function LandingNav({
                 rel="noopener noreferrer"
                 className={styles.navLink}
               >
-                National Portal ↗
+                {t.footer.nationalPortal}
               </a>
             </div>
 
@@ -142,7 +137,7 @@ export function LandingNav({
                   type="button"
                   className={styles.langBtn}
                   onClick={() => setIsLangOpen((prev) => !prev)}
-                  aria-label="Select language"
+                  aria-label={t.nav.selectLanguage}
                   aria-expanded={isLangOpen}
                   id="nav-language-select-btn"
                 >
@@ -153,20 +148,17 @@ export function LandingNav({
 
                 {isLangOpen && (
                   <div className={styles.langDropdown} role="menu">
-                    <div className={styles.dropdownHeader}>Select Language</div>
-                    {NAV_LANGUAGES.map((lang) => (
+                    <div className={styles.dropdownHeader}>{t.nav.selectLanguage}</div>
+                    {languages.map((item) => (
                       <button
-                        key={lang.code}
+                        key={item.code}
                         type="button"
                         role="menuitem"
-                        className={`${styles.langOption} ${selectedLang === lang.code ? styles.langOptionActive : ''}`}
-                        onClick={() => {
-                          onSelectLang?.(lang.code);
-                          setIsLangOpen(false);
-                        }}
+                        className={`${styles.langOption} ${currentLang === item.code ? styles.langOptionActive : ''}`}
+                        onClick={() => handleSelectLanguage(item.code)}
                       >
-                        <span className={styles.langNative}>{lang.native}</span>
-                        <span className={styles.langEnglish}>{lang.label}</span>
+                        <span className={styles.langNative}>{item.native}</span>
+                        <span className={styles.langEnglish}>{item.label}</span>
                       </button>
                     ))}
                   </div>
@@ -178,7 +170,7 @@ export function LandingNav({
                 type="button"
                 className={styles.themeBtn}
                 onClick={onToggleTheme}
-                aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                aria-label={theme === 'light' ? t.nav.themeDark : t.nav.themeLight}
                 id="landing-theme-toggle-btn"
               >
                 {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
@@ -187,7 +179,7 @@ export function LandingNav({
               {/* Desktop CTA Button */}
               <Link href="/roadmap/pvt-ltd-delhi" className={styles.ctaBtn} id="landing-open-canvas-btn">
                 <Network size={14} />
-                <span>Interactive Canvas</span>
+                <span>{t.nav.canvasBtn}</span>
               </Link>
 
               {/* Mobile Menu Toggle Button */}
@@ -195,7 +187,7 @@ export function LandingNav({
                 type="button"
                 className={styles.mobileMenuToggle}
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-                aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-label={isMobileMenuOpen ? t.nav.closeMenu : t.nav.menu}
                 aria-expanded={isMobileMenuOpen}
                 id="landing-mobile-menu-toggle-btn"
               >
@@ -213,7 +205,7 @@ export function LandingNav({
                   className={styles.mobileNavLink}
                   onClick={handleLinkClick}
                 >
-                  <span>Featured Roadmap</span>
+                  <span>{t.nav.featuredRoadmap}</span>
                   <ArrowRight size={14} />
                 </Link>
                 <Link
@@ -221,15 +213,7 @@ export function LandingNav({
                   className={styles.mobileNavLink}
                   onClick={handleLinkClick}
                 >
-                  <span>About Us</span>
-                  <ArrowRight size={14} />
-                </Link>
-                <Link
-                  href="#about-section"
-                  className={styles.mobileNavLink}
-                  onClick={handleLinkClick}
-                >
-                  <span>Directory</span>
+                  <span>{t.nav.aboutUs}</span>
                   <ArrowRight size={14} />
                 </Link>
                 <a
@@ -239,7 +223,7 @@ export function LandingNav({
                   className={styles.mobileNavLink}
                   onClick={handleLinkClick}
                 >
-                  <span>National Portal</span>
+                  <span>{t.footer.nationalPortal}</span>
                   <span className={styles.externalBadge}>↗</span>
                 </a>
               </div>
@@ -251,7 +235,7 @@ export function LandingNav({
                   onClick={handleLinkClick}
                 >
                   <Network size={16} />
-                  <span>Launch Interactive Canvas</span>
+                  <span>{t.nav.canvasBtn}</span>
                 </Link>
               </div>
             </div>
