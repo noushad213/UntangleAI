@@ -1,60 +1,124 @@
 .searchWrapper {
   width: 100%;
-  max-width: 740px;
-  margin: 0 auto clamp(18px, 3vh, 28px);
+  max-width: 680px;
+  margin: 0 auto;
   position: relative;
   z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Big styled capsule with rounded edges */
 .searchBar {
   display: flex;
   align-items: center;
   gap: clamp(8px, 1.8vw, 12px);
   width: 100%;
-  height: clamp(52px, 8vw, 64px);
-  padding: 4px 6px 4px clamp(14px, 2.5vw, 22px);
+  height: clamp(50px, 7vw, 58px);
+  padding: 4px clamp(16px, 2.5vw, 22px);
   border-radius: 9999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease;
   box-sizing: border-box;
 }
 
-.searchBar:hover {
-  background: rgba(255, 255, 255, 0.22);
+.searchBarWithActions {
+  padding-right: 6px;
+}
+
+.searchBarDragging {
+  background: rgba(255, 255, 255, 0.18);
   border-color: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.34),
-    inset 0 1px 1px rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35), 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+
+.searchBarListening {
+  border-color: rgba(239, 68, 68, 0.6);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25), 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.searchBar:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .searchBar:focus-within {
-  background: rgba(255, 255, 255, 0.26);
-  border-color: #ffffff;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4),
-    0 0 0 3px rgba(255, 255, 255, 0.32),
-    inset 0 1px 1px rgba(255, 255, 255, 0.9);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(255, 255, 255, 0.12);
 }
 
 .searchIcon {
-  color: #ffffff;
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.7);
   flex-shrink: 0;
-  transition: transform 0.25s ease;
+  transition: color 0.2s ease;
 }
 
 .searchBar:focus-within .searchIcon {
-  transform: scale(1.08);
-  opacity: 1;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-/* Real input field */
+/* Attached document pill */
+.attachedDocPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 0.76rem;
+  color: #ffffff;
+  max-width: 170px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  animation: actionsIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.attachedDocIcon {
+  color: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+}
+
+.attachedDocName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 90px;
+  font-weight: 500;
+}
+
+.attachedDocSize {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.65);
+  flex-shrink: 0;
+}
+
+.attachedDocRemove {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.attachedDocRemove:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
 .inputField {
   flex: 1;
   width: 100%;
@@ -63,8 +127,8 @@
   border: none;
   background: transparent;
   font-family: var(--font-family-sans), 'Segoe UI', Tahoma, sans-serif;
-  font-size: clamp(0.88rem, 2.2vw, 1.18rem);
-  font-weight: 500;
+  font-size: clamp(0.88rem, 2vw, 1.05rem);
+  font-weight: 400;
   color: #ffffff;
   outline: none;
   padding: 0 6px;
@@ -72,14 +136,13 @@
 }
 
 .inputField::placeholder {
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.55);
   font-weight: 400;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   transition: opacity 0.2s ease;
 }
 
 .inputField:focus::placeholder {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .rtlField {
@@ -87,33 +150,214 @@
   font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
 }
 
-/* Actions on the right */
 .actionsGroup {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   flex-shrink: 0;
+  animation: actionsIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes actionsIn {
+  from { opacity: 0; transform: translateX(4px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .clearBtn {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease;
   padding: 0;
   flex-shrink: 0;
 }
 
 .clearBtn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Tool Buttons (Upload & Voice) */
+.toolBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.toolBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.toolBtnActive {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.toolBtnListening {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.pulseRing {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  animation: listeningPulse 1.4s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes listeningPulse {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.micListeningIcon {
+  color: #ef4444;
+}
+
+/* Indian Voice Language Selector Trigger */
+.voiceLangContainer {
+  position: relative;
+}
+
+.voiceLangToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-family-sans), 'Segoe UI', Tahoma, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.voiceLangToggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+}
+
+.voiceLangToggleListening {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.14);
+  color: #fca5a5;
+}
+
+.voiceLangLabel {
+  font-weight: 600;
+}
+
+.chevronRotated {
+  transform: rotate(180deg);
+  transition: transform 0.15s ease;
+}
+
+.voiceLangDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: rgba(15, 23, 42, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  z-index: 60;
+  width: 210px;
+  overflow: hidden;
+  animation: actionsIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.voiceLangDropdownHeader {
+  padding: 8px 12px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.voiceLangList {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.voiceLangItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.voiceLangItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.voiceLangItemActive {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.voiceLangItemText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.voiceItemNative {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.voiceItemName {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.voiceItemCheck {
+  color: #38bdf8;
 }
 
 .submitBtn {
@@ -121,88 +365,285 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 10px 22px;
+  padding: 9px 20px;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: none;
   background: #ffffff;
-  color: #0b0f19;
+  color: #0f172a;
   font-family: var(--font-family-sans), sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background 0.2s ease, transform 0.15s ease;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .submitBtn:hover {
   background: #f1f5f9;
-  transform: scale(1.04);
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35);
+  transform: scale(1.03);
 }
 
 .submitBtn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .submitBtnText {
   display: inline;
 }
 
-/* Dropdown Autocomplete */
-.dropdown {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  right: 0;
-  background: rgba(18, 22, 36, 0.96);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
-  z-index: 50;
-  overflow: hidden;
-  max-height: clamp(240px, 45vh, 360px);
-  overflow-y: auto;
-  animation: dropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* Live Voice HUD & Real-time Transcript */
+.liveVoiceHUD {
+  width: 100%;
+  max-width: 680px;
+  margin-top: 10px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(239, 68, 68, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: actionsIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-sizing: border-box;
 }
 
-@keyframes dropdownIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.hudTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hudIndicator {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.liveRecordingDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px #ef4444;
+  animation: blink 1s infinite alternate;
+}
+
+.liveRecordingText {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fca5a5;
+  text-transform: uppercase;
+}
+
+.hudLangBadge {
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fecaca;
+}
+
+/* Audio frequency visualizer equalizer */
+.audioWaveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 24px;
+  padding: 0 6px;
+}
+
+.waveBar {
+  width: 3px;
+  border-radius: 9999px;
+  background: #ef4444;
+  transition: height 0.08s ease-out;
+}
+
+.hudStopBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.hudStopBtn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.liveTranscriptText {
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: #ffffff;
+  line-height: 1.4;
+  min-height: 22px;
+  word-break: break-word;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.listeningHint {
+  color: rgba(255, 255, 255, 0.45);
+  font-style: italic;
+  font-size: 0.82rem;
+}
+
+.blinkingCursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: #ef4444;
+  margin-left: 2px;
+  animation: cursorBlink 0.9s infinite;
+  vertical-align: middle;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Status Feedback Banner */
+.statusBanner {
+  margin: 10px auto 0 auto;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  animation: actionsIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.statusError {
+  background: rgba(239, 68, 68, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #ffffff;
+}
+
+.statusInfo {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.recordingDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+  animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+  0% { opacity: 0.35; }
+  100% { opacity: 1; }
+}
+
+.statusIcon {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.statusText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.statusCloseBtn {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.statusCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Autocomplete dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  overflow: hidden;
+  max-height: clamp(220px, 40vh, 340px);
+  overflow-y: auto;
+  animation: dropdownSlide 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dropdownSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdownHeader {
   padding: 10px 16px;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .dropdownItem {
-  padding: 12px 16px;
+  padding: 11px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: background 0.18s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.15s ease;
   text-align: left;
 }
 
@@ -212,7 +653,7 @@
 
 .dropdownItem:hover,
 .dropdownItemActive {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .itemMain {
@@ -224,14 +665,14 @@
 }
 
 .itemTitle {
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 600;
   color: #ffffff;
 }
 
 .itemDesc {
-  font-size: 0.76rem;
-  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -245,21 +686,21 @@
 }
 
 .itemPill {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 500;
   padding: 2px 7px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
   white-space: nowrap;
 }
 
 .emptyState {
   padding: 24px 18px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.84rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -268,9 +709,53 @@
 
 @media (max-width: 520px) {
   .searchBar {
-    height: 50px;
-    padding: 4px 6px 4px 14px;
-    gap: 8px;
+    height: 48px;
+    padding: 4px 12px;
+    gap: 6px;
+  }
+
+  .attachedDocPill {
+    max-width: 110px;
+    padding: 2px 6px;
+    font-size: 0.72rem;
+  }
+
+  .attachedDocName {
+    max-width: 55px;
+  }
+
+  .attachedDocSize {
+    display: none;
+  }
+
+  .voiceLangLabel {
+    display: none;
+  }
+
+  .voiceLangToggle {
+    padding: 0 6px;
+  }
+
+  .toolBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .liveVoiceHUD {
+    padding: 8px 12px;
+  }
+
+  .hudTopRow {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .audioWaveform {
+    height: 18px;
+  }
+
+  .searchBarWithActions {
+    padding-right: 5px;
   }
 
   .submitBtnText {
@@ -278,8 +763,8 @@
   }
 
   .submitBtn {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
     padding: 0;
     border-radius: 50%;
   }
