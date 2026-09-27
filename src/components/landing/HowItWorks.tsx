@@ -3,18 +3,20 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Compass, FileCheck, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './HowItWorks.module.css';
 
 export function HowItWorks() {
+  const { t } = useLanguage();
   const [applicantType, setApplicantType] = useState<'team' | 'solo'>('team');
 
   return (
-    <section id="about-section" className={styles.sectionContainer} aria-label="About UntangleAI">
+    <section id="about-section" className={styles.sectionContainer} aria-label={t.about.sectionTitle}>
       <div className={styles.contentWrapper}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>About Us</h2>
+          <h2 className={styles.sectionTitle}>{t.about.sectionTitle}</h2>
           <p className={styles.sectionSubtitle}>
-            Transforming complex public administration into transparent, actionable roadmaps.
+            {t.about.sectionSubtitle}
           </p>
         </div>
 
@@ -24,8 +26,8 @@ export function HowItWorks() {
             <div className={styles.cardPeriwinkle}>
               <div className={styles.cardImageWrapper}>
                 <img
-                  src="/images/village_lodge.jpg"
-                  alt="Scenic snow village street with warm ambient lights"
+                  src="/images/card_official_docs.jpg"
+                  alt="Government office desk with official forms, stamps, and a laptop"
                   className={styles.cardImage}
                   loading="lazy"
                 />
@@ -33,14 +35,13 @@ export function HowItWorks() {
 
               <div className={styles.cardTextContent}>
                 <h3 className={styles.cardHeading}>
-                  Direct Grounding in Official Portals
+                  {t.about.card1Heading}
                 </h3>
                 <p className={styles.cardBody}>
-                  Clear, verified procedural guidance synthesized directly from ministry portals
-                  (.gov.in and .nic.in). No broker commissions, no confusing jargon, zero guesswork.
+                  {t.about.card1Body}
                 </p>
                 <span className={styles.cardTagline}>
-                  Central & State Jurisdictions
+                  {t.about.card1Tag}
                 </span>
               </div>
             </div>
@@ -49,28 +50,28 @@ export function HowItWorks() {
               <div className={styles.sideBlockBadge}>
                 <Compass size={18} />
               </div>
-              <h4 className={styles.sideBlockHeading}>Verified Requirements</h4>
+              <h4 className={styles.sideBlockHeading}>{t.about.side1Heading}</h4>
               <p className={styles.sideBlockText}>
-                View verified prerequisites, authorized forms, and statutory fee schedules on every roadmap.
+                {t.about.side1Text}
               </p>
               <Link href="/roadmap/pvt-ltd-delhi" className={styles.sidePillBtn}>
-                <span>View roadmaps</span>
+                <span>{t.about.side1Btn}</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
           </div>
 
-          {/* Row 2: In DOM order: Primary Card first, Companion Action second (CSS row-reverse for desktop) */}
+          {/* Row 2: In DOM order: Primary Card first, Companion Action second */}
           <div className={styles.rowTwo}>
             <div className={styles.cardEspresso}>
               <div className={styles.cardTextContent}>
                 <h3 className={styles.cardHeading}>
-                  Personalized for Solo Applicants & Enterprises
+                  {t.about.card2Heading}
                 </h3>
                 <p className={styles.cardBody}>
                   {applicantType === 'team'
-                    ? 'Incorporate companies, assign multiple directors, obtain commercial food safety permits, and manage tax registrations with full compliance.'
-                    : 'Streamline personal driving license renewals, citizen certificates, and individual permits without redundant documentation.'}
+                    ? t.about.card2BodyTeam
+                    : t.about.card2BodySolo}
                 </p>
 
                 <div className={styles.segmentedControl} role="tablist" aria-label="Applicant Mode">
@@ -81,9 +82,9 @@ export function HowItWorks() {
                     className={`${styles.segmentBtn} ${applicantType === 'team' ? styles.segmentBtnActive : ''}`}
                     onClick={() => setApplicantType('team')}
                   >
-                    With team
+                    {t.about.withTeam}
                   </button>
-                  <span className={styles.segmentDivider}>&lt; Scope &gt;</span>
+                  <span className={styles.segmentDivider}>{t.about.scope}</span>
                   <button
                     type="button"
                     role="tab"
@@ -91,15 +92,15 @@ export function HowItWorks() {
                     className={`${styles.segmentBtn} ${applicantType === 'solo' ? styles.segmentBtnActive : ''}`}
                     onClick={() => setApplicantType('solo')}
                   >
-                    Solo applicant
+                    {t.about.soloApplicant}
                   </button>
                 </div>
               </div>
 
               <div className={styles.cardImageWrapper}>
                 <img
-                  src="/images/ridge_climber.jpg"
-                  alt="Mountaineer walking on snow ridge into sunset clouds"
+                  src="/images/card_citizen_service.jpg"
+                  alt="Person working on government forms at a modern workspace"
                   className={styles.cardImage}
                   loading="lazy"
                 />
@@ -110,12 +111,12 @@ export function HowItWorks() {
               <div className={styles.sideBlockBadge}>
                 <FileCheck size={18} />
               </div>
-              <h4 className={styles.sideBlockHeading}>Offline Checklists</h4>
+              <h4 className={styles.sideBlockHeading}>{t.about.side2Heading}</h4>
               <p className={styles.sideBlockText}>
-                Track your documentation offline or export interactive checklists directly before visiting authorities.
+                {t.about.side2Text}
               </p>
               <Link href="/roadmap/fssai-food-license" className={styles.sidePillBtn}>
-                <span>View checklists</span>
+                <span>{t.about.side2Btn}</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
