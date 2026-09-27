@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MOCK_ROADMAPS } from '@/data/mock-roadmaps';
+import { TRANSLATIONS, LanguageCode, getEffectiveLang } from '@/lib/translations';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,20 +20,26 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const query = (searchParams.get('q') || '').trim().toLowerCase();
   const location = (searchParams.get('location') || '').trim().toLowerCase();
+  const langParam = (searchParams.get('lang') || 'auto') as LanguageCode;
+  const effectiveLang = getEffectiveLang(langParam);
+  const dict = TRANSLATIONS[effectiveLang] || TRANSLATIONS.en;
 
   if (!query && !location) {
     // Return all available roadmaps as default recommendations
-    const results: SearchResult[] = MOCK_ROADMAPS.map((p) => ({
-      id: p.id,
-      title: p.title,
-      description: p.description,
-      category: p.category,
-      location: p.location,
-      stepCount: p.steps.length,
-      estimatedTotalTime: p.estimatedTotalTime,
-      estimatedTotalCost: p.estimatedTotalCost,
-      matchScore: 1,
-    }));
+    const results: SearchResult[] = MOCK_ROADMAPS.map((p) => {
+      const trans = dict.processes[p.id];
+      return {
+        id: p.id,
+        title: trans?.title || p.title,
+        description: trans?.description || p.description,
+        category: trans?.category || p.category,
+        location: p.location,
+        stepCount: p.steps.length,
+        estimatedTotalTime: p.estimatedTotalTime,
+        estimatedTotalCost: p.estimatedTotalCost,
+        matchScore: 1,
+      };
+    });
     return NextResponse.json({ results });
   }
 
@@ -108,11 +115,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const trans = dict.processes[p.id];
+
     return {
       id: p.id,
-      title: p.title,
-      description: p.description,
-      category: p.category,
+      title: trans?.title || p.title,
+      description: trans?.description || p.description,
+      category: trans?.category || p.category,
       location: p.location,
       stepCount: p.steps.length,
       estimatedTotalTime: p.estimatedTotalTime,

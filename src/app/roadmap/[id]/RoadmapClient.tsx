@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShieldAlert, ExternalLink } from 'lucide-react';
 import { MOCK_ROADMAPS } from '@/data/mock-roadmaps';
 import { CivicProcess, ProcessStep } from '@/types/roadmap';
+import { useLanguage } from '@/context/LanguageContext';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { RoadmapHeader } from '@/components/roadmap/RoadmapHeader';
 import { RoadmapCanvas } from '@/components/roadmap/RoadmapCanvas';
@@ -18,16 +19,27 @@ interface RoadmapClientProps {
 
 export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
   const router = useRouter();
-  const [currentProcess, setCurrentProcess] = useState<CivicProcess>(initialProcess);
-  const [selectedStep, setSelectedStep] = useState<ProcessStep | null>(null);
+  const { getLocalizedRoadmap, t } = useLanguage();
+
+  const [currentProcessRaw, setCurrentProcessRaw] = useState<CivicProcess>(initialProcess);
+  const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'graph' | 'list'>('graph');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  // Keep process in sync if initialProcess changes
+  // Keep raw process in sync if initialProcess changes
   useEffect(() => {
-    setCurrentProcess(initialProcess);
+    setCurrentProcessRaw(initialProcess);
   }, [initialProcess]);
+
+  // Localized current process and all processes
+  const currentProcess = useMemo(() => {
+    return getLocalizedRoadmap(currentProcessRaw);
+  }, [currentProcessRaw, getLocalizedRoadmap]);
+
+  const allProcesses = useMemo(() => {
+    return MOCK_ROADMAPS.map((p) => getLocalizedRoadmap(p));
+  }, [getLocalizedRoadmap]);
 
   // Load progress engine for current process
   const {
@@ -67,14 +79,14 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
   const handleSelectProcess = useCallback(
     (newProcessId: string) => {
       router.push(`/roadmap/${newProcessId}`);
-      setSelectedStep(null);
+      setSelectedStepId(null);
       setIsPanelOpen(false);
     },
     [router]
   );
 
   const handleSelectStep = useCallback((step: ProcessStep) => {
-    setSelectedStep(step);
+    setSelectedStepId(step.id);
     setIsPanelOpen(true);
   }, []);
 
@@ -93,6 +105,11 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isPanelOpen]);
 
+  const selectedStep = useMemo(() => {
+    if (!selectedStepId) return null;
+    return currentProcess.steps.find((s) => s.id === selectedStepId) || null;
+  }, [selectedStepId, currentProcess.steps]);
+
   const selectedStepStatus = selectedStep
     ? stepStatusMap.get(selectedStep.id) || 'pending'
     : 'pending';
@@ -109,7 +126,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     <div className={styles.mainContainer}>
       <RoadmapHeader
         currentProcess={currentProcess}
-        allProcesses={MOCK_ROADMAPS}
+        allProcesses={allProcesses}
         onSelectProcess={handleSelectProcess}
         viewMode={viewMode}
         onToggleViewMode={setViewMode}
@@ -128,7 +145,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
             stepStatusMap={stepStatusMap}
             completedStepIds={completedStepIds}
             unmetDependenciesMap={unmetDependenciesMap}
-            selectedStepId={selectedStep?.id || null}
+            selectedStepId={selectedStepId}
             onSelectStep={handleSelectStep}
             theme={theme}
           />
@@ -158,20 +175,23 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
       <footer className={styles.bottomDisclaimer} role="contentinfo">
         <div className={styles.disclaimerText}>
           <ShieldAlert size={14} style={{ color: 'var(--color-warning-500)', flexShrink: 0 }} />
-          <span>
-            Civic Guide disclaimer: Roadmaps are compiled from publicly accessible government portals.
-            Always confirm recent regulatory amendments on official department sites.
-          </span>
+          <span>{t.footer.disclaimer}</span>
         </div>
         <div>
-          Official Portal:{' '}
+          {t.roadmap.officialPortal}:{' '}
           <a
             href={currentProcess.officialPortal}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.disclaimerLink}
           >
-            {new URL(currentProcess.officialPortal).hostname}
+            {(() => {
+              try {
+                return new URL(currentProcess.officialPortal).hostname;
+              } catch {
+                return currentProcess.officialPortal;
+              }
+            })()}
             <ExternalLink size={10} style={{ marginLeft: 3, verticalAlign: -1, display: 'inline' }} />
           </a>
         </div>

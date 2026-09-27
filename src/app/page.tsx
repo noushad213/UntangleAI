@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingHero } from '@/components/landing/LandingHero';
 import { HowItWorks } from '@/components/landing/HowItWorks';
@@ -8,7 +9,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
 
 export default function HomePage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [selectedLang, setSelectedLang] = useState<string>('auto');
+  const { lang, setLang } = useLanguage();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('untangle_theme') as 'light' | 'dark' | null;
@@ -38,11 +39,11 @@ export default function HomePage() {
       <LandingNav
         theme={theme}
         onToggleTheme={toggleTheme}
-        selectedLang={selectedLang}
-        onSelectLang={setSelectedLang}
+        selectedLang={lang}
+        onSelectLang={setLang}
       />
       <main style={{ flex: 1 }}>
-        <LandingHero selectedLang={selectedLang} />
+        <LandingHero selectedLang={lang} />
         <HowItWorks />
       </main>
       <LandingFooter />
