@@ -1,0 +1,490 @@
+.pageContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-sans);
+  overflow-x: hidden;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 4rem;
+}
+
+/* Header Banner Section */
+.heroSection {
+  position: relative;
+  padding: 8rem 1.5rem 3.5rem;
+  background: var(--gradient-hero-bg);
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: flex;
+  justify-content: center;
+}
+
+.heroInner {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.badgePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: var(--color-brand-600);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+[data-theme='dark'] .badgePill {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.35);
+  color: var(--color-brand-300);
+}
+
+.pageTitle {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  margin: 0 0 1.75rem 0;
+}
+
+.pageSubtitle {
+  max-width: 680px;
+  font-size: clamp(0.95rem, 1.5vw, 1.125rem);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0 0 2rem 0;
+}
+
+/* Search Bar in Catalog */
+.searchContainer {
+  position: relative;
+  max-width: 640px;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1.125rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.875rem 2.75rem 0.875rem 3rem;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+.searchInput:focus {
+  border-color: var(--color-brand-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.clearButton {
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.clearButton:hover {
+  color: var(--color-text-primary);
+}
+
+/* Category Filter Pills */
+.filterPillsContainer {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.categoryPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.825rem;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.categoryPill:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text-primary);
+  background: var(--color-surface-tertiary);
+}
+
+.categoryPillActive {
+  background: var(--color-brand-600);
+  border-color: var(--color-brand-600);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.categoryPillActive:hover {
+  background: var(--color-brand-700);
+  border-color: var(--color-brand-700);
+  color: #ffffff;
+}
+
+.categoryCount {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.categoryPillActive .categoryCount {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Catalog Body Section */
+.catalogSection {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 1rem;
+}
+
+.catalogToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.resultsCount {
+  font-weight: 500;
+}
+
+/* Grid Layout */
+.roadmapsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Roadmap Card */
+.roadmapCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease;
+  position: relative;
+  outline: none;
+}
+
+.roadmapCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-brand-400);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.roadmapCard:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+/* Top Meta Row */
+.cardMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+}
+
+.cardCategory {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--color-brand-600);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+[data-theme='dark'] .cardCategory {
+  background: rgba(99, 102, 241, 0.16);
+  color: var(--color-brand-300);
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.cardLocation {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+/* Title & Description */
+.cardTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-text-primary);
+  margin: 0 0 0.625rem 0;
+  transition: color 0.15s ease;
+}
+
+.roadmapCard:hover .cardTitle {
+  color: var(--color-brand-600);
+}
+
+[data-theme='dark'] .roadmapCard:hover .cardTitle {
+  color: var(--color-brand-400);
+}
+
+.cardDescription {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  margin: 0 0 1.25rem 0;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Metrics Chip Row */
+.cardMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.metricChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border);
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Card Footer Action */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--color-border-subtle);
+  margin-top: auto;
+}
+
+.cardPortal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-brand-600);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.roadmapCard:hover .cardAction {
+  transform: translateX(3px);
+  color: var(--color-brand-700);
+}
+
+[data-theme='dark'] .cardAction {
+  color: var(--color-brand-400);
+}
+
+/* Saved Progress Highlight on Card */
+.progressIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: var(--color-success-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .progressIndicator {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-success-500);
+}
+
+.progressBarTrack {
+  flex: 1;
+  height: 4px;
+  background: rgba(34, 197, 94, 0.2);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: var(--color-success-500);
+  border-radius: 9999px;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  background: var(--color-surface-secondary);
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+  margin-top: 1rem;
+}
+
+.emptyIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--color-surface-tertiary);
+  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.emptyTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.emptyDescription {
+  max-width: 420px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  margin: 0 0 1.5rem 0;
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  background: var(--color-brand-600);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.resetButton:hover {
+  background: var(--color-brand-700);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .heroSection {
+    padding: 6.5rem 1rem 2.5rem;
+  }
+
+  .roadmapsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .filterPillsContainer {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}

@@ -213,7 +213,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
         </div>
 
         {/* Single CTA to roadmap browsing */}
-        <Link href="/roadmap/pvt-ltd-delhi" className={styles.ctaLink} id="hero-explore-roadmaps-card">
+        <Link href="/roadmap" className={styles.ctaLink} id="hero-explore-roadmaps-card">
           <BookOpen size={16} />
           <span>{t.heroStats.exploreTitle}</span>
           <ArrowRight size={14} className={styles.ctaArrow} />

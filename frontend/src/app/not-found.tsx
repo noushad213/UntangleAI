@@ -14,8 +14,8 @@ export default function NotFound() {
           We could not find the civic roadmap or page you requested. It may have moved or may not exist.
         </p>
         <div className={styles.actions}>
-          <Link href="/roadmap/pvt-ltd-delhi" className={styles.primaryButton}>
-            View sample roadmap
+          <Link href="/roadmap" className={styles.primaryButton}>
+            Browse roadmaps
           </Link>
           <Link href="/" className={styles.secondaryButton}>
             <ArrowLeft size={16} aria-hidden="true" />

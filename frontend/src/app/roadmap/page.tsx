@@ -1,41 +1,33 @@
-'use client';
+import { Suspense } from 'react';
+import { Metadata } from 'next';
+import RoadmapDirectoryClient from './RoadmapDirectoryClient';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { getLastVisitedSession } from '@/lib/storage';
+export const metadata: Metadata = {
+  title: 'Browse Guided Roadmaps — UntangleAI',
+  description: 'Explore step-by-step civic roadmaps verified against official Indian central and state government portals.',
+};
 
 export default function RoadmapIndexPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    try {
-      const lastSession = getLastVisitedSession();
-      if (lastSession && lastSession.id) {
-        const targetUrl = lastSession.urlPath || `/roadmap/${lastSession.id}`;
-        router.replace(targetUrl);
-        return;
-      }
-    } catch {
-      // Fallback if storage not available
-    }
-
-    router.replace('/roadmap/pvt-ltd-delhi');
-  }, [router]);
-
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        backgroundColor: 'var(--color-surface-primary)',
-        color: 'var(--color-text-secondary)',
-        fontFamily: 'var(--font-family-sans)',
-        fontSize: '0.9rem',
-      }}
+    <Suspense
+      fallback={
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            backgroundColor: 'var(--color-surface-primary)',
+            color: 'var(--color-text-secondary)',
+            fontFamily: 'var(--font-family-sans)',
+            fontSize: '0.9rem',
+          }}
+        >
+          <span>Loading roadmaps...</span>
+        </div>
+      }
     >
-      <span>Loading your roadmap...</span>
-    </div>
+      <RoadmapDirectoryClient />
+    </Suspense>
   );
 }
