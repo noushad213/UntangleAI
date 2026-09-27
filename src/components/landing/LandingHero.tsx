@@ -1,8 +1,24 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { MoreHorizontal, ArrowRight, Phone, Building2, Car, Utensils, ArrowDown } from 'lucide-react';
+import {
+  MoreHorizontal,
+  ArrowRight,
+  Phone,
+  Building2,
+  Car,
+  Utensils,
+  ExternalLink,
+  Briefcase,
+  Home,
+  FileText,
+  Users,
+  Landmark,
+  GraduationCap,
+  BookOpen,
+} from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 import { HeroQueryInput } from './HeroQueryInput';
 import styles from './LandingHero.module.css';
 
@@ -10,93 +26,152 @@ interface LandingHeroProps {
   selectedLang?: string;
 }
 
-export function LandingHero({ selectedLang = 'auto' }: LandingHeroProps) {
+export function LandingHero({ selectedLang }: LandingHeroProps) {
+  const { t, lang } = useLanguage();
+  const activeLang = selectedLang || lang;
+
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setIsMoreMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMoreMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <section className={styles.heroContainer} aria-label="Hero showcase">
-      {/* Background panoramic landscape image that scales fluidly */}
-      <div className={styles.heroBgWrapper}>
+    <section className={styles.heroSection} aria-label="Hero">
+      {/* Full-bleed background photo */}
+      <div className={styles.bgWrapper}>
         <img
-          src="/images/hero_alps.jpg"
-          alt="Majestic twilight snow mountain landscape"
-          className={styles.heroBgImage}
+          src="/images/hero_civic.jpg"
+          alt="Aerial view of Kartavya Path and government buildings, New Delhi"
+          className={styles.bgImage}
           loading="eager"
         />
-        <div className={styles.heroBgOverlay} />
+        <div className={styles.bgOverlay} />
       </div>
 
-      {/* Floating Glassmorphic Frame */}
-      <div className={styles.glassFrame}>
-        {/* Top Header Bar */}
-        <header className={styles.topBar}>
-          <button
-            type="button"
-            className={styles.iconBtn}
-            aria-label="Quick options"
-            title="Roadmap quick directory"
-          >
-            <MoreHorizontal size={18} />
-          </button>
-
-          <div className={styles.brandGroup}>
-            <span className={styles.brandTitle}>UNTANGLE</span>
-            <span className={styles.brandSubtitle}>Civic Process Navigator</span>
-          </div>
-
-          <Link href="#about-section" className={styles.pillActionBtn}>
-            <span>Find guidance</span>
-            <ArrowRight size={13} />
-          </Link>
-        </header>
-
-        {/* Center Title and Action */}
-        <div className={styles.centerContent}>
-          <h1 className={styles.heroTitle}>
-            Demystify Public Bureaucracy
-          </h1>
-
-          <h2 className={styles.queryHeading}>
-            Ask your queries
-          </h2>
-
-          <HeroQueryInput selectedLang={selectedLang} />
-
-          <Link href="#about-section" className={styles.heroCtaPill}>
-            <span>view roadmap selection</span>
-            <ArrowDown size={14} />
-          </Link>
+      {/* Content — vertically centered */}
+      <div className={styles.heroContent}>
+        <div className={styles.headingBlock}>
+          <h1 className={styles.headline}>{t.hero.title}</h1>
+          <p className={styles.subline}>{t.hero.tagline}</p>
         </div>
 
-        {/* Bottom Dock Bar */}
-        <footer className={styles.bottomBar}>
-          <a
-            href="tel:1800112026"
-            className={`${styles.bottomPill} ${styles.helplinePill}`}
-            title="National Government Services Portal helpline"
-          >
-            <Phone size={13} />
-            <span>1800 11 2026</span>
-          </a>
+        <HeroQueryInput selectedLang={activeLang} />
 
-          <div className={styles.centerPills}>
-            <Link href="/roadmap/pvt-ltd-delhi" className={styles.bottomPill}>
-              <Building2 size={13} />
-              <span>MCA SPICe+</span>
-            </Link>
-            <Link href="/roadmap/driving-license-delhi" className={styles.bottomPill}>
-              <Car size={13} />
-              <span>Sarathi Parivahan</span>
-            </Link>
-            <Link href="/roadmap/fssai-food-license" className={styles.bottomPill}>
-              <Utensils size={13} />
-              <span>FSSAI FoSCoS</span>
-            </Link>
-          </div>
-
-          <Link href="#about-section" className={`${styles.bottomPill} ${styles.explorePill}`}>
-            <span>explore roadmaps</span>
-            <span className={styles.toggleDot} />
+        {/* Category shortcuts */}
+        <div className={styles.categories} role="region" aria-label="Process categories">
+          <Link href="/roadmap/pvt-ltd-delhi" className={styles.pill} id="cat-business-licenses">
+            <Briefcase size={13} />
+            <span>{t.heroCategories.business}</span>
           </Link>
-        </footer>
+          <Link href="/roadmap/pvt-ltd-delhi?query=property" className={styles.pill} id="cat-property-land">
+            <Home size={13} />
+            <span>{t.heroCategories.property}</span>
+          </Link>
+          <Link href="/roadmap/driving-license-delhi" className={styles.pill} id="cat-id-documents">
+            <FileText size={13} />
+            <span>{t.heroCategories.idDocs}</span>
+          </Link>
+          <Link href="/roadmap/pvt-ltd-delhi?query=welfare" className={styles.pill} id="cat-social-welfare">
+            <Users size={13} />
+            <span>{t.heroCategories.welfare}</span>
+          </Link>
+          <Link href="/roadmap/pvt-ltd-delhi?query=tax" className={styles.pill} id="cat-tax-finance">
+            <Landmark size={13} />
+            <span>{t.heroCategories.tax}</span>
+          </Link>
+          <Link href="/roadmap/driving-license-delhi?query=education" className={styles.pill} id="cat-education">
+            <GraduationCap size={13} />
+            <span>{t.heroCategories.education}</span>
+          </Link>
+
+          <div className={styles.moreWrapper} ref={moreRef}>
+            <button
+              type="button"
+              className={`${styles.pill} ${styles.pillMore}`}
+              onClick={() => setIsMoreMenuOpen((prev) => !prev)}
+              id="cat-more-btn"
+              aria-expanded={isMoreMenuOpen}
+              aria-label={t.heroCategories.more}
+            >
+              <MoreHorizontal size={13} />
+              <span>{t.heroCategories.more}</span>
+            </button>
+
+            {isMoreMenuOpen && (
+              <div className={styles.dropdown} role="menu" id="cat-more-menu">
+                <div className={styles.dropdownTitle}>{t.nav.directory}</div>
+                <Link
+                  href="/roadmap/pvt-ltd-delhi"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <Building2 size={15} className={styles.dropdownIcon} />
+                  <span>{t.hero.mcaPill}</span>
+                </Link>
+                <Link
+                  href="/roadmap/driving-license-delhi"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <Car size={15} className={styles.dropdownIcon} />
+                  <span>{t.hero.sarathiPill}</span>
+                </Link>
+                <Link
+                  href="/roadmap/fssai-food-license"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <Utensils size={15} className={styles.dropdownIcon} />
+                  <span>{t.hero.fssaiPill}</span>
+                </Link>
+                <div className={styles.dropdownDivider} />
+                <a
+                  href="tel:1800112026"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <Phone size={15} className={styles.dropdownIcon} />
+                  <span>1800 11 2026</span>
+                </a>
+                <a
+                  href="https://www.india.gov.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <ExternalLink size={15} className={styles.dropdownIcon} />
+                  <span>{t.footer.nationalPortal}</span>
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Single CTA to roadmap browsing */}
+        <Link href="/roadmap/pvt-ltd-delhi" className={styles.ctaLink} id="hero-explore-roadmaps-card">
+          <BookOpen size={16} />
+          <span>{t.heroStats.exploreTitle}</span>
+          <ArrowRight size={14} className={styles.ctaArrow} />
+        </Link>
       </div>
     </section>
   );
