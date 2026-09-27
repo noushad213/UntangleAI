@@ -348,6 +348,16 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
         setQuery(`Driving license verification for ${file.name}`);
       } else if (nameLower.includes('company') || nameLower.includes('pvt') || nameLower.includes('mca') || nameLower.includes('spice') || nameLower.includes('moa') || nameLower.includes('aoa')) {
         setQuery(`Company registration documentation for ${file.name}`);
+      } else if (nameLower.includes('awas') || nameLower.includes('pmay') || nameLower.includes('housing') || nameLower.includes('makaan') || nameLower.includes('patta') || nameLower.includes('land_site')) {
+        setQuery(`PMAY housing grant verification for ${file.name}`);
+      } else if (nameLower.includes('kisan') || nameLower.includes('farmer') || nameLower.includes('bhulekh') || nameLower.includes('khasra') || nameLower.includes('7_12') || nameLower.includes('ror')) {
+        setQuery(`PM-Kisan farmer land verification for ${file.name}`);
+      } else if (nameLower.includes('ayushman') || nameLower.includes('health') || nameLower.includes('hospital') || nameLower.includes('pmjay') || nameLower.includes('abha') || nameLower.includes('medical')) {
+        setQuery(`Ayushman Bharat health card documentation for ${file.name}`);
+      } else if (nameLower.includes('sukanya') || nameLower.includes('ssy') || nameLower.includes('birth') || nameLower.includes('80c') || nameLower.includes('saving') || nameLower.includes('passbook')) {
+        setQuery(`Sukanya Samriddhi tax deduction documentation for ${file.name}`);
+      } else if (nameLower.includes('scholarship') || nameLower.includes('nsp') || nameLower.includes('marksheet') || nameLower.includes('bonafide') || nameLower.includes('student') || nameLower.includes('college')) {
+        setQuery(`NSP college scholarship application for ${file.name}`);
       } else if (nameLower.includes('rent') || nameLower.includes('electricity') || nameLower.includes('bill') || nameLower.includes('aadhaar') || nameLower.includes('pan') || nameLower.includes('utility')) {
         setQuery(`Address and ID proof verification for ${file.name}`);
       } else {
@@ -615,6 +625,74 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
         qLower.includes('ড্রাইভিং')
       ) {
         router.push(`/roadmap/driving-license-delhi${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
+      } else if (
+        qLower.includes('awas') ||
+        qLower.includes('pmay') ||
+        qLower.includes('housing') ||
+        qLower.includes('makaan') ||
+        qLower.includes('ghar') ||
+        qLower.includes('property') ||
+        qLower.includes('आवास') ||
+        qLower.includes('مکان') ||
+        qLower.includes('வீடு') ||
+        qLower.includes('আবাস')
+      ) {
+        router.push(`/roadmap/pmay-housing${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
+      } else if (
+        qLower.includes('kisan') ||
+        qLower.includes('farmer') ||
+        qLower.includes('kheti') ||
+        qLower.includes('fasal') ||
+        qLower.includes('agriculture') ||
+        qLower.includes('किसान') ||
+        qLower.includes('کسان') ||
+        qLower.includes('விவசாயி') ||
+        qLower.includes('কৃষক')
+      ) {
+        router.push(`/roadmap/pm-kisan-welfare${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
+      } else if (
+        qLower.includes('ayushman') ||
+        qLower.includes('health') ||
+        qLower.includes('hospital') ||
+        qLower.includes('pmjay') ||
+        qLower.includes('abha') ||
+        qLower.includes('ilaj') ||
+        qLower.includes('आयुष्मान') ||
+        qLower.includes('स्वास्थ्य') ||
+        qLower.includes('صحت') ||
+        qLower.includes('சுகாதாரம்') ||
+        qLower.includes('আয়ুষ্মান')
+      ) {
+        router.push(`/roadmap/ayushman-bharat${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
+      } else if (
+        qLower.includes('sukanya') ||
+        qLower.includes('samriddhi') ||
+        qLower.includes('tax') ||
+        qLower.includes('80c') ||
+        qLower.includes('savings') ||
+        qLower.includes('beti') ||
+        qLower.includes('सुकन्या') ||
+        qLower.includes('बचत') ||
+        qLower.includes('ٹیکس') ||
+        qLower.includes('சேமிப்பு') ||
+        qLower.includes('সুকন্যা')
+      ) {
+        router.push(`/roadmap/sukanya-samriddhi${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
+      } else if (
+        qLower.includes('scholarship') ||
+        qLower.includes('nsp') ||
+        qLower.includes('student') ||
+        qLower.includes('college') ||
+        qLower.includes('vidyalaxmi') ||
+        qLower.includes('education') ||
+        qLower.includes('shiksha') ||
+        qLower.includes('padhai') ||
+        qLower.includes('छात्रवृत्ति') ||
+        qLower.includes('وظیفہ') ||
+        qLower.includes('கல்வி') ||
+        qLower.includes('বৃত্তি')
+      ) {
+        router.push(`/roadmap/nsp-scholarship${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
       } else if (
         qLower.includes('company') ||
         qLower.includes('pvt') ||

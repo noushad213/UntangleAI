@@ -81,7 +81,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
             <Briefcase size={13} />
             <span>{t.heroCategories.business}</span>
           </Link>
-          <Link href="/roadmap/pvt-ltd-delhi?query=property" className={styles.pill} id="cat-property-land">
+          <Link href="/roadmap/pmay-housing" className={styles.pill} id="cat-property-land">
             <Home size={13} />
             <span>{t.heroCategories.property}</span>
           </Link>
@@ -89,15 +89,15 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
             <FileText size={13} />
             <span>{t.heroCategories.idDocs}</span>
           </Link>
-          <Link href="/roadmap/pvt-ltd-delhi?query=welfare" className={styles.pill} id="cat-social-welfare">
+          <Link href="/roadmap/pm-kisan-welfare" className={styles.pill} id="cat-social-welfare">
             <Users size={13} />
             <span>{t.heroCategories.welfare}</span>
           </Link>
-          <Link href="/roadmap/pvt-ltd-delhi?query=tax" className={styles.pill} id="cat-tax-finance">
+          <Link href="/roadmap/sukanya-samriddhi" className={styles.pill} id="cat-tax-finance">
             <Landmark size={13} />
             <span>{t.heroCategories.tax}</span>
           </Link>
-          <Link href="/roadmap/driving-license-delhi?query=education" className={styles.pill} id="cat-education">
+          <Link href="/roadmap/nsp-scholarship" className={styles.pill} id="cat-education">
             <GraduationCap size={13} />
             <span>{t.heroCategories.education}</span>
           </Link>
@@ -123,24 +123,64 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
-                  <Building2 size={15} className={styles.dropdownIcon} />
-                  <span>{t.hero.mcaPill}</span>
+                  <Building2 size={14} className={styles.dropdownIcon} />
+                  <span>Company Incorporation (MCA)</span>
                 </Link>
                 <Link
                   href="/roadmap/driving-license-delhi"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
-                  <Car size={15} className={styles.dropdownIcon} />
-                  <span>{t.hero.sarathiPill}</span>
+                  <Car size={14} className={styles.dropdownIcon} />
+                  <span>Driving License (Sarathi)</span>
                 </Link>
                 <Link
                   href="/roadmap/fssai-food-license"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
-                  <Utensils size={15} className={styles.dropdownIcon} />
-                  <span>{t.hero.fssaiPill}</span>
+                  <Utensils size={14} className={styles.dropdownIcon} />
+                  <span>Food Safety License (FSSAI)</span>
+                </Link>
+                <Link
+                  href="/roadmap/pmay-housing"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <Home size={14} className={styles.dropdownIcon} />
+                  <span>PMAY Housing for All</span>
+                </Link>
+                <Link
+                  href="/roadmap/pm-kisan-welfare"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <Users size={14} className={styles.dropdownIcon} />
+                  <span>PM-Kisan Farmer Direct Support</span>
+                </Link>
+                <Link
+                  href="/roadmap/ayushman-bharat"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <FileText size={14} className={styles.dropdownIcon} />
+                  <span>Ayushman Bharat (PM-JAY)</span>
+                </Link>
+                <Link
+                  href="/roadmap/sukanya-samriddhi"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <Landmark size={14} className={styles.dropdownIcon} />
+                  <span>Sukanya Samriddhi (Tax / SSY)</span>
+                </Link>
+                <Link
+                  href="/roadmap/nsp-scholarship"
+                  className={styles.dropdownItem}
+                  onClick={() => setIsMoreMenuOpen(false)}
+                >
+                  <GraduationCap size={14} className={styles.dropdownIcon} />
+                  <span>NSP Student Scholarships</span>
                 </Link>
                 <div className={styles.dropdownDivider} />
                 <a
@@ -148,8 +188,8 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
-                  <Phone size={15} className={styles.dropdownIcon} />
-                  <span>1800 11 2026</span>
+                  <Phone size={14} className={styles.dropdownIcon} />
+                  <span>Helpline: 1800 11 2026</span>
                 </a>
                 <a
                   href="https://www.india.gov.in"
@@ -158,7 +198,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
-                  <ExternalLink size={15} className={styles.dropdownIcon} />
+                  <ExternalLink size={14} className={styles.dropdownIcon} />
                   <span>{t.footer.nationalPortal}</span>
                 </a>
               </div>

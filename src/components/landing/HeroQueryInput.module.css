@@ -237,128 +237,7 @@
   color: #ef4444;
 }
 
-/* Indian Voice Language Selector Trigger */
-.voiceLangContainer {
-  position: relative;
-}
 
-.voiceLangToggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
-  font-family: var(--font-family-sans), 'Segoe UI', Tahoma, sans-serif;
-  font-size: 0.72rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.voiceLangToggle:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.35);
-  color: #ffffff;
-}
-
-.voiceLangToggleListening {
-  border-color: rgba(239, 68, 68, 0.4);
-  background: rgba(239, 68, 68, 0.14);
-  color: #fca5a5;
-}
-
-.voiceLangLabel {
-  font-weight: 600;
-}
-
-.chevronRotated {
-  transform: rotate(180deg);
-  transition: transform 0.15s ease;
-}
-
-.voiceLangDropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  background: rgba(15, 23, 42, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 14px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-  z-index: 60;
-  width: 210px;
-  overflow: hidden;
-  animation: actionsIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.voiceLangDropdownHeader {
-  padding: 8px 12px;
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.voiceLangList {
-  max-height: 220px;
-  overflow-y: auto;
-  padding: 4px;
-}
-
-.voiceLangItem {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 7px 10px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.85);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.12s ease;
-}
-
-.voiceLangItem:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-
-.voiceLangItemActive {
-  background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.voiceLangItemText {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.voiceItemNative {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.voiceItemName {
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.voiceItemCheck {
-  color: #38bdf8;
-}
 
 .submitBtn {
   display: inline-flex;
@@ -728,13 +607,7 @@
     display: none;
   }
 
-  .voiceLangLabel {
-    display: none;
-  }
 
-  .voiceLangToggle {
-    padding: 0 6px;
-  }
 
   .toolBtn {
     width: 28px;

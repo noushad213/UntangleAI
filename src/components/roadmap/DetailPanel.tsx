@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   X,
   CheckCircle2,
@@ -12,9 +12,14 @@ import {
   AlertTriangle,
   FileCheck2,
   Undo2,
+  Upload,
+  Download,
+  Trash2,
+  FolderCheck,
 } from 'lucide-react';
 import { ProcessStep, StepStatus } from '@/types/roadmap';
 import { useLanguage } from '@/context/LanguageContext';
+import { TrackedDocument, formatFileSize } from '@/lib/document-vault';
 import styles from './DetailPanel.module.css';
 
 interface DetailPanelProps {
@@ -26,6 +31,11 @@ interface DetailPanelProps {
   isOpen: boolean;
   onClose: () => void;
   onToggleComplete: (stepId: string) => void;
+  requirementDocumentsMap?: Map<string, TrackedDocument>;
+  onUploadDocument?: (file: File, stepId: string, requirementId?: string) => Promise<any>;
+  onRemoveDocument?: (docId: string) => void;
+  onDownloadDocument?: (docId: string) => void;
+  onOpenVault?: () => void;
 }
 
 export function DetailPanel({
@@ -37,10 +47,16 @@ export function DetailPanel({
   isOpen,
   onClose,
   onToggleComplete,
+  requirementDocumentsMap,
+  onUploadDocument,
+  onRemoveDocument,
+  onDownloadDocument,
+  onOpenVault,
 }: DetailPanelProps) {
   const { t } = useLanguage();
-  // Local document checklist tracking for user satisfaction
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
+  const [activeUploadReqId, setActiveUploadReqId] = useState<string | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!step) return null;
 
@@ -49,6 +65,26 @@ export function DetailPanel({
       ...prev,
       [reqId]: !prev[reqId],
     }));
+  };
+
+  const handleTriggerUpload = (reqId?: string) => {
+    setActiveUploadReqId(reqId);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onUploadDocument) return;
+    try {
+      await onUploadDocument(file, step.id, activeUploadReqId);
+    } catch (err) {
+      console.error('Upload failed:', err);
+    } finally {
+      setActiveUploadReqId(undefined);
+    }
   };
 
   const getBadgeClass = () => {
@@ -79,6 +115,15 @@ export function DetailPanel({
         role="dialog"
         aria-modal="true"
       >
+        {/* Hidden file input for step attachments */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept=".pdf,.jpg,.jpeg,.png,.docx"
+          style={{ display: 'none' }}
+        />
+
         <div className={styles.header}>
           <div className={styles.headerMeta}>
             <div className={styles.typeRow}>
@@ -165,9 +210,10 @@ export function DetailPanel({
               </span>
               <div className={styles.reqList}>
                 {step.requirements.map((req) => {
-                  const isChecked = !!checkedDocs[req.id];
+                  const attachedDoc = requirementDocumentsMap?.get(req.id);
+                  const isChecked = !!checkedDocs[req.id] || !!attachedDoc;
                   return (
-                    <label key={req.id} className={styles.reqItem}>
+                    <div key={req.id} className={styles.reqItem}>
                       <input
                         type="checkbox"
                         checked={isChecked}
@@ -175,25 +221,80 @@ export function DetailPanel({
                         className={styles.reqCheckbox}
                         aria-label={`${req.title}`}
                       />
-                      <div className={styles.reqDetails}>
-                        <span
-                          className={styles.reqName}
-                          style={{
-                            textDecoration: isChecked ? 'line-through' : 'none',
-                            opacity: isChecked ? 0.7 : 1,
-                          }}
-                        >
-                          {req.title}
-                        </span>
-                        <div className={styles.reqTag}>
-                          <FileCheck2 size={12} />
-                          <span>{req.isMandatory ? t.roadmap.mandatory : t.roadmap.optional}</span>
+                      <div className={styles.reqDetails} style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span
+                            className={styles.reqName}
+                            style={{
+                              textDecoration: isChecked ? 'line-through' : 'none',
+                              opacity: isChecked ? 0.7 : 1,
+                            }}
+                          >
+                            {req.title}
+                          </span>
+                          <div className={styles.reqTag}>
+                            <FileCheck2 size={12} />
+                            <span>{req.isMandatory ? t.roadmap.mandatory : t.roadmap.optional}</span>
+                          </div>
                         </div>
+
+                        {/* Uploaded doc preview or upload trigger */}
+                        {attachedDoc ? (
+                          <div className={styles.reqDocAttachmentRow}>
+                            <div className={styles.reqDocAttachedMeta} title={attachedDoc.fileName}>
+                              <CheckCircle2 size={12} style={{ color: 'var(--color-success-600)', flexShrink: 0 }} />
+                              <span>{attachedDoc.fileName}</span>
+                              <span>({formatFileSize(attachedDoc.fileSize)})</span>
+                            </div>
+                            <div className={styles.reqDocActions}>
+                              <button
+                                type="button"
+                                className={styles.reqDocActionBtn}
+                                onClick={() => onDownloadDocument?.(attachedDoc.id)}
+                                title="Download file"
+                              >
+                                <Download size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                className={`${styles.reqDocActionBtn} ${styles.reqDocActionBtnDanger}`}
+                                onClick={() => onRemoveDocument?.(attachedDoc.id)}
+                                title="Remove file"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <button
+                              type="button"
+                              className={styles.reqUploadTriggerBtn}
+                              onClick={() => handleTriggerUpload(req.id)}
+                              id={`panel-upload-btn-${req.id}`}
+                            >
+                              <Upload size={11} />
+                              <span>Attach Document</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    </label>
+                    </div>
                   );
                 })}
               </div>
+
+              {onOpenVault && (
+                <button
+                  type="button"
+                  className={styles.openVaultBannerBtn}
+                  onClick={onOpenVault}
+                  id="open-vault-from-panel-btn"
+                >
+                  <FolderCheck size={14} style={{ color: 'var(--color-brand-600)' }} />
+                  <span>Open Application Document Vault</span>
+                </button>
+              )}
             </section>
           )}
 
@@ -208,7 +309,7 @@ export function DetailPanel({
                 </div>
 
                 {step.sourceSnippet && (
-                  <p className={styles.sourceSnippet}>"{step.sourceSnippet}"</p>
+                  <p className={styles.sourceSnippet}>&quot;{step.sourceSnippet}&quot;</p>
                 )}
 
                 <a

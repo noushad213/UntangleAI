@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { MOCK_ROADMAPS } from '@/data/mock-roadmaps';
 import RoadmapClient from './RoadmapClient';
@@ -24,5 +25,9 @@ export default function RoadmapPage({ params }: Props) {
   const currentProcess =
     MOCK_ROADMAPS.find((p) => p.id === params.id) || MOCK_ROADMAPS[0];
 
-  return <RoadmapClient initialProcess={currentProcess} />;
+  return (
+    <Suspense fallback={null}>
+      <RoadmapClient initialProcess={currentProcess} />
+    </Suspense>
+  );
 }

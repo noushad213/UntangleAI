@@ -72,6 +72,51 @@ export async function GET(request: NextRequest) {
       'நிறுவனம்', 'வணிகம்',
       'কোম্পানি', 'ব্যবসা'
     ],
+    'pmay-housing': [
+      'pmay', 'awas', 'housing', 'makaan', 'ghar', 'house', 'gramin', 'pradhan mantri awas',
+      'awaassoft', 'awaas', 'kutcha', 'pucca', 'plinth', 'bdo', 'panchayat', 'property', 'land',
+      'plot', 'patta', 'gharkul',
+      'आवास', 'मकान', 'घर', 'प्रधानमंत्री आवास योजना', 'ग्रामीण', 'पक्का मकान',
+      'مکان', 'رہائش', 'گھر',
+      'வீடு', 'பிரதம மந்திரி ஆவாஸ்',
+      'আবাস', 'ঘর', 'প্রধানমন্ত্রী আবাস যোজনা'
+    ],
+    'pm-kisan-welfare': [
+      'kisan', 'farmer', 'kheti', 'agriculture', 'pmkisan', 'samman', 'nidhi', '6000', '2000',
+      'installment', 'bhulekh', 'khasra', 'khata', 'ror', 'welfare', 'dbt', 'crop', 'fasal',
+      'shetkari', 'krushak', 'rythu',
+      'किसान', 'खेती', 'पीएम किसान', 'सम्मान निधि', 'कृषि', 'खसरा', 'खतौनी',
+      'کسان', 'کھیتی', 'زرعی',
+      'விவசாயி', 'கிசான்',
+      'কৃষক', 'কিষাণ', 'কৃষি'
+    ],
+    'ayushman-bharat': [
+      'ayushman', 'bharat', 'pmjay', 'health', 'hospital', 'card', 'bima', 'insurance',
+      'cashless', '500000', '5 lakh', 'ilaj', 'dawa', 'swasthya', 'aarogya', 'abha', 'golden card',
+      'treatment', 'doctor', 'hospitalization',
+      'आयुष्मान', 'स्वास्थ्य', 'अस्पताल', 'इलाज', 'आरोग्य', 'गोल्डन कार्ड', 'दवा', 'बीमा',
+      'صحت', 'علاج', 'ہسپتال', 'بیمہ',
+      'சுகாதாரம்', 'மருத்துவமனை', 'ஆயுஷ்மான் பாரத்',
+      'আয়ুষ্মান ভারত', 'স্বাস্থ্য', 'হাসপাতাল', 'চিকিৎসা'
+    ],
+    'sukanya-samriddhi': [
+      'sukanya', 'samriddhi', 'ssy', 'beti', 'girl', 'daughter', 'bachat', 'savings',
+      'tax', '80c', 'interest', 'post office', 'dakghar', 'exemption', 'finance', 'deduction',
+      'deposit', 'passbook',
+      'सुकन्या', 'समृद्धि', 'बेटी', 'बचत', 'टैक्स', 'डाकघर', 'आयकर', '८०सी',
+      'بچی', 'بچت', 'ٹیکس',
+      'செல்வமகள்', 'சேமிப்பு', 'வரி',
+      'সুকন্যা সমৃদ্ধি', 'কন্যা', 'সঞ্চয়', 'কর'
+    ],
+    'nsp-scholarship': [
+      'scholarship', 'nsp', 'student', 'matric', 'post matric', 'college', 'school',
+      'vidyalaxmi', 'fee', 'tuition', 'padhai', 'shiksha', 'education', 'grant', 'fellowship',
+      'chhatravritti', 'university', 'admission',
+      'छात्रवृत्ति', 'स्कॉलरशिप', 'शिक्षा', 'पढ़ाई', 'कॉलेज', 'फीस', 'यूनिवर्सिटी',
+      'وظیفہ', 'تعلیم', 'اسکول',
+      'கல்வி உதவித்தொகை', 'படிப்பு', 'கல்லூரி',
+      'বৃত্তি', 'ছাত্রবৃত্তি', 'শিক্ষা', 'কলেজ'
+    ],
   };
 
   const matched = MOCK_ROADMAPS.map((p) => {

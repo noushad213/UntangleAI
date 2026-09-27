@@ -376,8 +376,8 @@ export const TRANSLATIONS: Record<Exclude<LanguageCode, 'auto'>, TranslationDict
         },
       },
       'driving-license-delhi': {
-        title: 'Renew Driving License (Delhi NCT)',
-        description: 'Step-by-step renewal process under Sarathi Parivahan (Ministry of Road Transport and Highways)',
+        title: 'Apply for Permanent Driving License',
+        description: 'Step-by-step licensing process under Sarathi Parivahan (Ministry of Road Transport and Highways)',
         category: 'Transport & Driving',
         steps: {
           'step-learner-app': {
@@ -441,6 +441,171 @@ export const TRANSLATIONS: Record<Exclude<LanguageCode, 'auto'>, TranslationDict
             title: 'Download Digitally Signed FSSAI Certificate',
             shortTitle: 'Download License',
             description: 'Upon approval, download 14-digit FSSAI license certificate and display prominently at food business entrance.',
+          },
+        },
+      },
+      'pmay-housing': {
+        title: 'Pradhan Mantri Awas Yojana (PMAY-G / Housing for All)',
+        description: 'Government financial grant and geo-tagged DBT installments for constructing a durable pucca house with basic civic amenities.',
+        category: 'Property & Land',
+        steps: {
+          'step-pmay-check': {
+            title: 'Verify Priority List Eligibility & Land Record',
+            shortTitle: 'Eligibility Verification',
+            description: 'Check beneficiary inclusion in the Awaas+ / SECC deprivation database and confirm ownership of unencumbered home site land.',
+          },
+          'step-pmay-kyc': {
+            title: 'Seed Bank Account with Aadhaar & NPCI for DBT',
+            shortTitle: 'Aadhaar Bank Seeding',
+            description: 'Ensure beneficiary single savings bank account or post office account is active and seeded with Aadhaar in the NPCI mapper for Direct Benefit Transfer.',
+          },
+          'step-pmay-geotag-pre': {
+            title: 'Site Geo-tagging via AwaasApp by Gram Panchayat Officer',
+            shortTitle: 'Pre-construction Geo-tag',
+            description: 'Village nodal officer conducts physical field inspection and captures geo-tagged photographs of the vacant site or existing kutcha structure.',
+          },
+          'step-pmay-inst-1': {
+            title: 'Receive Sanction Order & First Installment (Plinth Level)',
+            shortTitle: 'First Installment Release',
+            description: 'First installment of ₹40,000 is credited via PFMS directly to your account to begin foundation digging and plinth construction.',
+          },
+          'step-pmay-geotag-roof': {
+            title: 'Lintel Inspection & Second Installment (Roof Level)',
+            shortTitle: 'Mid-stage Inspection',
+            description: 'Once foundation and walls reach window/lintel level, officer captures second geo-tagged photo to trigger the second installment (₹60,000 - ₹70,000).',
+          },
+          'step-pmay-completion': {
+            title: 'Final Completion Verification & Toilet Grant Release',
+            shortTitle: 'Completion & Toilet Grant',
+            description: 'Roof casting, door/window installation, and Swachh Bharat toilet construction verified for final release of remaining funds and house handover.',
+          },
+        },
+      },
+      'pm-kisan-welfare': {
+        title: 'PM-Kisan Samman Nidhi & Farmer Income Support',
+        description: 'Direct income assistance of ₹6,000 annually in three equal quarterly installments of ₹2,000 for landholding agricultural families.',
+        category: 'Social Welfare & Benefits',
+        steps: {
+          'step-kisan-land': {
+            title: 'Verify Land Title & Revenue Record (Bhulekh / 7/12 / RoR)',
+            shortTitle: 'Land Record Check',
+            description: 'Ensure agricultural land is registered in the applicant name with updated Khata, Khesra/Survey number in state land records.',
+          },
+          'step-kisan-reg': {
+            title: 'Submit Farmer Self-Registration on PM-Kisan Portal',
+            shortTitle: 'Farmer Registration',
+            description: 'Enter Aadhaar number, state, district, sub-district, block, village, land record survey details, and upload the land ownership copy.',
+          },
+          'step-kisan-npci': {
+            title: 'Link Aadhaar with Bank Account via NPCI Mapper',
+            shortTitle: 'NPCI Bank Linkage',
+            description: 'Verify your bank account is seeded with Aadhaar on the NPCI gateway; PM-Kisan payments are strictly transferred via Aadhaar-based DBT payment bridge.',
+          },
+          'step-kisan-ekyc': {
+            title: 'Complete Mandatory e-KYC Verification',
+            shortTitle: 'Mandatory e-KYC',
+            description: 'Authenticate through OTP on UIDAI registered mobile number, biometric fingerprint at a CSC, or Face Authentication via the official PM-KISAN mobile app.',
+          },
+          'step-kisan-approval': {
+            title: 'State Verification & Installment Release Notification',
+            shortTitle: 'Approval & DBT Credit',
+            description: 'District and State Agriculture Nodal Officers verify land ownership and approve the record, triggering automated direct transfer of ₹2,000 every 4 months.',
+          },
+        },
+      },
+      'ayushman-bharat': {
+        title: 'Ayushman Bharat PM-JAY Health Protection',
+        description: 'Cashless hospital insurance coverage up to ₹5,00,000 per family per year for secondary and tertiary care hospitalization across India.',
+        category: 'Social Welfare & Benefits',
+        steps: {
+          'step-pmjay-check': {
+            title: 'Check Family Eligibility on NHA Beneficiary Portal',
+            shortTitle: 'Eligibility Check',
+            description: 'Search by Ration Card number, Aadhaar number, Family ID, or PM-JAY ID to verify your family coverage under SECC deprivation criteria.',
+          },
+          'step-pmjay-abha': {
+            title: 'Generate 14-Digit Ayushman Bharat Health Account (ABHA)',
+            shortTitle: 'Create ABHA ID',
+            description: 'Create unique 14-digit ABHA number linked with Aadhaar to store electronic health records, diagnostic reports, and digital prescriptions securely.',
+          },
+          'step-pmjay-kyc': {
+            title: 'Complete Aadhaar e-KYC Verification',
+            shortTitle: 'Complete e-KYC',
+            description: 'Perform instant digital e-KYC on the Beneficiary Portal or via Ayushman Mitra at any empanelled hospital or Common Service Centre.',
+          },
+          'step-pmjay-card': {
+            title: 'Download Ayushman Bharat Golden Card (PVC / Digital)',
+            shortTitle: 'Ayushman Card Download',
+            description: 'Download the official Ayushman card featuring QR code, PM-JAY ID, and family details. Printed PVC cards are issued free at CSCs or hospital helpdesks.',
+          },
+          'step-pmjay-hospital': {
+            title: 'Avail Cashless Hospital Admission at Empanelled Hospital',
+            shortTitle: 'Cashless Hospital Admission',
+            description: 'Present Ayushman Card at the Pradhan Mantri Aarogya Mitra (PMAM) desk in any of 27,000+ empanelled public or private hospitals nationwide.',
+          },
+        },
+      },
+      'sukanya-samriddhi': {
+        title: 'Sukanya Samriddhi Yojana (SSY) & Section 80C Tax Exemption',
+        description: 'Government savings scheme for girl child with sovereign 8.2% interest and triple tax exemption (EEE) under Section 80C of the Income Tax Act.',
+        category: 'Tax & Finance',
+        steps: {
+          'step-ssy-eligibility': {
+            title: 'Confirm Eligibility & Age Criteria for Girl Child',
+            shortTitle: 'Age & Eligibility Check',
+            description: 'Account can be opened by natural or legal guardian for a girl child from her birth up to the age of 10 years (maximum 2 accounts per family).',
+          },
+          'step-ssy-kyc': {
+            title: 'Gather Guardian KYC & Address Documents',
+            shortTitle: 'Guardian KYC Prep',
+            description: 'Prepare self-attested identity proof and address proof of the biological or legal guardian operating the account on behalf of the minor child.',
+          },
+          'step-ssy-apply': {
+            title: 'Submit Account Opening Form (Form SSA-1)',
+            shortTitle: 'Submit Form SSA-1',
+            description: 'Complete official Form SSA-1 with girl child details, guardian details, initial deposit amount, and nominee declaration.',
+          },
+          'step-ssy-deposit': {
+            title: 'Make Initial Deposit (₹250 - ₹1,50,000)',
+            shortTitle: 'Make Initial Deposit',
+            description: 'Deposit minimum opening amount of ₹250 (up to ₹1.5 Lakh per financial year) via Cash, Cheque, Demand Draft, or online IPPB transfer.',
+          },
+          'step-ssy-passbook': {
+            title: 'Collect SSY Passbook & Download 80C Tax Deduction Receipt',
+            shortTitle: 'Passbook & 80C Receipt',
+            description: 'Receive dedicated Sukanya Samriddhi Passbook with account number. Download deposit receipts for filing annual Income Tax returns under Section 80C.',
+          },
+        },
+      },
+      'nsp-scholarship': {
+        title: 'National Scholarship Portal (NSP) Post-Matric & Higher Education',
+        description: 'Central and state scholarship assistance providing 100% tuition reimbursement, maintenance allowances, and book grants for eligible students.',
+        category: 'Education & Scholarships',
+        steps: {
+          'step-nsp-otr': {
+            title: 'Generate One-Time Registration (OTR) with Aadhaar FaceRD',
+            shortTitle: 'OTR Registration',
+            description: 'Install AadhaarFaceRD & NSP OTR App or visit scholarships.gov.in to generate your unique 14-digit OTR number via facial authentication or Aadhaar OTP.',
+          },
+          'step-nsp-profile': {
+            title: 'Complete Student Profile & Select Eligible Scheme',
+            shortTitle: 'Profile & Scheme Selection',
+            description: 'Log in with OTR credentials, select your AISHE/DISE registered institution, course, year of study, community category, and scheme.',
+          },
+          'step-nsp-docs': {
+            title: 'Upload Mandatory Income, Caste, and Academic Proofs',
+            shortTitle: 'Upload Documents',
+            description: 'Upload verified Competent Authority Income Certificate, Category/Caste Certificate, Previous Year Marksheets, and Bonafide Student Certificate.',
+          },
+          'step-nsp-institute': {
+            title: 'Institute Level Verification by Nodal Officer (INO)',
+            shortTitle: 'Institute Verification',
+            description: 'College or university Institute Nodal Officer (INO) reviews online application, tallies enrollment records and fee receipts, and forwards to District/State.',
+          },
+          'step-nsp-dbt': {
+            title: 'State Sanction & Direct DBT Disbursement via PFMS',
+            shortTitle: 'Sanction & DBT Credit',
+            description: 'State Nodal Officer approves application; Public Financial Management System (PFMS) credits tuition fees and maintenance directly to student bank account.',
           },
         },
       },
@@ -706,6 +871,171 @@ export const TRANSLATIONS: Record<Exclude<LanguageCode, 'auto'>, TranslationDict
             title: 'FSSAI Certificate Download Karein Aur Display Karein',
             shortTitle: 'Certificate Download',
             description: 'Approval milne par 14-digit ka FSSAI certificate download karein aur entrance par lagayein.',
+          },
+        },
+      },
+      'pmay-housing': {
+        title: 'Pradhan Mantri Awas Yojana (PMAY-G / Sabke Liye Ghar)',
+        description: 'Pakka makan banane ke liye sarkari grant, geo-tagged inspection aur seedhe bank me DBT kistein.',
+        category: 'Property Aur Zameen',
+        steps: {
+          'step-pmay-check': {
+            title: 'Priority List Aur Zameen Ke Kagzat Check Karein',
+            shortTitle: 'Eligibility Jaanch',
+            description: 'Awaas+ aur SECC list me apna naam check karein aur ghar ki zameen ka patta verify karein.',
+          },
+          'step-pmay-kyc': {
+            title: 'Bank Account Ko Aadhaar Aur NPCI Se Link Karein',
+            shortTitle: 'Aadhaar Bank Seeding',
+            description: 'Direct Benefit Transfer ke liye single savings khate ko Aadhaar aur NPCI mapper se jodein.',
+          },
+          'step-pmay-geotag-pre': {
+            title: 'Panchayat Adhikari Dwara Site Ka Geo-tagging',
+            shortTitle: 'Pre-construction Geo-tag',
+            description: 'Panchayat Sachiv AwaasApp ke zariye zameen ki geo-tagged photo kheench kar upload karenge.',
+          },
+          'step-pmay-inst-1': {
+            title: 'Pehli Kist (₹40,000 Plinth Level) Prapt Karein',
+            shortTitle: 'Pehli Kist Release',
+            description: 'Sanction letter milne ke baad seedhe account me neenv khodne ke liye pehli kist credit hogi.',
+          },
+          'step-pmay-geotag-roof': {
+            title: 'Deewar Aur Chhat Dhalai Ki Inspection Aur Doosri Kist',
+            shortTitle: 'Mid-stage Inspection',
+            description: 'Khidki aur lintel level tak deewar banne par doosra geo-tag hoga aur agle ₹60,000 - ₹70,000 aayenge.',
+          },
+          'step-pmay-completion': {
+            title: 'Makan Tayyar Hone Ka Verification Aur Shauchalay Grant',
+            shortTitle: 'Final Completion Grant',
+            description: 'Chhat dhalai, rangai aur Swachh Bharat shauchalay banne par bachi hui kist aur ₹12,000 toilet grant milega.',
+          },
+        },
+      },
+      'pm-kisan-welfare': {
+        title: 'PM-Kisan Samman Nidhi & Farmer Sahayata',
+        description: 'Kisan parivaron ke liye har saal ₹6,000 ki aarthik sahayata, ₹2,000 ki teen quarterly DBT kiston me.',
+        category: 'Social Welfare Aur Kisan',
+        steps: {
+          'step-kisan-land': {
+            title: 'Zameen Ke Dastavej (Bhulekh / 7/12 / Khasra) Check Karein',
+            shortTitle: 'Zameen Record Check',
+            description: 'Kisan ke naam par kheti ki zameen aur revenue record me khata/khasra number confirm karein.',
+          },
+          'step-kisan-reg': {
+            title: 'PM-Kisan Portal Par Naya Farmer Registration Bharein',
+            shortTitle: 'Farmer Registration',
+            description: 'Aadhaar number, mobile OTP aur zameen ki details daalkar pmkisan.gov.in par register karein.',
+          },
+          'step-kisan-npci': {
+            title: 'Bank Account Ko NPCI DBT Bridge Se Link Karein',
+            shortTitle: 'NPCI Bank Linkage',
+            description: 'Apne bank me jakar Aadhaar seeding karwayein taaki kist seedhe bina rukaawat credit ho.',
+          },
+          'step-kisan-ekyc': {
+            title: 'Mandatory e-KYC Verification Pura Karein',
+            shortTitle: 'Mandatory e-KYC',
+            description: 'Mobile OTP, CSC centre biometric ya PM-KISAN app par Face Authentication se e-KYC karein.',
+          },
+          'step-kisan-approval': {
+            title: 'State Approval Aur ₹2,000 Kist Transfer Status',
+            shortTitle: 'Approval & DBT Credit',
+            description: 'Zila kheti adhikari ki verification ke baad har 4 mahine me ₹2,000 account me aana shuru ho jayenge.',
+          },
+        },
+      },
+      'ayushman-bharat': {
+        title: 'Ayushman Bharat PM-JAY Health Card',
+        description: 'Har saal pure parivar ke liye ₹5 Lakh tak ka cashless ilaj, sarkari aur top private hospitals me.',
+        category: 'Health Aur Welfare',
+        steps: {
+          'step-pmjay-check': {
+            title: 'Ration Card Ya Aadhaar Se Eligibility Check Karein',
+            shortTitle: 'Eligibility Check',
+            description: 'beneficiary.nha.gov.in par Ration Card ya Family ID daalkar dekhein ki naam list me hai ya nahi.',
+          },
+          'step-pmjay-abha': {
+            title: '14-Digit Ka ABHA Health Account Banayein',
+            shortTitle: 'ABHA Health ID',
+            description: 'Apne digital medical records aur prescriptions ke liye Aadhaar se ABHA card banayein.',
+          },
+          'step-pmjay-kyc': {
+            title: 'Aadhaar e-KYC Verification Pura Karein',
+            shortTitle: 'Complete e-KYC',
+            description: 'Portal par selfie/OTP se ya CSC/Mo Seva Kendra par biometric fingerprint se e-KYC karein.',
+          },
+          'step-pmjay-card': {
+            title: 'Ayushman Bharat Golden Card Download Karein',
+            shortTitle: 'Golden Card Download',
+            description: 'Approval hote hi QR-code wala Golden Card download karein ya hospital kiosk se PVC card lein.',
+          },
+          'step-pmjay-hospital': {
+            title: 'Empanelled Hospital Me Cashless Admission Lein',
+            shortTitle: 'Cashless Ilaj',
+            description: 'Hospital me Ayushman Mitra desk par card dikhayein aur bina koi paisa diye cashless admit ho.',
+          },
+        },
+      },
+      'sukanya-samriddhi': {
+        title: 'Sukanya Samriddhi Yojana (SSY) & Section 80C Tax Chhut',
+        description: 'Beti ke bhavishya ke liye sarkari bachat khata, 8.2% byaj aur Income Tax Section 80C me tax chhut.',
+        category: 'Tax Aur Bachat',
+        steps: {
+          'step-ssy-eligibility': {
+            title: 'Beti Ki Umra Aur Eligibility Confirm Karein',
+            shortTitle: 'Age & Eligibility Check',
+            description: 'Janm se lekar 10 saal tak ki beti ke naam par mata-pita ya legal guardian khata khol sakte hain.',
+          },
+          'step-ssy-kyc': {
+            title: 'Guardian KYC Aur Beti Ka Birth Certificate Ikatha Karein',
+            shortTitle: 'Kagzat Tayyari',
+            description: 'Mata-pita ka PAN, Aadhaar, photo aur beti ka official janam praman patra attach karein.',
+          },
+          'step-ssy-apply': {
+            title: 'Form SSA-1 Bhar Kar Post Office Ya Bank Me Jama Karein',
+            shortTitle: 'Form SSA-1 Submit',
+            description: 'Nazdeeki Dakghar ya authorized sarkari bank branch me khata kholne ka form bharein.',
+          },
+          'step-ssy-deposit': {
+            title: 'Pehli Jama Rashi (Kam Se Kam ₹250) Jama Karein',
+            shortTitle: 'Initial Deposit',
+            description: 'Kam se kam ₹250 cash ya cheque se jama karein (saal me ₹1.5 Lakh tak deposit kar sakte hain).',
+          },
+          'step-ssy-passbook': {
+            title: 'SSY Passbook Lein Aur 80C Tax Receipt Download Karein',
+            shortTitle: 'Passbook & 80C Receipt',
+            description: 'Passbook prapt karein aur ITR me Section 80C deduction claim karne ke liye receipt sambhal kar rakhein.',
+          },
+        },
+      },
+      'nsp-scholarship': {
+        title: 'National Scholarship Portal (NSP) Post-Matric & Higher Education',
+        description: 'Students ke liye 100% tuition fees reimbursement, maintenance allowances aur book grants.',
+        category: 'Education Aur Scholarships',
+        steps: {
+          'step-nsp-otr': {
+            title: 'Aadhaar FaceRD Se 14-Digit OTR Number Banayein',
+            shortTitle: 'OTR Registration',
+            description: 'NSP portal ya app par One-Time Registration (OTR) generate karein Aadhaar verification ke zariye.',
+          },
+          'step-nsp-profile': {
+            title: 'Student Profile Bharein Aur Scheme Select Karein',
+            shortTitle: 'Scheme Chunein',
+            description: 'Apne college ka AISHE code, course, category aur applicable Post-Matric scholarship chunein.',
+          },
+          'step-nsp-docs': {
+            title: 'Aay Praman Patra, Marksheet Aur Bonafide Certificate Upload Karein',
+            shortTitle: 'Dastavej Upload',
+            description: 'Tehsildar dwara jari income certificate, college bonafide aur pichle saal ki marksheet upload karein.',
+          },
+          'step-nsp-institute': {
+            title: 'College / Institute Nodal Officer Dwara Verification',
+            shortTitle: 'Institute Verification',
+            description: 'College ke scholarship desk par jakar biometric ya document scrutiny confirm karwayein.',
+          },
+          'step-nsp-dbt': {
+            title: 'State Sanction Aur PFMS DBT Se Bank Khate Me Credit',
+            shortTitle: 'Scholarship Credit',
+            description: 'State approval ke baad PFMS ke zariye seedhe student ke Aadhaar-seeded bank khate me scholarship credit hogi.',
           },
         },
       },

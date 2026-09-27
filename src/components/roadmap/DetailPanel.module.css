@@ -370,3 +370,101 @@
     transform: translateY(0);
   }
 }
+
+.reqDocAttachmentRow {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.reqDocAttachedMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reqDocActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reqDocActionBtn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.reqDocActionBtn:hover {
+  background: var(--color-surface-tertiary);
+  color: var(--color-text-primary);
+}
+
+.reqDocActionBtnDanger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--color-danger-600);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.reqUploadTriggerBtn {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-brand-400);
+  background: transparent;
+  color: var(--color-brand-600);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.reqUploadTriggerBtn:hover {
+  background: rgba(14, 165, 233, 0.08);
+  border-color: var(--color-brand-500);
+}
+
+.openVaultBannerBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: var(--space-3);
+  padding: 8px 12px;
+  font-size: var(--type-xs);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.openVaultBannerBtn:hover {
+  background: var(--color-surface-tertiary);
+  border-color: var(--color-brand-400);
+}

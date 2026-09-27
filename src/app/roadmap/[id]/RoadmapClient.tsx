@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldAlert, ExternalLink } from 'lucide-react';
 import { MOCK_ROADMAPS } from '@/data/mock-roadmaps';
 import { CivicProcess, ProcessStep } from '@/types/roadmap';
@@ -11,6 +11,13 @@ import { RoadmapHeader } from '@/components/roadmap/RoadmapHeader';
 import { RoadmapCanvas } from '@/components/roadmap/RoadmapCanvas';
 import { StepListView } from '@/components/roadmap/StepListView';
 import { DetailPanel } from '@/components/roadmap/DetailPanel';
+import { DocumentVaultDrawer } from '@/components/roadmap/DocumentVaultDrawer';
+import {
+  RoadmapFilters,
+  INDIAN_LOCATIONS,
+  adaptRoadmapForContext,
+  requestAIRoadmapAdaptation,
+} from '@/lib/roadmap-adapters';
 import styles from '@/app/page.module.css';
 
 interface RoadmapClientProps {
@@ -19,6 +26,7 @@ interface RoadmapClientProps {
 
 export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { getLocalizedRoadmap, t } = useLanguage();
 
   const [currentProcessRaw, setCurrentProcessRaw] = useState<CivicProcess>(initialProcess);
@@ -27,21 +35,93 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
   const [viewMode, setViewMode] = useState<'graph' | 'list'>('graph');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
+  // Match default location based on process title or location
+  const defaultLocation = useMemo(() => {
+    const locParam = searchParams?.get('location');
+    if (locParam && INDIAN_LOCATIONS.some((l) => l.id === locParam)) {
+      return locParam;
+    }
+    const match = INDIAN_LOCATIONS.find(
+      (l) =>
+        initialProcess.location.toLowerCase().includes(l.id) ||
+        l.name.toLowerCase().includes(initialProcess.location.toLowerCase()) ||
+        initialProcess.title.toLowerCase().includes(l.id)
+    );
+    return match ? match.id : 'delhi';
+  }, [searchParams, initialProcess.location, initialProcess.title]);
+
+  const [filters, setFilters] = useState<RoadmapFilters>(() => ({
+    location: searchParams?.get('location') || defaultLocation,
+    applicantProfile: searchParams?.get('profile') || 'individual',
+    serviceMode: searchParams?.get('mode') || 'online',
+  }));
+
   // Keep raw process in sync if initialProcess changes
   useEffect(() => {
     setCurrentProcessRaw(initialProcess);
-  }, [initialProcess]);
+    if (!searchParams?.get('location')) {
+      setFilters((prev) => ({
+        ...prev,
+        location: defaultLocation,
+      }));
+    }
+  }, [initialProcess, defaultLocation, searchParams]);
+
+  // Contextual and deterministic adaptation
+  const adaptationResult = useMemo(() => {
+    return adaptRoadmapForContext(currentProcessRaw, filters);
+  }, [currentProcessRaw, filters]);
+
+  // AI adaptation integration hook for teammates
+  const [isAdapting, setIsAdapting] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkAIAdaptation() {
+      setIsAdapting(true);
+      try {
+        const aiResult = await requestAIRoadmapAdaptation(currentProcessRaw.id, filters);
+        if (!cancelled && aiResult && aiResult.adaptedProcess) {
+          // Teammate's AI adapter can enrich the process here
+        }
+      } catch {
+        // Fallback safely to deterministic rules
+      } finally {
+        if (!cancelled) setIsAdapting(false);
+      }
+    }
+    checkAIAdaptation();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentProcessRaw.id, filters]);
+
+  // Update filters and URL search params cleanly
+  const handleUpdateFilters = useCallback((updates: Partial<RoadmapFilters>) => {
+    setFilters((prev) => {
+      const next = { ...prev, ...updates };
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        params.set('location', next.location);
+        params.set('profile', next.applicantProfile);
+        params.set('mode', next.serviceMode);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState(null, '', newUrl);
+      }
+      return next;
+    });
+  }, []);
 
   // Localized current process and all processes
   const currentProcess = useMemo(() => {
-    return getLocalizedRoadmap(currentProcessRaw);
-  }, [currentProcessRaw, getLocalizedRoadmap]);
+    return getLocalizedRoadmap(adaptationResult.adaptedProcess);
+  }, [adaptationResult.adaptedProcess, getLocalizedRoadmap]);
 
   const allProcesses = useMemo(() => {
     return MOCK_ROADMAPS.map((p) => getLocalizedRoadmap(p));
   }, [getLocalizedRoadmap]);
 
-  // Load progress engine for current process
+  // Load progress engine and document vault for current process
   const {
     completedStepIds,
     stepStatusMap,
@@ -49,6 +129,17 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     toggleStep,
     resetProgress,
     progressPercent,
+    isTrackingActive,
+    documents,
+    startTracking,
+    uploadDocument,
+    removeDocument,
+    downloadDoc,
+    exportDossier,
+    requirementDocumentsMap,
+    isTrackerDrawerOpen,
+    openTrackerDrawer,
+    closeTrackerDrawer,
   } = useRoadmapProgress(currentProcess);
 
   // Initialize and apply theme
@@ -136,6 +227,13 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
         onResetProgress={resetProgress}
         theme={theme}
         onToggleTheme={toggleTheme}
+        filters={filters}
+        onUpdateFilters={handleUpdateFilters}
+        appliedContexts={adaptationResult.appliedContexts}
+        isAdapting={isAdapting}
+        isTrackingActive={isTrackingActive}
+        onStartTracking={isTrackingActive ? openTrackerDrawer : startTracking}
+        documentsCount={documents.length}
       />
 
       <main className={styles.contentArea}>
@@ -169,8 +267,27 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
           isOpen={isPanelOpen}
           onClose={handleClosePanel}
           onToggleComplete={toggleStep}
+          requirementDocumentsMap={requirementDocumentsMap}
+          onUploadDocument={uploadDocument}
+          onRemoveDocument={removeDocument}
+          onDownloadDocument={downloadDoc}
+          onOpenVault={openTrackerDrawer}
         />
       </main>
+
+      <DocumentVaultDrawer
+        isOpen={isTrackerDrawerOpen}
+        onClose={closeTrackerDrawer}
+        process={currentProcess}
+        completedStepIds={completedStepIds}
+        documents={documents}
+        onUploadDocument={uploadDocument}
+        onRemoveDocument={removeDocument}
+        onDownloadDocument={downloadDoc}
+        onExportDossier={exportDossier}
+        requirementDocumentsMap={requirementDocumentsMap}
+        onToggleStep={toggleStep}
+      />
 
       <footer className={styles.bottomDisclaimer} role="contentinfo">
         <div className={styles.disclaimerText}>
