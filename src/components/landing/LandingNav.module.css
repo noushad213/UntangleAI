@@ -1,58 +1,49 @@
-/* Fixed header shell that centers the floating container */
 .headerShell {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 16px 24px;
+  padding: 14px 24px;
   display: flex;
   justify-content: center;
   pointer-events: none;
-  transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: padding 0.3s ease;
 }
 
 .headerScrolled {
-  padding: 10px 24px;
+  padding: 8px 24px;
 }
 
-/* Max-width constraint aligning with hero glass frame (1180px) */
 .navContainerWrapper {
   width: 100%;
-  max-width: 1180px;
+  max-width: 1100px;
   display: flex;
   justify-content: center;
 }
 
-/* Floating capsule container — luminous frosted glass aesthetic */
 .navContainer {
   pointer-events: auto;
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding: 8px 14px 8px 18px;
+  padding: 7px 14px 7px 18px;
   border-radius: 9999px;
-
-  /* Frosted glass container */
-  background: rgba(42, 50, 74, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.34);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.4),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .navScrolled {
-  background: rgba(30, 38, 58, 0.84);
-  border-color: rgba(255, 255, 255, 0.38);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.3);
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   padding: 6px 12px 6px 16px;
 }
 
-/* Main horizontal row inside capsule */
 .navMainRow {
   width: 100%;
   display: flex;
@@ -61,13 +52,12 @@
   gap: 12px;
 }
 
-/* Remove underlines globally from all nav bar elements */
 .navContainer,
 .navContainer * {
   text-decoration: none !important;
 }
 
-/* Brand Group */
+/* Brand */
 .brandGroup {
   display: flex;
   align-items: center;
@@ -77,57 +67,53 @@
 }
 
 .logoIcon {
-  width: 32px;
-  height: 32px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(8px);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-  transition: transform 0.25s ease;
   flex-shrink: 0;
+  transition: background 0.2s ease;
 }
 
 .brandGroup:hover .logoIcon {
-  transform: scale(1.08) rotate(-4deg);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .logoText {
   font-family: var(--font-family-display), serif;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   color: #ffffff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
   text-decoration: none !important;
   white-space: nowrap;
 }
 
 .logoTag {
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.55);
   font-size: 0.85em;
   margin-left: 2px;
 }
 
-/* Center Links (Desktop) */
+/* Center links */
 .navLinks {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .navLink {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.92);
-  padding: 7px 14px;
+  color: rgba(255, 255, 255, 0.75);
+  padding: 6px 14px;
   border-radius: 9999px;
-  transition: all 0.2s ease;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: color 0.15s ease, background 0.15s ease;
   white-space: nowrap;
   text-decoration: none !important;
 }
@@ -136,15 +122,15 @@
 .navLink:focus,
 .navLink:active {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
   text-decoration: none !important;
 }
 
-/* Right Actions Group */
+/* Right group */
 .rightGroup {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
@@ -152,75 +138,66 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   flex-shrink: 0;
   text-decoration: none !important;
 }
 
 .themeBtn:hover {
-  background: rgba(255, 255, 255, 0.28);
-  transform: scale(1.06);
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
 }
 
 .ctaBtn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 16px;
-  background: rgba(255, 255, 255, 0.24);
-  border: 1px solid rgba(255, 255, 255, 0.48);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: #ffffff;
-  font-size: 0.82rem;
+  gap: 6px;
+  padding: 7px 15px;
+  background: #ffffff;
+  border: none;
+  color: #0f172a;
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
   border-radius: 9999px;
   text-decoration: none !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: background 0.15s ease, transform 0.15s ease;
   white-space: nowrap;
 }
 
 .ctaBtn:hover,
 .ctaBtn:focus,
 .ctaBtn:active {
-  background: rgba(255, 255, 255, 0.36);
+  background: #f1f5f9;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   text-decoration: none !important;
 }
 
-/* Mobile Menu Toggle Button */
+/* Mobile toggle */
 .mobileMenuToggle {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease;
   flex-shrink: 0;
 }
 
 .mobileMenuToggle:hover {
-  background: rgba(255, 255, 255, 0.28);
-  transform: scale(1.06);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* Language selector */
@@ -231,28 +208,24 @@
 .langBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 11px;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #ffffff;
-  font-size: 0.78rem;
+  gap: 5px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.76rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease;
   user-select: none;
   white-space: nowrap;
   text-decoration: none !important;
 }
 
 .langBtn:hover {
-  background: rgba(255, 255, 255, 0.28);
-  border-color: rgba(255, 255, 255, 0.65);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .langBtnLabel {
@@ -265,7 +238,7 @@
 
 .caret {
   transition: transform 0.2s ease;
-  opacity: 0.8;
+  opacity: 0.6;
   flex-shrink: 0;
 }
 
@@ -275,43 +248,37 @@
 
 .langDropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   right: 0;
-  min-width: 175px;
-  background: rgba(24, 30, 48, 0.96);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
-  padding: 6px;
+  min-width: 170px;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  padding: 5px;
   z-index: 200;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  animation: dropdownIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  gap: 1px;
+  animation: dropIn 0.15s ease forwards;
 }
 
-@keyframes dropdownIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdownHeader {
-  padding: 6px 10px 4px;
-  font-size: 0.68rem;
+  padding: 5px 10px 4px;
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 3px;
   text-decoration: none !important;
 }
 
@@ -325,17 +292,17 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.12s ease;
   text-align: left;
   text-decoration: none !important;
 }
 
 .langOption:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .langOptionActive {
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .langNative {
@@ -346,38 +313,32 @@
 }
 
 .langEnglish {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
   text-decoration: none !important;
 }
 
-/* Mobile Drawer Menu */
+/* Mobile drawer */
 .mobileDrawer {
   width: 100%;
-  margin-top: 12px;
-  padding: 12px 8px 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  margin-top: 10px;
+  padding: 10px 6px 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  animation: drawerSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  gap: 10px;
+  animation: drawerIn 0.2s ease forwards;
 }
 
-@keyframes drawerSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes drawerIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .mobileLinksList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .mobileNavLink {
@@ -385,23 +346,22 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 0.88rem;
+  border-radius: 10px;
+  font-size: 0.86rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.95);
-  background: rgba(255, 255, 255, 0.08);
-  transition: background 0.2s ease, transform 0.15s ease;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+  transition: background 0.15s ease;
 }
 
 .mobileNavLink:hover,
 .mobileNavLink:focus {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateX(3px);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .externalBadge {
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .mobileCtaWrapper {
@@ -412,25 +372,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 8px;
   width: 100%;
   padding: 11px 18px;
   border-radius: 9999px;
   background: #ffffff;
-  color: #0b0f19;
-  font-size: 0.86rem;
+  color: #0f172a;
+  font-size: 0.84rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background 0.15s ease;
 }
 
 .mobileCtaBtn:hover {
   background: #f1f5f9;
-  transform: scale(1.02);
 }
 
-/* Tablet & Mobile Breakpoints */
+/* Responsive */
 @media (max-width: 920px) {
   .navLinks {
     display: none;
@@ -445,11 +403,11 @@
   }
 
   .headerShell {
-    padding: 12px 16px;
+    padding: 10px 16px;
   }
 
   .navContainer {
-    border-radius: 24px;
+    border-radius: 16px;
     padding: 7px 12px 7px 14px;
   }
 }
@@ -464,30 +422,33 @@
   }
 
   .navContainer {
-    border-radius: 20px;
+    border-radius: 14px;
     padding: 6px 10px;
   }
 
   .logoIcon {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
   }
 
   .logoText {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     letter-spacing: 0.1em;
   }
 
   .langBtn {
-    height: 32px;
+    height: 30px;
     padding: 0 8px;
     font-size: 0.72rem;
+    border-radius: 6px;
   }
 
   .themeBtn,
   .mobileMenuToggle {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
   }
 }
 
@@ -497,7 +458,7 @@
   }
 
   .logoText {
-    font-size: 0.88rem;
+    font-size: 0.86rem;
     letter-spacing: 0.06em;
   }
 
@@ -506,7 +467,6 @@
   }
 
   .rightGroup {
-    gap: 5px;
+    gap: 4px;
   }
 }
-
