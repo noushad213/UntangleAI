@@ -2,9 +2,12 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './LandingFooter.module.css';
 
 export function LandingFooter() {
+  const { t } = useLanguage();
+
   return (
     <footer className={styles.footerWrapper} role="contentinfo" aria-label="Site footer">
       {/* City Skyline Silhouette */}
@@ -65,19 +68,19 @@ export function LandingFooter() {
       {/* Solid Dark Footer Section with Giant Typography and Civic Navigation */}
       <div className={styles.footerBody}>
         <div className={styles.giantTextWrapper}>
-          <span className={styles.giantBrandText}>UNTANGLE</span>
+          <span className={styles.giantBrandText}>{t.footer.brand}</span>
         </div>
 
         <div className={styles.footerMetaBar}>
           <div className={styles.footerLinksRow}>
             <Link href="/roadmap/pvt-ltd-delhi" className={styles.footerLink}>
-              MCA SPICe+
+              {t.footer.mcaLink}
             </Link>
             <Link href="/roadmap/driving-license-delhi" className={styles.footerLink}>
-              Sarathi Parivahan
+              {t.footer.sarathiLink}
             </Link>
             <Link href="/roadmap/fssai-food-license" className={styles.footerLink}>
-              FSSAI FoSCoS
+              {t.footer.fssaiLink}
             </Link>
             <a
               href="https://www.india.gov.in"
@@ -85,17 +88,16 @@ export function LandingFooter() {
               rel="noopener noreferrer"
               className={styles.footerLink}
             >
-              National Portal ↗
+              {t.footer.nationalPortal}
             </a>
           </div>
 
           <p className={styles.footerDisclaimer}>
-            UntangleAI is an open-access civic navigation tool. Procedural guidance, statutory timelines,
-            and forms are synthesized directly from official gazettes and ministry portals.
+            {t.footer.disclaimer}
           </p>
 
           <p className={styles.footerCopyright}>
-            © 2026 UntangleAI. Built for transparent public administration.
+            {t.footer.copyright}
           </p>
         </div>
       </div>
