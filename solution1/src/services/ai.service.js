@@ -7,45 +7,68 @@ function shouldFallbackToGroq(error) {
     error?.message || error || ""
   ).toLowerCase();
 
-  // Gemini quota exhausted
+  const statusCode =
+    error?.statusCode ||
+    error?.status ||
+    error?.code;
+
+  // Gemini quota / resource exhaustion
   if (
     message.includes("quota exceeded") ||
     message.includes("quota_exceeded") ||
     message.includes("resource_exhausted") ||
     message.includes("free_tier_requests") ||
-    message.includes("generaterequestsperdayperproject")
+    message.includes(
+      "generaterequestsperdayperproject"
+    )
   ) {
     return true;
   }
 
-  // Temporary Gemini service failures
+  // Temporary Gemini server failures
   if (
     message.includes("503") ||
     message.includes("500") ||
     message.includes("502") ||
     message.includes("504") ||
     message.includes("high demand") ||
-    message.includes("unavailable")
+    message.includes("unavailable") ||
+    statusCode === 500 ||
+    statusCode === 502 ||
+    statusCode === 503 ||
+    statusCode === 504
   ) {
     return true;
   }
 
-  // Network/timeout failures
+  // Network / timeout failures
   if (
     message.includes("timeout") ||
     message.includes("etimedout") ||
     message.includes("econnreset") ||
     message.includes("econnrefused") ||
-    message.includes("enotfound")
+    message.includes("enotfound") ||
+    message.includes("network")
   ) {
     return true;
   }
 
-  // Gemini rate limiting
+  // Rate limiting
   if (
     message.includes("429") ||
     message.includes("rate limit") ||
-    message.includes("too many requests")
+    message.includes("too many requests") ||
+    statusCode === 429
+  ) {
+    return true;
+  }
+
+  // Generic Gemini failure.
+  // If Gemini service reaches this point, the primary provider
+  // has already failed after its own retry logic.
+  if (
+    message.includes("gemini request failed") ||
+    message.includes("gemini_failed")
   ) {
     return true;
   }
@@ -59,9 +82,12 @@ async function classifyIntent(
   issueCatalog
 ) {
   try {
-    logger.info("AI provider: Gemini", {
-      operation: "classifyIntent",
-    });
+    logger.info(
+      "AI provider: Gemini",
+      {
+        operation: "classifyIntent",
+      }
+    );
 
     return await gemini.classifyIntent(
       query,
@@ -73,10 +99,22 @@ async function classifyIntent(
       throw error;
     }
 
-    logger.warn("Gemini failed, falling back to Groq", {
-      operation: "classifyIntent",
-      reason: error?.message || String(error),
-    });
+    logger.warn(
+      "Gemini failed, falling back to Groq",
+      {
+        operation: "classifyIntent",
+        reason:
+          error?.message ||
+          String(error),
+      }
+    );
+
+    logger.info(
+      "AI provider: Groq",
+      {
+        operation: "classifyIntent",
+      }
+    );
 
     return await groq.classifyIntent(
       query,
@@ -91,9 +129,12 @@ async function extractWorkflow(
   sources
 ) {
   try {
-    logger.info("AI provider: Gemini", {
-      operation: "extractWorkflow",
-    });
+    logger.info(
+      "AI provider: Gemini",
+      {
+        operation: "extractWorkflow",
+      }
+    );
 
     return await gemini.extractWorkflow(
       issueLabel,
@@ -104,10 +145,22 @@ async function extractWorkflow(
       throw error;
     }
 
-    logger.warn("Gemini failed, falling back to Groq", {
-      operation: "extractWorkflow",
-      reason: error?.message || String(error),
-    });
+    logger.warn(
+      "Gemini failed, falling back to Groq",
+      {
+        operation: "extractWorkflow",
+        reason:
+          error?.message ||
+          String(error),
+      }
+    );
+
+    logger.info(
+      "AI provider: Groq",
+      {
+        operation: "extractWorkflow",
+      }
+    );
 
     return await groq.extractWorkflow(
       issueLabel,

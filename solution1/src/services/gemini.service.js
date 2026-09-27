@@ -28,7 +28,7 @@ const MODEL =
  * Strips markdown code fences and parses JSON.
  */
 function parseJsonResponse(text) {
-  const cleaned = text
+  const cleaned = String(text || "")
     .replace(/```json|```/g, "")
     .trim();
 
@@ -36,7 +36,7 @@ function parseJsonResponse(text) {
     return JSON.parse(cleaned);
   } catch (err) {
     logger.warn("Gemini returned non-JSON output", {
-      length: text.length,
+      length: String(text || "").length,
     });
 
     throw makeError(
@@ -51,18 +51,10 @@ function parseJsonResponse(text) {
 
 /**
  * Determines whether a Gemini error is safe to retry.
- *
- * Important:
- * - 503 = temporary service overload → retry
- * - 500/502/504 = temporary server/network issue → retry
- * - timeout/network reset → retry
- * - 429 caused by quota exhaustion → DO NOT retry
- * - 429 caused by temporary rate limiting → retry
  */
 function getRetryDecision(errorMessage) {
   const message = String(errorMessage || "");
 
-  // Gemini free-tier/project quota exhaustion.
   const quotaExceeded =
     /quota exceeded|quotaexceeded|RESOURCE_EXHAUSTED|free_tier_requests|GenerateRequestsPerDayPerProject/i.test(
       message
@@ -75,7 +67,6 @@ function getRetryDecision(errorMessage) {
     };
   }
 
-  // Temporary rate limiting.
   if (/429|rate limit|too many requests/i.test(message)) {
     return {
       retry: true,
@@ -83,7 +74,6 @@ function getRetryDecision(errorMessage) {
     };
   }
 
-  // Temporary server/service errors.
   if (/500|502|503|504|high demand|UNAVAILABLE/i.test(message)) {
     return {
       retry: true,
@@ -91,8 +81,11 @@ function getRetryDecision(errorMessage) {
     };
   }
 
-  // Temporary network errors.
-  if (/timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|ENOTFOUND/i.test(message)) {
+  if (
+    /timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|ENOTFOUND/i.test(
+      message
+    )
+  ) {
     return {
       retry: true,
       reason: "network_error",
@@ -106,13 +99,11 @@ function getRetryDecision(errorMessage) {
 }
 
 /**
- * Extracts retry delay from Gemini error response when available.
+ * Extracts retry delay from Gemini error response.
  */
 function getRetryDelay(errorMessage, attempt) {
   const message = String(errorMessage || "");
 
-  // Example:
-  // "Please retry in 4.046234588s."
   const secondsMatch = message.match(
     /retry(?: in| after)\s+([\d.]+)\s*s/i
   );
@@ -121,7 +112,6 @@ function getRetryDelay(errorMessage, attempt) {
     const seconds = Number(secondsMatch[1]);
 
     if (Number.isFinite(seconds)) {
-      // Add a small buffer.
       return Math.min(
         Math.ceil(seconds * 1000) + 500,
         30000
@@ -129,10 +119,6 @@ function getRetryDelay(errorMessage, attempt) {
     }
   }
 
-  // Default exponential backoff:
-  // attempt 1 → 1s
-  // attempt 2 → 2s
-  // attempt 3 → 4s
   return 1000 * 2 ** attempt;
 }
 
@@ -156,25 +142,26 @@ async function callGemini(
         maxAttempts: retries + 1,
       });
 
-      const response = await ai.models.generateContent({
-        model: MODEL,
+      const response =
+        await ai.models.generateContent({
+          model: MODEL,
 
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: userContent,
-              },
-            ],
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: userContent,
+                },
+              ],
+            },
+          ],
+
+          config: {
+            systemInstruction,
+            responseMimeType: "application/json",
           },
-        ],
-
-        config: {
-          systemInstruction,
-          responseMimeType: "application/json",
-        },
-      });
+        });
 
       const text =
         response.text ??
@@ -210,7 +197,6 @@ async function callGemini(
         }
       );
 
-      // Don't retry quota exhaustion or permanent errors.
       if (
         !decision.retry ||
         attempt === retries
@@ -257,29 +243,79 @@ async function callGemini(
 }
 
 /**
- * Classifies a natural-language query into a known issue.
+ * Understands a natural-language civic query.
+ *
+ * IMPORTANT:
+ * The issue catalog is optional context only.
+ * It is NOT a restriction.
+ *
+ * The model may identify a completely new civic issue
+ * that does not exist in the municipality issue catalog.
  */
 async function classifyIntent(
   query,
   municipalityName,
-  issueCatalog
+  issueCatalog = []
 ) {
   const system = [
-    "You classify a citizen's civic request into one issue from a fixed catalog.",
-    "Respond with ONLY a JSON object: {\"issueKey\":string|null,\"intent\":string,\"keywords\":string[],\"confidence\":number between 0 and 1}.",
-    "issueKey must be one of the catalog's issueKey values, or null if nothing matches well.",
-    "Do not explain.",
-    "Do not invent an issueKey not in the catalog.",
+    "You are a civic-service intent classifier.",
+
+    "Understand the user's natural-language civic request for the specified municipality.",
+
+    "The user may ask about ANY civic issue or government service.",
+
+    "Do NOT restrict the answer to a predefined catalog.",
+
+    "The issue catalog, if supplied, is only optional context for recognizing common known issues.",
+
+    "If the requested issue is not present in the catalog, create a new normalized issue representation.",
+
+    "Return ONLY valid JSON.",
+
+    "Return exactly this structure:",
+    '{"issueKey":"string","intent":"string","keywords":["string"],"confidence":0}',
+
+    "issueKey must be a short, stable, lowercase kebab-case identifier describing the civic issue.",
+
+    "Examples of valid issueKey values:",
+    "dog-license",
+    "property-tax-payment",
+    "birth-certificate",
+    "water-connection",
+    "building-permission",
+    "marriage-certificate",
+
+    "Do not include municipality names in issueKey.",
+
+    "Do not include dates, personal names, addresses, or temporary details in issueKey.",
+
+    "Use the core civic service or issue as the issueKey.",
+
+    "intent should be a concise human-readable name for the requested civic service.",
+
+    "keywords should contain useful search terms related to the issue.",
+
+    "confidence must be a number between 0 and 1.",
+
+    "If the query is clearly a civic-service request, provide the best issue representation even when the issue is not in the catalog.",
+
+    "Only use a very low confidence when the query is genuinely ambiguous or is not a civic-service request.",
+
+    "Do not explain your answer.",
   ].join(" ");
 
   const user = JSON.stringify({
     municipality: municipalityName,
     query,
-    issueCatalog: issueCatalog.map((i) => ({
-      issueKey: i.issueKey,
-      label: i.label,
-      keywords: i.keywords,
-    })),
+
+    optionalIssueCatalog:
+      Array.isArray(issueCatalog)
+        ? issueCatalog.map((item) => ({
+            issueKey: item.issueKey,
+            label: item.label,
+            keywords: item.keywords,
+          }))
+        : [],
   });
 
   const text = await callGemini(
@@ -291,8 +327,12 @@ async function classifyIntent(
     parseJsonResponse(text);
 
   if (
-    typeof parsed.confidence !== "number" ||
-    !Array.isArray(parsed.keywords)
+    typeof parsed.issueKey !== "string" ||
+    !parsed.issueKey.trim() ||
+    typeof parsed.intent !== "string" ||
+    !parsed.intent.trim() ||
+    !Array.isArray(parsed.keywords) ||
+    typeof parsed.confidence !== "number"
   ) {
     throw makeError(
       "GEMINI_INVALID_OUTPUT",
@@ -300,11 +340,34 @@ async function classifyIntent(
     );
   }
 
-  return parsed;
+  return {
+    issueKey: parsed.issueKey
+      .trim()
+      .toLowerCase(),
+
+    intent: parsed.intent.trim(),
+
+    keywords: parsed.keywords
+      .filter(
+        (keyword) =>
+          typeof keyword === "string" &&
+          keyword.trim()
+      )
+      .map((keyword) => keyword.trim()),
+
+    confidence: Math.max(
+      0,
+      Math.min(1, parsed.confidence)
+    ),
+  };
 }
 
 /**
  * Extracts a source-grounded workflow from official source text.
+ *
+ * IMPORTANT:
+ * Gemini does NOT generate or verify official URLs.
+ * The backend is responsible for resolving URLs from source records.
  */
 async function extractWorkflow(
   issueLabel,
@@ -321,13 +384,31 @@ async function extractWorkflow(
 
     "When a fact comes from a supplied chunk, include an evidence entry with its exact chunkId, pageStart, pageEnd, and a short verbatim quote.",
 
-    "Do not invent anchors or quotes.",
+    "Do not invent anchors, quotes, sourceIds, chunkIds, page numbers, or evidence.",
 
-    "officialUrl must always be null; the backend owns official URLs and will add them from source records.",
+    "IMPORTANT URL RULE: Never generate, guess, reconstruct, modify, shorten, or invent a URL.",
+
+    "Do not create a URL from a website name, page title, service name, or your own knowledge.",
+
+    "Do not transform a PDF URL into a webpage URL.",
+
+    "Do not transform a webpage URL into a different URL.",
+
+    "Do not return a URL based on what you believe the official website should be.",
+
+    "officialUrl must ALWAYS be null in the model response.",
+
+    "The backend will assign officialUrl using the original URL stored in the corresponding source record.",
+
+    "Use sourceIds to identify which supplied sources support each step.",
+
+    "The backend will use those sourceIds to resolve the real URL.",
+
+    "If no source supports a URL, do not provide one.",
 
     "If sources disagree, add an entry to conflicts describing the disagreement and the sourceIds involved.",
 
-    "Respond with ONLY JSON matching: {\"steps\":[{\"stepId\":string,\"title\":string,\"description\":string,\"dependsOn\":string[],\"sourceIds\":string[],\"evidence\":[{\"chunkId\":string,\"pageStart\":number|null,\"pageEnd\":number|null,\"quote\":string|null}],\"fee\":string|null,\"deadline\":string|null,\"documentsRequired\":string[],\"eligibility\":string|null,\"office\":string|null,\"officialUrl\":string|null,\"isUncertain\":boolean,\"uncertaintyNote\":string|null}],\"conflicts\":[{\"description\":string,\"sourceIds\":string[]}],\"missingInformation\":string[]}"
+    'Respond with ONLY JSON matching: {"steps":[{"stepId":string,"title":string,"description":string,"dependsOn":string[],"sourceIds":string[],"evidence":[{"chunkId":string,"pageStart":number|null,"pageEnd":number|null,"quote":string|null}],"fee":string|null,"deadline":string|null,"documentsRequired":string[],"eligibility":string|null,"office":string|null,"officialUrl":null,"isUncertain":boolean,"uncertaintyNote":string|null}],"conflicts":[{"description":string,"sourceIds":string[]}],"missingInformation":string[]}',
   ].join(" ");
 
   const user = JSON.stringify({
