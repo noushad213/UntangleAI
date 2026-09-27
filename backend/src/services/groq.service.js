@@ -1,8 +1,18 @@
 const Groq = require("groq-sdk");
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+let groqClient = null;
+
+function getGroqClient() {
+  if (!groqClient) {
+    if (!process.env.GROQ_API_KEY) {
+      throw new Error("The GROQ_API_KEY environment variable is missing or empty.");
+    }
+    groqClient = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
+  }
+  return groqClient;
+}
 
 function getRetryDecision(errorMessage = "") {
   const message = String(errorMessage).toLowerCase();
@@ -74,8 +84,9 @@ async function callGroq(
         `Groq request attempt ${attempt}`
       );
 
+      const client = getGroqClient();
       const response =
-        await groq.chat.completions.create({
+        await client.chat.completions.create({
           model:
             process.env.GROQ_MODEL ||
             "openai/gpt-oss-120b",
