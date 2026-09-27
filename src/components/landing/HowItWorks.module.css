@@ -1,6 +1,6 @@
 .sectionContainer {
   width: 100%;
-  padding: clamp(64px, 8vh, 100px) clamp(12px, 3vw, 24px) clamp(80px, 10vh, 120px);
+  padding: clamp(64px, 8vh, 100px) clamp(12px, 3vw, 24px) clamp(160px, 18vw, 260px);
   background-color: #faf9fd;
   position: relative;
   overflow: hidden;
