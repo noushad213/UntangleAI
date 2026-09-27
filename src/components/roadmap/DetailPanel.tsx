@@ -14,6 +14,7 @@ import {
   Undo2,
 } from 'lucide-react';
 import { ProcessStep, StepStatus } from '@/types/roadmap';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './DetailPanel.module.css';
 
 interface DetailPanelProps {
@@ -37,6 +38,7 @@ export function DetailPanel({
   onClose,
   onToggleComplete,
 }: DetailPanelProps) {
+  const { t } = useLanguage();
   // Local document checklist tracking for user satisfaction
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
 
@@ -53,6 +55,12 @@ export function DetailPanel({
     if (step.nodeType === 'action') return styles.badgeAction;
     if (step.nodeType === 'document') return styles.badgeDocument;
     return styles.badgePrerequisite;
+  };
+
+  const getNodeTypeName = () => {
+    if (step.nodeType === 'action') return t.roadmap.action;
+    if (step.nodeType === 'document') return t.roadmap.document;
+    return t.roadmap.prerequisite;
   };
 
   const isLocked = status === 'locked';
@@ -75,10 +83,10 @@ export function DetailPanel({
           <div className={styles.headerMeta}>
             <div className={styles.typeRow}>
               <span className={`${styles.badge} ${getBadgeClass()}`}>
-                {step.nodeType}
+                {getNodeTypeName()}
               </span>
               <span className={styles.stepOrder}>
-                Step {step.stepOrder} of {totalStepsCount}
+                {t.roadmap.step} {step.stepOrder} {t.roadmap.of} {totalStepsCount}
               </span>
             </div>
             <h2 id="step-panel-title" className={styles.panelTitle}>
@@ -90,7 +98,7 @@ export function DetailPanel({
             type="button"
             className={styles.closeButton}
             onClick={onClose}
-            aria-label="Close detail panel"
+            aria-label={t.roadmap.close}
             id="close-detail-panel-btn"
           >
             <X size={18} />
@@ -102,8 +110,7 @@ export function DetailPanel({
             <div className={styles.warningBox} role="alert">
               <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: 2 }} />
               <div className={styles.warningText}>
-                <strong>Prerequisites Required First</strong>
-                <span>Complete the preceding step(s) before starting this one:</span>
+                <strong>{t.roadmap.prerequisitesRequired}</strong>
                 <ul className={styles.warningList}>
                   {unmetPrereqs.map((prereqName, index) => (
                     <li key={index}>{prereqName}</li>
@@ -114,31 +121,31 @@ export function DetailPanel({
           )}
 
           <section className={styles.section}>
-            <span className={styles.sectionTitle}>Overview & Instructions</span>
+            <span className={styles.sectionTitle}>{t.roadmap.info}</span>
             <p className={styles.descriptionText}>{step.description}</p>
           </section>
 
           <div className={styles.quickStatsGrid}>
             <div className={styles.statCard}>
-              <span className={styles.statLabel}>Processing Time</span>
+              <span className={styles.statLabel}>{t.roadmap.estimatedTimeline}</span>
               <span className={styles.statValue}>
                 <Clock size={14} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} />
-                {step.timeEstimate || 'Not specified'}
+                {step.timeEstimate || '—'}
               </span>
             </div>
 
             <div className={styles.statCard}>
-              <span className={styles.statLabel}>Statutory Fees</span>
+              <span className={styles.statLabel}>{t.roadmap.statutoryFee}</span>
               <span className={styles.statValue}>
                 <IndianRupee size={14} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} />
-                {step.fees || 'Free / Included'}
+                {step.fees || '—'}
               </span>
             </div>
           </div>
 
           {step.office && (
             <section className={styles.section}>
-              <span className={styles.sectionTitle}>Responsible Authority</span>
+              <span className={styles.sectionTitle}>{t.roadmap.department}</span>
               <div className={styles.officeInfo}>
                 <Building2 size={18} style={{ color: 'var(--color-brand-500)', marginTop: 2, flexShrink: 0 }} />
                 <div className={styles.officeText}>
@@ -154,7 +161,7 @@ export function DetailPanel({
           {step.requirements && step.requirements.length > 0 && (
             <section className={styles.section}>
               <span className={styles.sectionTitle}>
-                Required Documents ({step.requirements.length})
+                {t.roadmap.requiredDocs} ({step.requirements.length})
               </span>
               <div className={styles.reqList}>
                 {step.requirements.map((req) => {
@@ -166,7 +173,7 @@ export function DetailPanel({
                         checked={isChecked}
                         onChange={() => toggleDoc(req.id)}
                         className={styles.reqCheckbox}
-                        aria-label={`Mark document ready: ${req.title}`}
+                        aria-label={`${req.title}`}
                       />
                       <div className={styles.reqDetails}>
                         <span
@@ -180,7 +187,7 @@ export function DetailPanel({
                         </span>
                         <div className={styles.reqTag}>
                           <FileCheck2 size={12} />
-                          <span>{req.isMandatory ? 'Mandatory' : 'Optional / If applicable'}</span>
+                          <span>{req.isMandatory ? t.roadmap.mandatory : t.roadmap.optional}</span>
                         </div>
                       </div>
                     </label>
@@ -192,14 +199,11 @@ export function DetailPanel({
 
           {step.sourceUrl && (
             <section className={styles.section}>
-              <span className={styles.sectionTitle}>Official Verification & Source</span>
+              <span className={styles.sectionTitle}>{t.roadmap.legalBasis}</span>
               <div className={styles.sourceBox}>
                 <div className={styles.sourceHeader}>
                   <span className={styles.verifiedBadge}>
-                    <ShieldCheck size={14} /> Official Government Source
-                  </span>
-                  <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)' }}>
-                    Confidence: High
+                    <ShieldCheck size={14} /> {t.roadmap.officialSource}
                   </span>
                 </div>
 
@@ -214,7 +218,7 @@ export function DetailPanel({
                   className={styles.sourceLink}
                   id={`external-source-link-${step.id}`}
                 >
-                  <span>Verify on Official Portal</span>
+                  <span>{t.roadmap.officialPortal}</span>
                   <ExternalLink size={12} />
                 </a>
               </div>
@@ -231,11 +235,13 @@ export function DetailPanel({
           >
             {isCompleted ? (
               <>
-                <Undo2 size={16} /> Mark as Incomplete
+                <Undo2 size={16} />
+                <span>{t.roadmap.markIncomplete}</span>
               </>
             ) : (
               <>
-                <CheckCircle2 size={16} /> Mark as Completed
+                <CheckCircle2 size={16} />
+                <span>{t.roadmap.markCompleted}</span>
               </>
             )}
           </button>
