@@ -20,6 +20,11 @@
   border-color: var(--color-brand-500);
 }
 
+.nodeContainer:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
 .selected {
   border-color: var(--color-brand-600) !important;
   box-shadow: 0 0 0 3px var(--color-brand-100), var(--shadow-md) !important;
