@@ -25,7 +25,6 @@ const municipalitySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-municipalitySchema.index({ slug: 1 }, { unique: true });
 municipalitySchema.index({ "issueCatalog.issueKey": 1 });
 
 module.exports = mongoose.model("Municipality", municipalitySchema);
