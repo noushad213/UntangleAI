@@ -12,9 +12,6 @@ import {
   Paperclip,
   FileText,
   AlertCircle,
-  Languages,
-  Check,
-  ChevronDown,
   Square,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -154,26 +151,6 @@ export const ALL_QUERY_EXAMPLES: QueryExample[] = [
   },
 ];
 
-export interface IndicVoiceOption {
-  code: string;
-  name: string;
-  native: string;
-}
-
-export const INDIC_VOICE_OPTIONS: IndicVoiceOption[] = [
-  { code: 'hi-IN', name: 'Hindi', native: 'हिन्दी' },
-  { code: 'en-IN', name: 'English (India)', native: 'English (IN)' },
-  { code: 'ta-IN', name: 'Tamil', native: 'தமிழ்' },
-  { code: 'te-IN', name: 'Telugu', native: 'తెలుగు' },
-  { code: 'bn-IN', name: 'Bengali', native: 'বাংলা' },
-  { code: 'mr-IN', name: 'Marathi', native: 'मराठी' },
-  { code: 'gu-IN', name: 'Gujarati', native: 'ગુજરાતી' },
-  { code: 'kn-IN', name: 'Kannada', native: 'ಕನ್ನಡ' },
-  { code: 'ml-IN', name: 'Malayalam', native: 'മലയാളം' },
-  { code: 'pa-IN', name: 'Punjabi', native: 'ਪੰਜਾਬੀ' },
-  { code: 'ur-IN', name: 'Urdu', native: 'اردو' },
-];
-
 const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'webp'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -181,22 +158,6 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function getDefaultVoiceLang(lang?: string): string {
-  switch (lang) {
-    case 'hi':
-    case 'hinglish':
-      return 'hi-IN';
-    case 'ta':
-      return 'ta-IN';
-    case 'bn':
-      return 'bn-IN';
-    case 'ur':
-      return 'ur-IN';
-    default:
-      return 'en-IN';
-  }
 }
 
 interface HeroQueryInputProps {
@@ -225,8 +186,6 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
 
   // Voice recognition and document upload states
   const [isListening, setIsListening] = useState(false);
-  const [voiceLang, setVoiceLang] = useState<string>(getDefaultVoiceLang(activeLang));
-  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
   const [audioBars, setAudioBars] = useState<number[]>([15, 25, 40, 25, 15]);
 
@@ -237,7 +196,6 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const langMenuRef = useRef<HTMLDivElement>(null);
 
   // Speech and Audio analysis refs
   const recognitionRef = useRef<any>(null);
@@ -245,11 +203,6 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
-
-  // Sync default voice language when global activeLang changes
-  useEffect(() => {
-    setVoiceLang(getDefaultVoiceLang(activeLang));
-  }, [activeLang]);
 
   // Filter examples according to active language
   const examples = useMemo(() => {
@@ -259,8 +212,6 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
   }, [activeLang]);
 
   const currentExample = examples[exampleIndex % examples.length] || ALL_QUERY_EXAMPLES[0];
-  const currentVoiceOption =
-    INDIC_VOICE_OPTIONS.find((opt) => opt.code === voiceLang) || INDIC_VOICE_OPTIONS[0];
 
   // Reset index when language selection changes
   useEffect(() => {
@@ -289,17 +240,6 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
         audioContextRef.current.close().catch(() => {});
       }
     };
-  }, []);
-
-  // Close voice language menu on outside click
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
-        setIsLangMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
   // Typewriter animation loop for the cycling placeholder
@@ -395,7 +335,6 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       type: 'info',
     });
 
-    // Auto-dismiss info banner after 3 seconds
     setTimeout(() => {
       setFeedback((prev) => (prev?.type === 'info' ? null : prev));
     }, 3000);
@@ -496,7 +435,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
 
       updateBars();
     } catch {
-      // Audio visualizer fallback (speech recognition still functions)
+      // Audio visualizer fallback
     }
   };
 
@@ -516,8 +455,19 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
     setAudioBars([15, 25, 40, 25, 15]);
   };
 
-  // Launch Speech Recognition
-  const startRecognition = (langCode: string) => {
+  // Automatically determine optimal language locale:
+  // en-IN in Google Speech is specially trained for Indian bilingual code-switching (Hinglish)
+  // and Indian accents, while regional selections map automatically to their native models.
+  const getAutoDetectedLang = (): string => {
+    if (activeLang === 'hi') return 'hi-IN';
+    if (activeLang === 'ta') return 'ta-IN';
+    if (activeLang === 'bn') return 'bn-IN';
+    if (activeLang === 'ur') return 'ur-IN';
+    // Hinglish, Multilingual ('auto'), or English: 'en-IN' is Google's dedicated Indic/Hinglish model
+    return 'en-IN';
+  };
+
+  const startRecognition = () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
@@ -534,7 +484,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       recognitionRef.current = recognition;
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = langCode;
+      recognition.lang = getAutoDetectedLang();
 
       recognition.onstart = () => {
         setIsListening(true);
@@ -613,19 +563,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       stopRecognition();
     } else {
       setFeedback(null);
-      startRecognition(voiceLang);
-    }
-  };
-
-  const handleSelectVoiceLang = (code: string) => {
-    setVoiceLang(code);
-    setIsLangMenuOpen(false);
-
-    if (isListening) {
-      stopRecognition();
-      setTimeout(() => {
-        startRecognition(code);
-      }, 150);
+      startRecognition();
     }
   };
 
@@ -731,7 +669,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
   const isCurrentRtl =
     Boolean(currentExample.isRtl) ||
     isRtl ||
-    voiceLang === 'ur-IN' ||
+    activeLang === 'ur' ||
     /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(query);
 
   return (
@@ -777,7 +715,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={isListening ? `Listening in ${currentVoiceOption.name} (${currentVoiceOption.native})...` : query ? '' : displayText}
+          placeholder={isListening ? 'Listening... Speak in any language or Hinglish' : query ? '' : displayText}
           autoComplete="off"
           dir={isCurrentRtl ? 'rtl' : 'ltr'}
           aria-label={t.search.placeholder}
@@ -817,51 +755,12 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
             id="hero-file-upload-input"
           />
 
-          {/* Indian Voice Engine Selector Trigger */}
-          <div className={styles.voiceLangContainer} ref={langMenuRef}>
-            <button
-              type="button"
-              className={`${styles.voiceLangToggle} ${isListening ? styles.voiceLangToggleListening : ''}`}
-              onClick={() => setIsLangMenuOpen((prev) => !prev)}
-              title={`Voice Language: ${currentVoiceOption.name} (${currentVoiceOption.native})`}
-              aria-label={`Voice Language: ${currentVoiceOption.name}`}
-              id="hero-voice-lang-menu-btn"
-            >
-              <Languages size={14} />
-              <span className={styles.voiceLangLabel}>{currentVoiceOption.native}</span>
-              <ChevronDown size={11} className={isLangMenuOpen ? styles.chevronRotated : ''} />
-            </button>
-
-            {isLangMenuOpen && (
-              <div className={styles.voiceLangDropdown} role="menu" id="hero-voice-lang-dropdown">
-                <div className={styles.voiceLangDropdownHeader}>Indian Language Voice Engine</div>
-                <div className={styles.voiceLangList}>
-                  {INDIC_VOICE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.code}
-                      type="button"
-                      className={`${styles.voiceLangItem} ${opt.code === voiceLang ? styles.voiceLangItemActive : ''}`}
-                      onClick={() => handleSelectVoiceLang(opt.code)}
-                      role="menuitem"
-                    >
-                      <div className={styles.voiceLangItemText}>
-                        <span className={styles.voiceItemNative}>{opt.native}</span>
-                        <span className={styles.voiceItemName}>{opt.name}</span>
-                      </div>
-                      {opt.code === voiceLang && <Check size={14} className={styles.voiceItemCheck} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Voice Input Button */}
           <button
             type="button"
             className={`${styles.toolBtn} ${isListening ? styles.toolBtnListening : ''}`}
             onClick={toggleVoiceInput}
-            title={isListening ? t.search.voiceStop : `${t.search.voiceSearch} (${currentVoiceOption.name})`}
+            title={isListening ? t.search.voiceStop : t.search.voiceSearch}
             aria-label={isListening ? t.search.voiceStop : t.search.voiceSearch}
             id="hero-voice-input-btn"
           >
@@ -897,7 +796,6 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
             <div className={styles.hudIndicator}>
               <span className={styles.liveRecordingDot} />
               <span className={styles.liveRecordingText}>LIVE TRANSCRIPT</span>
-              <span className={styles.hudLangBadge}>{currentVoiceOption.native}</span>
             </div>
 
             {/* Reactive Audio Frequency Visualizer */}
@@ -927,7 +825,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
           <div className={styles.liveTranscriptText}>
             {interimTranscript || query || (
               <span className={styles.listeningHint}>
-                Speak now in {currentVoiceOption.name} ({currentVoiceOption.native})...
+                Listening... Speak now in any Indian language or Hinglish...
               </span>
             )}
             <span className={styles.blinkingCursor} />
