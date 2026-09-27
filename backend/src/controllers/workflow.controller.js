@@ -61,7 +61,7 @@ async function listForMunicipality(req, res, next) {
 async function verify(req, res, next) {
   try {
     const id = requireString(req.params.id, "id");
-    const verifiedBy = requireString(req.body.verifiedBy, "verifiedBy");
+    const verifiedBy = req.admin.id;
     const workflow = await workflowService.markWorkflowVerified(id, verifiedBy);
     res.json({ workflow: workflowService.toGraphJson(workflow) });
   } catch (err) {

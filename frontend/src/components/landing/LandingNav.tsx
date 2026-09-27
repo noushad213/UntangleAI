@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { GitFork, Network, Moon, Sun, Globe, ChevronDown, Menu, X, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { usePersistentSession } from '@/hooks/usePersistentSession';
+import { buildResumeUrl } from '@/lib/storage';
 import { NAV_LANGUAGES, LanguageOption, LanguageCode } from '@/lib/translations';
 import styles from './LandingNav.module.css';
 
@@ -24,6 +26,7 @@ export function LandingNav({
   onSelectLang: propOnSelectLang,
 }: LandingNavProps) {
   const { lang, setLang, t, languages } = useLanguage();
+  const { lastSession } = usePersistentSession();
   const currentLang = (propSelectedLang || lang) as LanguageCode;
 
   const [scrolled, setScrolled] = useState(false);
@@ -177,9 +180,17 @@ export function LandingNav({
               </button>
 
               {/* Desktop CTA Button */}
-              <Link href="/roadmap/pvt-ltd-delhi" className={styles.ctaBtn} id="landing-open-canvas-btn">
+              <Link
+                href={lastSession ? buildResumeUrl(lastSession) : '/roadmap/pvt-ltd-delhi'}
+                className={styles.ctaBtn}
+                id="landing-open-canvas-btn"
+                title={lastSession ? `Resume ${lastSession.title}` : t.nav.canvasBtn}
+              >
                 <Network size={14} />
-                <span>{t.nav.canvasBtn}</span>
+                <span>{lastSession ? 'Resume Roadmap' : t.nav.canvasBtn}</span>
+                {lastSession && (
+                  <span className={styles.ctaBadge}>{lastSession.progressPercent}%</span>
+                )}
               </Link>
 
               {/* Mobile Menu Toggle Button */}
@@ -230,12 +241,12 @@ export function LandingNav({
 
               <div className={styles.mobileCtaWrapper}>
                 <Link
-                  href="/roadmap/pvt-ltd-delhi"
+                  href={lastSession ? buildResumeUrl(lastSession) : '/roadmap/pvt-ltd-delhi'}
                   className={styles.mobileCtaBtn}
                   onClick={handleLinkClick}
                 >
                   <Network size={16} />
-                  <span>{t.nav.canvasBtn}</span>
+                  <span>{lastSession ? `Resume Progress (${lastSession.progressPercent}%)` : t.nav.canvasBtn}</span>
                 </Link>
               </div>
             </div>

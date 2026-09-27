@@ -9,8 +9,21 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { processId, location, applicantProfile, serviceMode } = body;
 
-    const baseProcess =
-      MOCK_ROADMAPS.find((p) => p.id === processId) || MOCK_ROADMAPS[0];
+    if (typeof processId !== 'string' || !processId.trim()) {
+      return NextResponse.json(
+        { success: false, error: 'processId is required' },
+        { status: 400 }
+      );
+    }
+
+    const baseProcess = MOCK_ROADMAPS.find((p) => p.id === processId);
+
+    if (!baseProcess) {
+      return NextResponse.json(
+        { success: false, error: 'Roadmap not found' },
+        { status: 404 }
+      );
+    }
 
     const filters: RoadmapFilters = {
       location: location || 'delhi',
@@ -29,9 +42,10 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       provider: 'UntangleAI Context & AI Adaptation Engine',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to adapt roadmap';
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to adapt roadmap' },
+      { success: false, error: message },
       { status: 500 }
     );
   }

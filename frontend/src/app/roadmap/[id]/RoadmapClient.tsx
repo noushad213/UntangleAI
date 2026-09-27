@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldAlert, ExternalLink } from 'lucide-react';
+import { ShieldAlert, ExternalLink, FolderCheck, Network } from 'lucide-react';
 import { MOCK_ROADMAPS } from '@/data/mock-roadmaps';
 import { CivicProcess, ProcessStep } from '@/types/roadmap';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,12 +12,18 @@ import { RoadmapCanvas } from '@/components/roadmap/RoadmapCanvas';
 import { StepListView } from '@/components/roadmap/StepListView';
 import { DetailPanel } from '@/components/roadmap/DetailPanel';
 import { DocumentVaultDrawer } from '@/components/roadmap/DocumentVaultDrawer';
+import { TrackingWorkspacePane } from '@/components/roadmap/TrackingWorkspacePane';
 import {
   RoadmapFilters,
   INDIAN_LOCATIONS,
   adaptRoadmapForContext,
   requestAIRoadmapAdaptation,
 } from '@/lib/roadmap-adapters';
+import {
+  getRoadmapPreferences,
+  saveRoadmapPreferences,
+  saveLastVisitedSession,
+} from '@/lib/storage';
 import styles from '@/app/page.module.css';
 
 interface RoadmapClientProps {
@@ -29,13 +35,28 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
   const searchParams = useSearchParams();
   const { getLocalizedRoadmap, t } = useLanguage();
 
-  const [currentProcessRaw, setCurrentProcessRaw] = useState<CivicProcess>(initialProcess);
-  const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
+  const isResumeRequested =
+    searchParams?.get('track') === 'true' ||
+    searchParams?.get('resume') === 'true';
+
+  const [selectedStepId, setSelectedStepId] = useState<string | null>(() => {
+    const stepParam = searchParams?.get('step');
+    if (stepParam && initialProcess.steps.some((s) => s.id === stepParam)) {
+      return stepParam;
+    }
+    if (isResumeRequested) {
+      return initialProcess.steps[0]?.id || null;
+    }
+    return null;
+  });
+
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'graph' | 'list'>('graph');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [isTrackingMode, setIsTrackingMode] = useState(isResumeRequested);
+  const [currentProcessRaw, setCurrentProcessRaw] = useState<CivicProcess>(initialProcess);
 
-  // Match default location based on process title or location
+  // Match default location based on URL param, process location, or process title
   const defaultLocation = useMemo(() => {
     const locParam = searchParams?.get('location');
     if (locParam && INDIAN_LOCATIONS.some((l) => l.id === locParam)) {
@@ -118,8 +139,11 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
   }, [adaptationResult.adaptedProcess, getLocalizedRoadmap]);
 
   const allProcesses = useMemo(() => {
-    return MOCK_ROADMAPS.map((p) => getLocalizedRoadmap(p));
-  }, [getLocalizedRoadmap]);
+    const samples = MOCK_ROADMAPS.map((p) => getLocalizedRoadmap(p));
+    return samples.some((process) => process.id === currentProcess.id)
+      ? samples
+      : [currentProcess, ...samples];
+  }, [currentProcess, getLocalizedRoadmap]);
 
   // Load progress engine and document vault for current process
   const {
@@ -127,6 +151,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     stepStatusMap,
     unmetDependenciesMap,
     toggleStep,
+    setStepCompleted,
     resetProgress,
     progressPercent,
     isTrackingActive,
@@ -185,6 +210,231 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     setIsPanelOpen(false);
   }, []);
 
+  const [showRightPane, setShowRightPane] = useState(isResumeRequested);
+
+  const [activeStepId, setActiveStepId] = useState<string>(() => {
+    const stepParam = searchParams?.get('step');
+    if (stepParam && initialProcess.steps.some((s) => s.id === stepParam)) {
+      return stepParam;
+    }
+    return initialProcess.steps[0]?.id || '';
+  });
+
+  const [advancingStepId, setAdvancingStepId] = useState<string | null>(null);
+
+  const isPreferencesLoadedRef = useRef(false);
+
+  // Synchronize preferences on client mount and when switching roadmaps
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const prefs = getRoadmapPreferences(currentProcessRaw.id);
+    if (prefs) {
+      const hasLocationParam = !!searchParams?.get('location');
+      const hasProfileParam = !!searchParams?.get('profile');
+      const hasModeParam = !!searchParams?.get('mode');
+
+      if (prefs.filters && (!hasLocationParam || !hasProfileParam || !hasModeParam)) {
+        setFilters((prev) => ({
+          location: hasLocationParam ? prev.location : prefs.filters?.location || prev.location,
+          applicantProfile: hasProfileParam ? prev.applicantProfile : prefs.filters?.applicantProfile || prev.applicantProfile,
+          serviceMode: hasModeParam ? prev.serviceMode : prefs.filters?.serviceMode || prev.serviceMode,
+        }));
+      }
+
+      if (!searchParams?.get('step')) {
+        if (prefs.lastActiveStepId && currentProcessRaw.steps.some((s) => s.id === prefs.lastActiveStepId)) {
+          setActiveStepId(prefs.lastActiveStepId);
+          setSelectedStepId(prefs.lastActiveStepId);
+        } else if (prefs.selectedStepId && currentProcessRaw.steps.some((s) => s.id === prefs.selectedStepId)) {
+          setSelectedStepId(prefs.selectedStepId);
+        }
+      }
+
+      if (isResumeRequested) {
+        setViewMode('graph');
+        setIsTrackingMode(true);
+        setShowRightPane(true);
+        startTracking();
+      } else {
+        if (prefs.viewMode) {
+          setViewMode(prefs.viewMode);
+        }
+        if (typeof prefs.isTrackingMode === 'boolean') {
+          setIsTrackingMode(prefs.isTrackingMode);
+          setShowRightPane(prefs.isTrackingMode);
+        }
+      }
+    } else if (isResumeRequested) {
+      setViewMode('graph');
+      setIsTrackingMode(true);
+      setShowRightPane(true);
+      startTracking();
+    }
+
+    isPreferencesLoadedRef.current = true;
+  }, [currentProcessRaw.id, currentProcessRaw.steps, searchParams, isResumeRequested, startTracking]);
+
+  // Checkbox state persisted per process
+  const storageKey = `untangle_tasks_${currentProcess.id}`;
+  const [checkedTasks, setCheckedTasks] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) return setCheckedTasks(JSON.parse(stored));
+    } catch {
+      // Fallback
+    }
+    setCheckedTasks({});
+  }, [storageKey]);
+
+  const saveTasks = useCallback(
+    (newTasks: Record<string, boolean>) => {
+      setCheckedTasks(newTasks);
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(newTasks));
+      } catch {
+        // Storage quota
+      }
+    },
+    [storageKey]
+  );
+
+  // Automatically persist roadmap preferences & active session state once initial preferences have been loaded
+  useEffect(() => {
+    if (!isPreferencesLoadedRef.current) return;
+
+    const currentActiveStep =
+      currentProcess.steps.find((s) => s.id === (activeStepId || selectedStepId)) ||
+      currentProcess.steps[0];
+
+    saveRoadmapPreferences(currentProcess.id, {
+      lastActiveStepId: activeStepId,
+      selectedStepId: selectedStepId || undefined,
+      viewMode,
+      isTrackingMode,
+      filters: {
+        location: filters.location,
+        applicantProfile: filters.applicantProfile,
+        serviceMode: filters.serviceMode,
+      },
+    });
+
+    saveLastVisitedSession({
+      id: currentProcess.id,
+      title: currentProcess.title,
+      location: currentProcess.location,
+      lastActiveStepId: currentActiveStep?.id,
+      lastActiveStepTitle: currentActiveStep?.shortTitle || currentActiveStep?.title,
+      lastVisitedAt: new Date().toISOString(),
+      completedCount: completedStepIds.length,
+      totalSteps: currentProcess.steps.length,
+      progressPercent,
+      viewMode,
+      isTrackingMode,
+      filters: {
+        location: filters.location,
+        applicantProfile: filters.applicantProfile,
+        serviceMode: filters.serviceMode,
+      },
+      urlPath: `/roadmap/${currentProcess.id}?location=${filters.location}&profile=${filters.applicantProfile}&mode=${filters.serviceMode}${currentActiveStep?.id ? `&step=${currentActiveStep.id}` : ''}${isTrackingMode ? '&track=true&resume=true' : ''}`,
+    });
+  }, [
+    currentProcess.id,
+    currentProcess.title,
+    currentProcess.location,
+    currentProcess.steps,
+    activeStepId,
+    selectedStepId,
+    viewMode,
+    isTrackingMode,
+    filters,
+    completedStepIds.length,
+    progressPercent,
+  ]);
+
+  const activeStep = useMemo(() => {
+    return (
+      currentProcess.steps.find((s) => s.id === (selectedStepId || activeStepId)) ||
+      currentProcess.steps[0]
+    );
+  }, [currentProcess.steps, selectedStepId, activeStepId]);
+
+  const activeStepIndex = useMemo(() => {
+    return currentProcess.steps.findIndex((s) => s.id === activeStep?.id);
+  }, [currentProcess.steps, activeStep]);
+
+  const nextStep =
+    activeStepIndex < currentProcess.steps.length - 1
+      ? currentProcess.steps[activeStepIndex + 1]
+      : null;
+
+  const handleToggleTask = useCallback(
+    (taskId: string, allChecked: boolean) => {
+      const nextChecked = !checkedTasks[taskId];
+      const updated = { ...checkedTasks, [taskId]: nextChecked };
+      saveTasks(updated);
+
+      if (allChecked) {
+        setStepCompleted(activeStep.id, true);
+
+        // Auto-advance to next step
+        if (nextStep) {
+          setAdvancingStepId(activeStep.id);
+          setTimeout(() => {
+            setActiveStepId(nextStep.id);
+            setSelectedStepId(nextStep.id);
+            setAdvancingStepId(null);
+          }, 550);
+        }
+      } else {
+        if (completedStepIds.includes(activeStep.id)) {
+          setStepCompleted(activeStep.id, false);
+        }
+        setAdvancingStepId(null);
+      }
+    },
+    [checkedTasks, saveTasks, setStepCompleted, activeStep.id, nextStep, completedStepIds]
+  );
+
+  const handleSelectNextStep = useCallback(() => {
+    if (nextStep) {
+      setActiveStepId(nextStep.id);
+      setSelectedStepId(nextStep.id);
+    }
+  }, [nextStep]);
+
+  const handleStartTracking = useCallback(() => {
+    closeTrackerDrawer();
+    startTracking();
+    setIsPanelOpen(false);
+    setShowRightPane(false);
+    setIsTrackingMode(true);
+  }, [closeTrackerDrawer, startTracking]);
+
+  const handleExitTracking = useCallback(() => {
+    setShowRightPane(false);
+    setIsTrackingMode(false);
+  }, []);
+
+  const handleMorphComplete = useCallback(() => {
+    setShowRightPane(true);
+  }, []);
+
+  const handleSelectStepFromCanvas = useCallback(
+    (step: ProcessStep) => {
+      setActiveStepId(step.id);
+      setSelectedStepId(step.id);
+      if (!isTrackingMode) {
+        setIsPanelOpen(true);
+      } else {
+        setShowRightPane(true);
+      }
+    },
+    [isTrackingMode]
+  );
+
   // Escape key listener for panel close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -213,6 +463,22 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     ? completedStepIds.includes(selectedStep.id)
     : false;
 
+  const handleResetProgress = useCallback(() => {
+    resetProgress();
+    setCheckedTasks({});
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {
+      // Ignore
+    }
+    saveRoadmapPreferences(currentProcess.id, {
+      lastActiveStepId: currentProcess.steps[0]?.id,
+      selectedStepId: undefined,
+    });
+    setActiveStepId(currentProcess.steps[0]?.id || '');
+    setSelectedStepId(null);
+  }, [resetProgress, storageKey, currentProcess.id, currentProcess.steps]);
+
   return (
     <div className={styles.mainContainer}>
       <RoadmapHeader
@@ -220,33 +486,112 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
         allProcesses={allProcesses}
         onSelectProcess={handleSelectProcess}
         viewMode={viewMode}
-        onToggleViewMode={setViewMode}
+        onToggleViewMode={(mode) => {
+          setViewMode(mode);
+          setIsTrackingMode(false);
+          setShowRightPane(false);
+        }}
         progressPercent={progressPercent}
         completedCount={completedStepIds.length}
         totalSteps={currentProcess.steps.length}
-        onResetProgress={resetProgress}
+        onResetProgress={handleResetProgress}
         theme={theme}
         onToggleTheme={toggleTheme}
         filters={filters}
         onUpdateFilters={handleUpdateFilters}
         appliedContexts={adaptationResult.appliedContexts}
         isAdapting={isAdapting}
-        isTrackingActive={isTrackingActive}
-        onStartTracking={isTrackingActive ? openTrackerDrawer : startTracking}
-        documentsCount={documents.length}
+        onStartTracking={handleStartTracking}
+        onOpenDocuments={openTrackerDrawer}
       />
+
+      {currentProcess.review && (
+        <section
+          className={`${styles.reviewBanner} ${styles[`reviewBanner_${currentProcess.review.status}`]}`}
+          aria-label="Roadmap verification status"
+        >
+          <div>
+            <strong>
+              {currentProcess.review.status === 'verified'
+                ? 'Reviewed civic guidance'
+                : currentProcess.review.status === 'outdated'
+                  ? 'This roadmap needs an update'
+                  : 'Source-based draft awaiting review'}
+            </strong>
+            <p>
+              {currentProcess.review.status === 'verified'
+                ? `Reviewed by ${currentProcess.review.verifiedBy || 'an authorized reviewer'}.`
+                : 'Check each official source before submitting forms or paying fees.'}
+            </p>
+          </div>
+          {(currentProcess.review.conflicts.length > 0 ||
+            currentProcess.review.missingInformation.length > 0) && (
+            <div className={styles.reviewIssues}>
+              {currentProcess.review.conflicts.length > 0 && (
+                <span>{currentProcess.review.conflicts.length} source conflict(s)</span>
+              )}
+              {currentProcess.review.missingInformation.length > 0 && (
+                <span>{currentProcess.review.missingInformation.length} missing detail(s)</span>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       <main className={styles.contentArea}>
         {viewMode === 'graph' ? (
-          <RoadmapCanvas
-            process={currentProcess}
-            stepStatusMap={stepStatusMap}
-            completedStepIds={completedStepIds}
-            unmetDependenciesMap={unmetDependenciesMap}
-            selectedStepId={selectedStepId}
-            onSelectStep={handleSelectStep}
-            theme={theme}
-          />
+          <>
+            <RoadmapCanvas
+              process={currentProcess}
+              stepStatusMap={stepStatusMap}
+              completedStepIds={completedStepIds}
+              unmetDependenciesMap={unmetDependenciesMap}
+              selectedStepId={activeStep?.id || null}
+              onSelectStep={handleSelectStepFromCanvas}
+              isTrackingMode={isTrackingMode}
+              onMorphComplete={handleMorphComplete}
+              theme={theme}
+            />
+
+            <TrackingWorkspacePane
+              isOpen={isTrackingMode && showRightPane}
+              process={currentProcess}
+              activeStep={activeStep}
+              activeStepIndex={activeStepIndex}
+              totalCount={currentProcess.steps.length}
+              isCompleted={completedStepIds.includes(activeStep.id)}
+              stepStatus={stepStatusMap.get(activeStep.id) || 'pending'}
+              checkedTasks={checkedTasks}
+              onToggleTask={handleToggleTask}
+              onSetStepCompleted={setStepCompleted}
+              onSelectStep={handleSelectStepFromCanvas}
+              onSelectNextStep={handleSelectNextStep}
+              advancingStepId={advancingStepId}
+              nextStep={nextStep}
+              requirementDocumentsMap={requirementDocumentsMap}
+              onUploadDocument={uploadDocument}
+              onRemoveDocument={removeDocument}
+              onDownloadDocument={downloadDoc}
+              onOpenVault={openTrackerDrawer}
+              onClose={() => setShowRightPane(false)}
+            />
+
+            <DetailPanel
+              step={selectedStep}
+              status={selectedStepStatus}
+              isCompleted={isSelectedCompleted}
+              unmetPrereqs={selectedStepUnmet}
+              totalStepsCount={currentProcess.steps.length}
+              isOpen={isPanelOpen && !isTrackingMode}
+              onClose={handleClosePanel}
+              onToggleComplete={toggleStep}
+              requirementDocumentsMap={requirementDocumentsMap}
+              onUploadDocument={uploadDocument}
+              onRemoveDocument={removeDocument}
+              onDownloadDocument={downloadDoc}
+              onOpenVault={openTrackerDrawer}
+            />
+          </>
         ) : (
           <StepListView
             process={currentProcess}
@@ -258,21 +603,37 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
           />
         )}
 
-        <DetailPanel
-          step={selectedStep}
-          status={selectedStepStatus}
-          isCompleted={isSelectedCompleted}
-          unmetPrereqs={selectedStepUnmet}
-          totalStepsCount={currentProcess.steps.length}
-          isOpen={isPanelOpen}
-          onClose={handleClosePanel}
-          onToggleComplete={toggleStep}
-          requirementDocumentsMap={requirementDocumentsMap}
-          onUploadDocument={uploadDocument}
-          onRemoveDocument={removeDocument}
-          onDownloadDocument={downloadDoc}
-          onOpenVault={openTrackerDrawer}
-        />
+        {/* Floating pill-shaped button in bottom middle */}
+        <div className={styles.floatingTrackerContainer}>
+          {isTrackingMode ? (
+            <button
+              type="button"
+              className={`${styles.floatingTrackerBtn} ${styles.floatingTrackerBtnActive}`}
+              onClick={handleExitTracking}
+              id="track-progress-btn"
+              title="Return to full interactive canvas view"
+              aria-label="Return to full canvas view"
+            >
+              <Network size={16} className={styles.floatingTrackerIcon} />
+              <span className={styles.floatingTrackerText}>Back to Full Canvas</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={`${styles.floatingTrackerBtn} ${isTrackingActive ? styles.floatingTrackerBtnActive : ''}`}
+              onClick={handleStartTracking}
+              id="track-progress-btn"
+              title="Track progress, view vertical checklist, and complete steps"
+              aria-label="Track Your Progress"
+            >
+              <FolderCheck size={16} className={styles.floatingTrackerIcon} />
+              <span className={styles.floatingTrackerText}>Track Your Progress</span>
+              <span className={styles.floatingTrackerBadge}>
+                {completedStepIds.length}/{currentProcess.steps.length}
+              </span>
+            </button>
+          )}
+        </div>
       </main>
 
       <DocumentVaultDrawer
@@ -286,7 +647,6 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
         onDownloadDocument={downloadDoc}
         onExportDossier={exportDossier}
         requirementDocumentsMap={requirementDocumentsMap}
-        onToggleStep={toggleStep}
       />
 
       <footer className={styles.bottomDisclaimer} role="contentinfo">

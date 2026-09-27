@@ -12,8 +12,11 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
     "build:frontend": "npm --prefix frontend run build",
+    "typecheck:frontend": "npm --prefix frontend run typecheck",
+    "lint:frontend": "npm --prefix frontend run lint",
     "start:frontend": "npm --prefix frontend run start",
     "start:backend": "npm --prefix backend start",
-    "test:backend": "npm --prefix backend test"
+    "test:backend": "npm --prefix backend test",
+    "postinstall": "node scripts/patch-next.js"
   }
 }

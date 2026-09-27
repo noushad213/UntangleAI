@@ -70,7 +70,6 @@ export function useRoadmapProgress(process: CivicProcess) {
       saveTrackingState(process.id, next);
       return next;
     });
-    setIsTrackerDrawerOpen(true);
   }, [process.id]);
 
   // Stop / pause tracking roadmap
@@ -100,7 +99,7 @@ export function useRoadmapProgress(process: CivicProcess) {
         fileType: file.type || 'application/octet-stream',
         uploadedAt: new Date().toISOString(),
         dataUrl: base64,
-        status: 'verified_locally',
+        status: 'attached_locally',
       };
 
       setTrackingState((prev) => {
@@ -220,6 +219,18 @@ export function useRoadmapProgress(process: CivicProcess) {
     [completedSet, completedStepIds, saveToStorage]
   );
 
+  const setStepCompleted = useCallback(
+    (stepId: string, completed: boolean) => {
+      const isCurrentlyCompleted = completedSet.has(stepId);
+      if (completed && !isCurrentlyCompleted) {
+        saveToStorage([...completedStepIds, stepId]);
+      } else if (!completed && isCurrentlyCompleted) {
+        saveToStorage(completedStepIds.filter((id) => id !== stepId));
+      }
+    },
+    [completedSet, completedStepIds, saveToStorage]
+  );
+
   const resetProgress = useCallback(() => {
     saveToStorage([]);
     const resetVault: RoadmapTrackingState = {
@@ -257,12 +268,16 @@ export function useRoadmapProgress(process: CivicProcess) {
     return map;
   }, [trackingState.documents]);
 
+  const openTrackerDrawer = useCallback(() => setIsTrackerDrawerOpen(true), []);
+  const closeTrackerDrawer = useCallback(() => setIsTrackerDrawerOpen(false), []);
+
   return {
     completedStepIds,
     isLoaded,
     stepStatusMap,
     unmetDependenciesMap,
     toggleStep,
+    setStepCompleted,
     resetProgress,
     progressPercent,
     // Tracking & Document Vault
@@ -277,7 +292,7 @@ export function useRoadmapProgress(process: CivicProcess) {
     stepDocumentsMap,
     requirementDocumentsMap,
     isTrackerDrawerOpen,
-    openTrackerDrawer: () => setIsTrackerDrawerOpen(true),
-    closeTrackerDrawer: () => setIsTrackerDrawerOpen(false),
+    openTrackerDrawer,
+    closeTrackerDrawer,
   };
 }

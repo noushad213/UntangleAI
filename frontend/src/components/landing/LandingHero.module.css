@@ -267,6 +267,13 @@
     justify-content: center;
   }
 
+  .dropdown {
+    width: 100%;
+    max-width: 100%;
+    left: 0;
+    right: 0;
+  }
+
   .ctaLink {
     width: 100%;
     justify-content: center;

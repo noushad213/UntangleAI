@@ -8,7 +8,7 @@ export interface TrackedDocument {
   fileType: string;
   uploadedAt: string;
   dataUrl?: string; // Base64 data URI for offline persistence and preview
-  status?: 'uploaded' | 'verified_locally';
+  status?: 'attached_locally';
   notes?: string;
 }
 

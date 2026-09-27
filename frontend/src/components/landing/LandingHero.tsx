@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   MoreHorizontal,
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { HeroQueryInput } from './HeroQueryInput';
+import { ResumeBanner } from './ResumeBanner';
 import styles from './LandingHero.module.css';
 
 interface LandingHeroProps {
@@ -57,11 +59,13 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
     <section className={styles.heroSection} aria-label="Hero">
       {/* Full-bleed background photo */}
       <div className={styles.bgWrapper}>
-        <img
+        <Image
           src="/images/hero_civic.jpg"
           alt="Aerial view of Kartavya Path and government buildings, New Delhi"
           className={styles.bgImage}
-          loading="eager"
+          fill
+          priority
+          sizes="100vw"
         />
         <div className={styles.bgOverlay} />
       </div>
@@ -72,6 +76,8 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
           <h1 className={styles.headline}>{t.hero.title}</h1>
           <p className={styles.subline}>{t.hero.tagline}</p>
         </div>
+
+        <ResumeBanner />
 
         <HeroQueryInput selectedLang={activeLang} />
 

@@ -22,7 +22,7 @@ function getClient() {
 }
 
 const MODEL =
-  process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
 /**
  * Strips markdown code fences and parses JSON.

@@ -10,6 +10,14 @@ const {
 } = require("../src/services/extraction.service");
 const fs = require("fs/promises");
 const path = require("path");
+const { spawnSync } = require("child_process");
+
+function commandIsAvailable(command) {
+  return !spawnSync(command, ["--version"], { stdio: "ignore" }).error;
+}
+
+const hasTesseract = commandIsAvailable("tesseract");
+const hasLibreOffice = commandIsAvailable("libreoffice");
 
 const SAMPLE_PDF = Buffer.from(
   "JVBERi0xLjQKJcTl8uXrpOAKMSAwIG9iago8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUj4+\nZW5kb2JqCjIgMCBvYmoKPDwvVHlwZSAvUGFnZXMgL0tpZHMgWzMgMCBSXSAvQ291bnQgMT4+\nZW5kb2JqCjMgMCBvYmoKPDwvVHlwZSAvUGFnZSAvUGFyZW50IDIgMCBSIC9NZWRpYUJveCBbMCAwIDMwMCAxNDRdIC9Db250ZW50cyA0IDAgUiA+PgplbmRvYmoKNCAwIG9iago8PC9MZW5ndGggNTQ+PnN0cmVhbQpCVAovRjEgMTIgVGYKMzAgMTAwIFRkCihQcm9wZXJ0eSB0YXggcGF5bWVudCBmb3JtKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCAxCjAwMDAwMDAwMDAgNjU1MzUgZgowMDAwMDAwMDA5IDAwMDAwIG4KMDAwMDAwMDA1OCAwMDAwMCBuCjAwMDAwMDEyMSAwMDAwMCBuCjAwMDAwMDIyMCAwMDAwMCBuCnRyYWlsZXIKPDwvUm9vdCAxIDAgUiAvU2l6ZSA1Pj4Kc3RhcnR4cmVmCjMyNAolJUVPRgo=",
@@ -47,13 +55,13 @@ test("extracts text from a PDF buffer", async () => {
   assert.match(text, /Property tax payment/i);
 });
 
-test("extracts text from a scanned-style image with local OCR", async () => {
+test("extracts text from a scanned-style image with local OCR", { skip: !hasTesseract }, async () => {
   const image = await fs.readFile(path.join(__dirname, "fixtures", "ocr-government-form.png"));
   const text = await extractImageText(image, ".png");
   assert.match(text, /Government Form Application/i);
 });
 
-test("converts an Office-readable HTML document to text with LibreOffice", async () => {
+test("converts an Office-readable HTML document to text with LibreOffice", { skip: !hasLibreOffice }, async () => {
   const text = await extractOfficeText(
     Buffer.from("<html><body><h1>Municipal Permit Application</h1><p>Submit the completed form to the civic office.</p></body></html>"),
     ".html"

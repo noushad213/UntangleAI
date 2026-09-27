@@ -10,8 +10,8 @@ import {
   FileText,
   ShieldCheck,
   CheckCircle2,
-  AlertCircle,
   FileCheck,
+  CalendarClock,
 } from 'lucide-react';
 import { CivicProcess } from '@/types/roadmap';
 import { TrackedDocument, formatFileSize } from '@/lib/document-vault';
@@ -23,12 +23,11 @@ interface DocumentVaultDrawerProps {
   process: CivicProcess;
   completedStepIds: string[];
   documents: TrackedDocument[];
-  onUploadDocument: (file: File, stepId: string, requirementId?: string) => Promise<any>;
+  onUploadDocument: (file: File, stepId: string, requirementId?: string) => Promise<TrackedDocument>;
   onRemoveDocument: (docId: string) => void;
   onDownloadDocument: (docId: string) => void;
   onExportDossier: () => void;
   requirementDocumentsMap: Map<string, TrackedDocument>;
-  onToggleStep: (stepId: string) => void;
 }
 
 export function DocumentVaultDrawer({
@@ -42,13 +41,13 @@ export function DocumentVaultDrawer({
   onDownloadDocument,
   onExportDossier,
   requirementDocumentsMap,
-  onToggleStep,
 }: DocumentVaultDrawerProps) {
   const [activeUploadTarget, setActiveUploadTarget] = useState<{
     stepId: string;
     requirementId?: string;
   } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [activeView, setActiveView] = useState<'checklist' | 'documents'>('checklist');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Extract all requirements from process steps
@@ -86,6 +85,25 @@ export function DocumentVaultDrawer({
   const uploadedMandatoryDocs = allRequirements.filter((r) => r.isMandatory && !!r.document).length;
   const isAllReady = totalMandatoryDocs > 0 && uploadedMandatoryDocs >= totalMandatoryDocs;
 
+  const documentsByStep = React.useMemo(() => {
+    return process.steps
+      .map((step) => ({
+        step,
+        documents: documents
+          .filter((document) => document.stepId === step.id)
+          .sort(
+            (left, right) =>
+              new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime()
+          ),
+      }))
+      .filter((group) => group.documents.length > 0);
+  }, [documents, process.steps]);
+
+  const requirementTitleById = React.useMemo(
+    () => new Map(allRequirements.map((requirement) => [requirement.requirementId, requirement.title])),
+    [allRequirements]
+  );
+
   const handleTriggerUpload = (stepId: string, requirementId?: string) => {
     setActiveUploadTarget({ stepId, requirementId });
     if (fileInputRef.current) {
@@ -101,8 +119,6 @@ export function DocumentVaultDrawer({
     try {
       setIsUploading(true);
       await onUploadDocument(file, activeUploadTarget.stepId, activeUploadTarget.requirementId);
-    } catch (err) {
-      console.error('Document upload error:', err);
     } finally {
       setIsUploading(false);
       setActiveUploadTarget(null);
@@ -137,7 +153,7 @@ export function DocumentVaultDrawer({
           <div className={styles.headerInfo}>
             <h2 id="vault-drawer-title" className={styles.drawerTitle}>
               <FolderCheck size={18} style={{ color: 'var(--color-brand-600)' }} />
-              Application Tracker & Document Vault
+              Documents
             </h2>
             <span className={styles.drawerSubtitle}>
               {process.title} • {process.location}
@@ -185,29 +201,49 @@ export function DocumentVaultDrawer({
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionTitle}>
-              <FileCheck size={16} style={{ color: 'var(--color-brand-500)' }} />
-              Required Document Checklist
-            </span>
-            <div className={styles.actionBtnRow}>
-              <button
-                type="button"
-                className={styles.secondaryActionBtn}
-                onClick={onExportDossier}
-                title="Export application dossier summary in JSON"
-                id="export-dossier-btn"
-              >
-                <Download size={13} />
-                <span>Export Dossier</span>
-              </button>
-            </div>
+          <div className={styles.viewTabs} role="tablist" aria-label="Document views">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeView === 'checklist'}
+              className={`${styles.viewTab} ${activeView === 'checklist' ? styles.viewTabActive : ''}`}
+              onClick={() => setActiveView('checklist')}
+            >
+              <FileCheck size={14} />
+              Checklist
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeView === 'documents'}
+              className={`${styles.viewTab} ${activeView === 'documents' ? styles.viewTabActive : ''}`}
+              onClick={() => setActiveView('documents')}
+            >
+              <FileText size={14} />
+              My documents
+              <span className={styles.tabCount}>{documents.length}</span>
+            </button>
           </div>
 
-          {/* Document list */}
-          <div className={styles.docList}>
-            {allRequirements.map((req) => (
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionTitle}>
+              {activeView === 'checklist' ? 'Required documents' : 'Documents added by step'}
+            </span>
+            <button
+              type="button"
+              className={styles.secondaryActionBtn}
+              onClick={onExportDossier}
+              title="Export application dossier summary in JSON"
+              id="export-dossier-btn"
+            >
+              <Download size={13} />
+              <span>Export</span>
+            </button>
+          </div>
+
+          {activeView === 'checklist' ? (
+            <div className={styles.docList}>
+              {allRequirements.map((req) => (
               <div key={req.requirementId} className={styles.docCard}>
                 <div className={styles.docCardHeader}>
                   <div className={styles.docInfo}>
@@ -269,27 +305,91 @@ export function DocumentVaultDrawer({
                     id={`upload-btn-${req.requirementId}`}
                   >
                     <Upload size={12} />
-                    <span>Upload Document (PDF / Image)</span>
+                    <span>Add Local Copy (PDF / Image)</span>
                   </button>
                 )}
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : documentsByStep.length === 0 ? (
+            <div className={styles.emptyDocuments}>
+              <FolderCheck size={24} />
+              <strong>No documents added yet</strong>
+              <span>Add a file from the checklist or from a roadmap step.</span>
+              <button type="button" onClick={() => setActiveView('checklist')}>
+                Open checklist
+              </button>
+            </div>
+          ) : (
+            <div className={styles.stepGroups}>
+              {documentsByStep.map(({ step, documents: stepDocuments }) => (
+                <section key={step.id} className={styles.stepGroup}>
+                  <div className={styles.stepGroupHeader}>
+                    <span className={styles.stepNumber}>Step {step.stepOrder}</span>
+                    <h3>{step.shortTitle || step.title}</h3>
+                    <span>{stepDocuments.length}</span>
+                  </div>
+                  <div className={styles.uploadedDocumentsList}>
+                    {stepDocuments.map((document) => (
+                      <article key={document.id} className={styles.uploadedDocumentCard}>
+                        <FileText size={18} className={styles.documentTypeIcon} />
+                        <div className={styles.uploadedDocumentInfo}>
+                          <strong title={document.fileName}>{document.fileName}</strong>
+                          <span>
+                            {document.requirementId
+                              ? requirementTitleById.get(document.requirementId) || 'Step document'
+                              : 'Supporting document'}
+                          </span>
+                          <small>
+                            <CalendarClock size={11} />
+                            {new Date(document.uploadedAt).toLocaleString('en-IN', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            })}
+                            {' · '}
+                            {formatFileSize(document.fileSize)}
+                          </small>
+                        </div>
+                        <div className={styles.fileActions}>
+                          <button
+                            type="button"
+                            className={styles.fileActionIconBtn}
+                            onClick={() => onDownloadDocument(document.id)}
+                            aria-label={`Download ${document.fileName}`}
+                          >
+                            <Download size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.fileActionIconBtn} ${styles.fileActionIconBtnDanger}`}
+                            onClick={() => onRemoveDocument(document.id)}
+                            aria-label={`Remove ${document.fileName}`}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )}
 
           {/* Privacy & Sandbox Security Guarantee */}
           <div className={styles.privacyBanner}>
             <ShieldCheck size={16} style={{ color: 'var(--color-brand-600)', flexShrink: 0, marginTop: 2 }} />
             <div>
-              <strong>Zero-Cloud Local Storage:</strong> All uploaded documents and progress tracking
-              data are preserved strictly in your browser&apos;s sandboxed local storage. No documents
-              are uploaded to remote servers without explicit citizen authorization.
+              <strong>Stored on this device:</strong> Files remain in this browser and are not sent to
+              our servers. Browser storage is not encrypted, so do not add identity documents on a
+              shared or public device.
             </div>
           </div>
         </div>
 
         <div className={styles.footer}>
           <span className={styles.footerNote}>
-            {documents.length} document{documents.length === 1 ? '' : 's'} secured locally
+            {documents.length} local document cop{documents.length === 1 ? 'y' : 'ies'}
           </span>
           <button
             type="button"

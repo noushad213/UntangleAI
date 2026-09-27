@@ -4,6 +4,12 @@ const logger = require("../utils/logger");
 
 const TAVILY_URL = "https://api.tavily.com/search";
 
+function getSearchResultLimit(env = process.env) {
+  const configured = Number(env.SOURCE_SEARCH_RESULT_LIMIT);
+  if (!Number.isInteger(configured) || configured < 1) return 10;
+  return Math.min(configured, 10);
+}
+
 /**
  * Builds a focused query. Domain restriction is applied via Tavily's
  * `include_domains`, not by string-stuffing the query.
@@ -31,7 +37,7 @@ async function searchGovernmentSources(issueLabel, municipalityName, allowedDoma
     api_key: process.env.TAVILY_API_KEY,
     query,
     search_depth: "basic",
-    max_results: 5,
+    max_results: getSearchResultLimit(),
   };
   if (allowedDomains.length > 0) {
     body.include_domains = allowedDomains;
@@ -65,4 +71,4 @@ async function searchGovernmentSources(issueLabel, municipalityName, allowedDoma
   }));
 }
 
-module.exports = { searchGovernmentSources };
+module.exports = { searchGovernmentSources, getSearchResultLimit };

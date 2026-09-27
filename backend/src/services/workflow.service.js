@@ -15,8 +15,51 @@ const {
 
 const logger = require("../utils/logger");
 
-const MAX_SOURCES_PER_WORKFLOW = 4;
 const MAX_TOTAL_GEMINI_CHUNKS = 10;
+const DEFAULT_WORKFLOW_FRESHNESS_MS = 7 * 24 * 60 * 60 * 1000;
+
+function getMaxSourcesPerWorkflow(env = process.env) {
+  const configured = Number(env.MAX_SOURCES_PER_WORKFLOW);
+  if (!Number.isInteger(configured) || configured < 1) return 8;
+  return Math.min(configured, 10);
+}
+
+function matchCatalogIssue(query, issueCatalog = []) {
+  if (typeof query !== "string" || !Array.isArray(issueCatalog)) return null;
+
+  const normalizedQuery = query.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  if (!normalizedQuery) return null;
+
+  const match = issueCatalog.find((issue) => {
+    const phrases = [issue.label, ...(Array.isArray(issue.keywords) ? issue.keywords : [])]
+      .filter((value) => typeof value === "string")
+      .map((value) => value.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim())
+      .filter((value) => value.length >= 4);
+
+    return phrases.some((phrase) => normalizedQuery.includes(phrase));
+  });
+
+  if (!match) return null;
+
+  return {
+    issueKey: match.issueKey,
+    intent: match.label,
+    keywords: Array.isArray(match.keywords) ? match.keywords : [],
+    confidence: 1,
+    classifier: "catalog",
+  };
+}
+
+function isWorkflowFresh(
+  workflow,
+  freshnessMs = Number(process.env.WORKFLOW_FRESHNESS_MS) || DEFAULT_WORKFLOW_FRESHNESS_MS,
+  now = new Date()
+) {
+  const checkedAt = workflow?.lastRecheckedAt || workflow?.updatedAt;
+  if (!checkedAt) return false;
+  const checkedTime = new Date(checkedAt).getTime();
+  return Number.isFinite(checkedTime) && now.getTime() - checkedTime <= freshnessMs;
+}
 
 /**
  * Returns an existing workflow for municipality + issueKey.
@@ -119,6 +162,7 @@ async function resolveWorkflowForQuery(
    * New civic issues are allowed.
    */
   const classification =
+    matchCatalogIssue(rawQuery, municipality.issueCatalog || []) ||
     await aiService.classifyIntent(
       rawQuery,
       municipality.name,
@@ -211,7 +255,8 @@ async function resolveWorkflowForQuery(
 
     if (
       cached &&
-      cached.status !== "outdated"
+      cached.status !== "outdated" &&
+      isWorkflowFresh(cached)
     ) {
       logger.info(
         "Workflow cache hit",
@@ -236,6 +281,11 @@ async function resolveWorkflowForQuery(
         fromCache:
           true,
       };
+    }
+
+    if (cached && cached.status !== "outdated") {
+      cached.status = "outdated";
+      await cached.save();
     }
 
     logger.info(
@@ -323,6 +373,7 @@ async function buildWorkflowFromScratch(
    */
   const sourceDocs = [];
   const processedUrls = new Set();
+  const maxSources = getMaxSourcesPerWorkflow();
 
   async function collectSources(
     searchQuery
@@ -367,6 +418,7 @@ async function buildWorkflowFromScratch(
       const candidate of
         candidates
     ) {
+      if (sourceDocs.length >= maxSources) break;
       if (
         !candidate ||
         typeof candidate.url !==
@@ -1247,6 +1299,12 @@ function toGraphJson(
     title:
       workflow.title,
 
+    municipalityId:
+      String(workflow.municipalityId),
+
+    issueKey:
+      workflow.issueKey,
+
     status:
       workflow.status,
 
@@ -1282,7 +1340,7 @@ function toGraphJson(
               s.officialUrl,
 
             sourceIds:
-              s.sourceIds,
+              (s.sourceIds || []).map((sourceId) => String(sourceId)),
 
             isUncertain:
               s.isUncertain,
@@ -1318,6 +1376,18 @@ function toGraphJson(
 
     missingInformation:
       workflow.missingInformation,
+
+    verifiedBy:
+      workflow.verifiedBy || null,
+
+    verifiedAt:
+      workflow.verifiedAt ? new Date(workflow.verifiedAt).toISOString() : null,
+
+    lastRecheckedAt:
+      workflow.lastRecheckedAt ? new Date(workflow.lastRecheckedAt).toISOString() : null,
+
+    updatedAt:
+      workflow.updatedAt ? new Date(workflow.updatedAt).toISOString() : null,
   };
 }
 
@@ -1327,4 +1397,7 @@ module.exports = {
   getCachedWorkflow,
   markWorkflowVerified,
   toGraphJson,
+  isWorkflowFresh,
+  getMaxSourcesPerWorkflow,
+  matchCatalogIssue,
 };

@@ -9,7 +9,6 @@ import {
   ChevronRight,
   Mic,
   MicOff,
-  Paperclip,
   FileText,
   AlertCircle,
   Square,
@@ -151,15 +150,6 @@ export const ALL_QUERY_EXAMPLES: QueryExample[] = [
   },
 ];
 
-const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'webp'];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 interface HeroQueryInputProps {
   selectedLang?: string;
 }
@@ -189,13 +179,11 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
   const [interimTranscript, setInterimTranscript] = useState('');
   const [audioBars, setAudioBars] = useState<number[]>([15, 25, 40, 25, 15]);
 
-  const [attachedFile, setAttachedFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Speech and Audio analysis refs
   const recognitionRef = useRef<any>(null);
@@ -312,92 +300,8 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
   const handleSelectResult = (resultId: string) => {
     setIsOpen(false);
     startTransition(() => {
-      const docParam = attachedFile ? `?doc=${encodeURIComponent(attachedFile.name)}` : '';
-      router.push(`/roadmap/${resultId}${docParam}`);
+      router.push(`/roadmap/${resultId}`);
     });
-  };
-
-  const handleDocumentProcess = useCallback((file: File) => {
-    if (file.size > MAX_FILE_SIZE) {
-      setFeedback({ text: t.search.fileLimitError, type: 'error' });
-      return;
-    }
-
-    const ext = file.name.split('.').pop()?.toLowerCase() || '';
-    if (!ALLOWED_EXTENSIONS.includes(ext)) {
-      setFeedback({ text: t.search.fileFormatError, type: 'error' });
-      return;
-    }
-
-    setAttachedFile(file);
-    setFeedback({
-      text: `${file.name} attached (${formatFileSize(file.size)})`,
-      type: 'info',
-    });
-
-    setTimeout(() => {
-      setFeedback((prev) => (prev?.type === 'info' ? null : prev));
-    }, 3000);
-
-    // Smart civic intent extraction from filename
-    const nameLower = file.name.toLowerCase();
-    if (!query.trim()) {
-      if (nameLower.includes('food') || nameLower.includes('restaurant') || nameLower.includes('fssai') || nameLower.includes('kitchen') || nameLower.includes('dhaba') || nameLower.includes('cafe')) {
-        setQuery(`FSSAI food license for ${file.name}`);
-      } else if (nameLower.includes('driving') || nameLower.includes('license') || nameLower.includes('dl') || nameLower.includes('sarathi') || nameLower.includes('vehicle')) {
-        setQuery(`Driving license verification for ${file.name}`);
-      } else if (nameLower.includes('company') || nameLower.includes('pvt') || nameLower.includes('mca') || nameLower.includes('spice') || nameLower.includes('moa') || nameLower.includes('aoa')) {
-        setQuery(`Company registration documentation for ${file.name}`);
-      } else if (nameLower.includes('awas') || nameLower.includes('pmay') || nameLower.includes('housing') || nameLower.includes('makaan') || nameLower.includes('patta') || nameLower.includes('land_site')) {
-        setQuery(`PMAY housing grant verification for ${file.name}`);
-      } else if (nameLower.includes('kisan') || nameLower.includes('farmer') || nameLower.includes('bhulekh') || nameLower.includes('khasra') || nameLower.includes('7_12') || nameLower.includes('ror')) {
-        setQuery(`PM-Kisan farmer land verification for ${file.name}`);
-      } else if (nameLower.includes('ayushman') || nameLower.includes('health') || nameLower.includes('hospital') || nameLower.includes('pmjay') || nameLower.includes('abha') || nameLower.includes('medical')) {
-        setQuery(`Ayushman Bharat health card documentation for ${file.name}`);
-      } else if (nameLower.includes('sukanya') || nameLower.includes('ssy') || nameLower.includes('birth') || nameLower.includes('80c') || nameLower.includes('saving') || nameLower.includes('passbook')) {
-        setQuery(`Sukanya Samriddhi tax deduction documentation for ${file.name}`);
-      } else if (nameLower.includes('scholarship') || nameLower.includes('nsp') || nameLower.includes('marksheet') || nameLower.includes('bonafide') || nameLower.includes('student') || nameLower.includes('college')) {
-        setQuery(`NSP college scholarship application for ${file.name}`);
-      } else if (nameLower.includes('rent') || nameLower.includes('electricity') || nameLower.includes('bill') || nameLower.includes('aadhaar') || nameLower.includes('pan') || nameLower.includes('utility')) {
-        setQuery(`Address and ID proof verification for ${file.name}`);
-      } else {
-        setQuery(`Check requirements for ${file.name}`);
-      }
-    }
-  }, [query, t.search.fileLimitError, t.search.fileFormatError]);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleDocumentProcess(e.target.files[0]);
-    }
-  };
-
-  const handleRemoveFile = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setAttachedFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    setFeedback(null);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleDocumentProcess(e.dataTransfer.files[0]);
-    }
   };
 
   // Start real Audio visualizer using Web Audio API
@@ -577,7 +481,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isListening) {
@@ -590,124 +494,50 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       return;
     }
 
-    const effectiveQuery = query.trim() || (attachedFile ? attachedFile.name : '');
+    const effectiveQuery = query.trim();
 
     if (!effectiveQuery) {
       inputRef.current?.focus();
       return;
     }
 
-    const qLower = effectiveQuery.toLowerCase();
-    const docQueryParam = attachedFile ? `&doc=${encodeURIComponent(attachedFile.name)}` : '';
     setIsOpen(false);
+    setIsGenerating(true);
+    setFeedback({ text: 'Checking official sources and building your roadmap…', type: 'info' });
 
-    startTransition(() => {
-      if (
-        qLower.includes('restaurant') ||
-        qLower.includes('resturant') ||
-        qLower.includes('food') ||
-        qLower.includes('kholna') ||
-        qLower.includes('fssai') ||
-        qLower.includes('रेस्टोरेंट') ||
-        qLower.includes('ریسٹورنٹ') ||
-        qLower.includes('உணவகம்') ||
-        qLower.includes('রেস্তোরাঁ')
-      ) {
-        router.push(`/roadmap/fssai-food-license${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
-      } else if (
-        qLower.includes('driving') ||
-        qLower.includes('license') ||
-        qLower.includes('licence') ||
-        qLower.includes('sarathi') ||
-        qLower.includes('ड्राइविंग') ||
-        qLower.includes('ڈرائیونگ') ||
-        qLower.includes('ஓட்டுநர்') ||
-        qLower.includes('ড্রাইভিং')
-      ) {
-        router.push(`/roadmap/driving-license-delhi${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
-      } else if (
-        qLower.includes('awas') ||
-        qLower.includes('pmay') ||
-        qLower.includes('housing') ||
-        qLower.includes('makaan') ||
-        qLower.includes('ghar') ||
-        qLower.includes('property') ||
-        qLower.includes('आवास') ||
-        qLower.includes('مکان') ||
-        qLower.includes('வீடு') ||
-        qLower.includes('আবাস')
-      ) {
-        router.push(`/roadmap/pmay-housing${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
-      } else if (
-        qLower.includes('kisan') ||
-        qLower.includes('farmer') ||
-        qLower.includes('kheti') ||
-        qLower.includes('fasal') ||
-        qLower.includes('agriculture') ||
-        qLower.includes('किसान') ||
-        qLower.includes('کسان') ||
-        qLower.includes('விவசாயி') ||
-        qLower.includes('কৃষক')
-      ) {
-        router.push(`/roadmap/pm-kisan-welfare${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
-      } else if (
-        qLower.includes('ayushman') ||
-        qLower.includes('health') ||
-        qLower.includes('hospital') ||
-        qLower.includes('pmjay') ||
-        qLower.includes('abha') ||
-        qLower.includes('ilaj') ||
-        qLower.includes('आयुष्मान') ||
-        qLower.includes('स्वास्थ्य') ||
-        qLower.includes('صحت') ||
-        qLower.includes('சுகாதாரம்') ||
-        qLower.includes('আয়ুষ্মান')
-      ) {
-        router.push(`/roadmap/ayushman-bharat${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
-      } else if (
-        qLower.includes('sukanya') ||
-        qLower.includes('samriddhi') ||
-        qLower.includes('tax') ||
-        qLower.includes('80c') ||
-        qLower.includes('savings') ||
-        qLower.includes('beti') ||
-        qLower.includes('सुकन्या') ||
-        qLower.includes('बचत') ||
-        qLower.includes('ٹیکس') ||
-        qLower.includes('சேமிப்பு') ||
-        qLower.includes('সুকন্যা')
-      ) {
-        router.push(`/roadmap/sukanya-samriddhi${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
-      } else if (
-        qLower.includes('scholarship') ||
-        qLower.includes('nsp') ||
-        qLower.includes('student') ||
-        qLower.includes('college') ||
-        qLower.includes('vidyalaxmi') ||
-        qLower.includes('education') ||
-        qLower.includes('shiksha') ||
-        qLower.includes('padhai') ||
-        qLower.includes('छात्रवृत्ति') ||
-        qLower.includes('وظیفہ') ||
-        qLower.includes('கல்வி') ||
-        qLower.includes('বৃত্তি')
-      ) {
-        router.push(`/roadmap/nsp-scholarship${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
-      } else if (
-        qLower.includes('company') ||
-        qLower.includes('pvt') ||
-        qLower.includes('mca') ||
-        qLower.includes('startup') ||
-        qLower.includes('कंपनी') ||
-        qLower.includes('کمپنی') ||
-        qLower.includes('நிறுவனம்') ||
-        qLower.includes('কোম্পানি')
-      ) {
-        router.push(`/roadmap/pvt-ltd-delhi${docQueryParam ? `?${docQueryParam.slice(1)}` : ''}`);
-      } else {
-        router.push(`/roadmap/pvt-ltd-delhi?query=${encodeURIComponent(effectiveQuery)}${docQueryParam}`);
+    try {
+      const municipalitySlug =
+        process.env.NEXT_PUBLIC_DEFAULT_MUNICIPALITY_SLUG || 'pune';
+      const response = await fetch('/api/v1/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: effectiveQuery,
+          municipalitySlug,
+        }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok || !payload.workflow?.id) {
+        throw new Error(payload.error?.message || 'We could not build a reliable roadmap for that task.');
       }
-    });
+
+      startTransition(() => {
+        router.push(
+          `/roadmap/${encodeURIComponent(payload.workflow.id)}?generated=1&location=${encodeURIComponent(municipalitySlug)}`
+        );
+      });
+    } catch (error) {
+      setFeedback({
+        text:
+          error instanceof Error
+            ? error.message
+            : 'We could not build this roadmap. Try a more specific task.',
+        type: 'error',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -732,8 +562,6 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       stopRecognition();
     }
     setQuery('');
-    setAttachedFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
     setIsOpen(false);
     setActiveIndex(-1);
     setFeedback(null);
@@ -741,7 +569,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
   };
 
   const hasTyped = query.trim().length > 0;
-  const hasActionableInput = hasTyped || attachedFile !== null;
+  const hasActionableInput = hasTyped;
 
   // Determine text direction for Arabic/Urdu
   const isCurrentRtl =
@@ -754,36 +582,12 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
     <div className={styles.searchWrapper} ref={wrapperRef}>
       <form
         className={`${styles.searchBar} ${hasActionableInput ? styles.searchBarWithActions : ''} ${
-          isDragging ? styles.searchBarDragging : ''
-        } ${isListening ? styles.searchBarListening : ''}`}
+          isListening ? styles.searchBarListening : ''
+        }`}
         onSubmit={handleSubmit}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
         role="search"
       >
         <Search size={22} className={styles.searchIcon} />
-
-        {/* Attached Document Pill */}
-        {attachedFile && (
-          <div
-            className={styles.attachedDocPill}
-            title={`${attachedFile.name} (${formatFileSize(attachedFile.size)})`}
-          >
-            <FileText size={13} className={styles.attachedDocIcon} />
-            <span className={styles.attachedDocName}>{attachedFile.name}</span>
-            <span className={styles.attachedDocSize}>{formatFileSize(attachedFile.size)}</span>
-            <button
-              type="button"
-              className={styles.attachedDocRemove}
-              onClick={handleRemoveFile}
-              title={t.search.removeDoc}
-              aria-label={t.search.removeDoc}
-            >
-              <X size={11} />
-            </button>
-          </div>
-        )}
 
         <input
           ref={inputRef}
@@ -813,26 +617,6 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
             </button>
           )}
 
-          {/* Document Upload Button */}
-          <button
-            type="button"
-            className={`${styles.toolBtn} ${attachedFile ? styles.toolBtnActive : ''}`}
-            onClick={() => fileInputRef.current?.click()}
-            title={t.search.uploadDoc}
-            aria-label={t.search.uploadDoc}
-            id="hero-doc-upload-btn"
-          >
-            <Paperclip size={18} />
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            style={{ display: 'none' }}
-            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/jpeg,image/png,image/webp"
-            onChange={handleFileChange}
-            id="hero-file-upload-input"
-          />
-
           {/* Voice Input Button */}
           <button
             type="button"
@@ -859,8 +643,11 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
               className={styles.submitBtn}
               id="hero-query-submit-btn"
               aria-label={t.search.searchBtnAria}
+              disabled={isGenerating}
             >
-              <span className={styles.submitBtnText}>{t.search.submitBtn}</span>
+              <span className={styles.submitBtnText}>
+                {isGenerating ? 'Building roadmap…' : t.search.submitBtn}
+              </span>
               <ArrowRight size={15} />
             </button>
           )}

@@ -8,12 +8,13 @@ const municipalityRoutes = require("./routes/municipality.routes");
 const workflowRoutes = require("./routes/workflow.routes");
 const queryRoutes = require("./routes/query.routes");
 const { notFoundHandler, errorHandler } = require("./utils/errorHandler");
+const { createCorsOptions } = require("./middleware/security");
 
 function createApp() {
   const app = express();
 
   app.use(helmet());
-  app.use(cors());
+  app.use(cors(createCorsOptions()));
   app.use(express.json({ limit: "200kb" }));
   app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 

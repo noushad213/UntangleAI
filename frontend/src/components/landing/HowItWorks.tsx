@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Compass, FileCheck, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -25,11 +26,12 @@ export function HowItWorks() {
           <div className={styles.rowOne}>
             <div className={styles.cardPeriwinkle}>
               <div className={styles.cardImageWrapper}>
-                <img
+                <Image
                   src="/images/card_official_docs.jpg"
                   alt="Government office desk with official forms, stamps, and a laptop"
                   className={styles.cardImage}
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 44vw"
                 />
               </div>
 
@@ -98,11 +100,12 @@ export function HowItWorks() {
               </div>
 
               <div className={styles.cardImageWrapper}>
-                <img
+                <Image
                   src="/images/card_citizen_service.jpg"
                   alt="Person working on government forms at a modern workspace"
                   className={styles.cardImage}
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 44vw"
                 />
               </div>
             </div>

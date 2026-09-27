@@ -180,6 +180,18 @@
   text-decoration: none !important;
 }
 
+.ctaBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: var(--color-brand-600);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
 /* Mobile toggle */
 .mobileMenuToggle {
   display: none;
@@ -251,6 +263,7 @@
   top: calc(100% + 6px);
   right: 0;
   min-width: 170px;
+  max-width: min(220px, calc(100vw - 24px));
   background: rgba(15, 23, 42, 0.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -263,6 +276,7 @@
   flex-direction: column;
   gap: 1px;
   animation: dropIn 0.15s ease forwards;
+  box-sizing: border-box;
 }
 
 @keyframes dropIn {

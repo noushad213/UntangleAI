@@ -82,8 +82,18 @@ function StepNodeComponent({ data, selected }: NodeProps) {
 
       {/* React Flow Left Handle (Incoming Dependency) */}
       <Handle
+        id="target-left"
         type="target"
         position={Position.Left}
+        className={styles.handle}
+        isConnectable={false}
+      />
+
+      {/* React Flow Top Handle (Incoming Dependency in Vertical Mode) */}
+      <Handle
+        id="target-top"
+        type="target"
+        position={Position.Top}
         className={styles.handle}
         isConnectable={false}
       />
@@ -131,8 +141,18 @@ function StepNodeComponent({ data, selected }: NodeProps) {
 
       {/* React Flow Right Handle (Outgoing Dependency) */}
       <Handle
+        id="source-right"
         type="source"
         position={Position.Right}
+        className={styles.handle}
+        isConnectable={false}
+      />
+
+      {/* React Flow Bottom Handle (Outgoing Dependency in Vertical Mode) */}
+      <Handle
+        id="source-bottom"
+        type="source"
+        position={Position.Bottom}
         className={styles.handle}
         isConnectable={false}
       />

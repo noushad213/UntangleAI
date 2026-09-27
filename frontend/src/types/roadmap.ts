@@ -53,4 +53,12 @@ export interface CivicProcess {
   lastUpdated: string;
   steps: ProcessStep[];
   dependencies: StepDependency[];
+  review?: {
+    status: 'needs_review' | 'verified' | 'outdated';
+    conflicts: string[];
+    missingInformation: string[];
+    verifiedBy?: string;
+    verifiedAt?: string;
+    lastCheckedAt?: string;
+  };
 }

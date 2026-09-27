@@ -14,6 +14,9 @@ class AppError extends Error {
 
 const Codes = {
   INVALID_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  RATE_LIMITED: 429,
   MUNICIPALITY_NOT_FOUND: 404,
   ISSUE_NOT_RECOGNIZED: 404,
   SEARCH_FAILED: 502,
@@ -26,6 +29,7 @@ const Codes = {
   DATABASE_ERROR: 500,
   NOT_FOUND: 404,
   INTERNAL_ERROR: 500,
+  SERVICE_UNAVAILABLE: 503,
 };
 
 function makeError(code, message, details) {
