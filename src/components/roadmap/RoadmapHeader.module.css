@@ -209,3 +209,134 @@
     width: 100%;
   }
 }
+
+.langWrapper {
+  position: relative;
+}
+
+.langBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+  font-size: var(--type-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.langBtn:hover {
+  background: var(--color-surface-tertiary);
+  color: var(--color-text-primary);
+}
+
+.caret {
+  transition: transform var(--duration-fast) ease;
+}
+
+.caretOpen {
+  transform: rotate(180deg);
+}
+
+.langDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 170px;
+  z-index: 50;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdownHeader {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+  padding: 6px 8px 4px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  margin-bottom: 2px;
+}
+
+.langOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  font-size: var(--type-xs);
+  cursor: pointer;
+  width: 100%;
+  color: var(--color-text-secondary);
+  transition: all var(--duration-fast) ease;
+}
+
+.langOption:hover {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+}
+
+.langOptionActive {
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-600);
+  font-weight: 700;
+}
+
+.langNative {
+  font-weight: 600;
+}
+
+.langEnglish {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.shareWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.copyToast {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-success-500);
+  color: var(--color-text-primary);
+  font-size: var(--type-xs);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+  z-index: 50;
+  animation: toastFadeIn 0.2s ease;
+  pointer-events: none;
+}
+
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
