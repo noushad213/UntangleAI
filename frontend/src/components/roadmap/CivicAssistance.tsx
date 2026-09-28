@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { ProcessStep } from '@/types/roadmap';
-import { buildCoverLetter, getCivicHelpline, safeWebUrl } from '@/lib/civic-assistance';
+import { buildCoverLetter, getCivicHelpline, safeWebUrl, buildOfficeMapUrls } from '@/lib/civic-assistance';
 import styles from './CivicAssistance.module.css';
 
 interface Props { step: ProcessStep; location: string }
@@ -10,6 +10,9 @@ interface OfficeMatch { name: string; address: string; coordinates: { lat: numbe
 
 export function CivicAssistance({ step, location }: Props) {
   const [query, setQuery] = useState([step.office, step.officeLocation || location].filter(Boolean).join(', ').slice(0, 300));
+  const [mapQuery, setMapQuery] = useState(query);
+  const [mapOpen, setMapOpen] = useState(false);
+  const [selectedOffice, setSelectedOffice] = useState<OfficeMatch | null>(null);
   const [city, setCity] = useState('');
   const [matches, setMatches] = useState<OfficeMatch[] | null>(null);
   const [error, setError] = useState('');
@@ -18,10 +21,13 @@ export function CivicAssistance({ step, location }: Props) {
   const requestId = useRef(0);
   const helpline = getCivicHelpline(city);
   const sourceUrl = safeWebUrl(step.sourceUrl);
+  const mapUrls = buildOfficeMapUrls(mapQuery, selectedOffice?.coordinates);
 
   async function lookup(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const id = ++requestId.current;
+    setMapQuery(query.trim());
+    setSelectedOffice(null);
     setBusy(true); setError(''); setMatches(null);
     try {
       const response = await fetch('/api/v1/offices', {
@@ -32,8 +38,9 @@ export function CivicAssistance({ step, location }: Props) {
       if (id !== requestId.current) return;
       if (!response.ok) throw new Error(payload.error?.message || 'Office lookup failed. Try again.');
       setMatches(payload.matches);
-    } catch (cause) {
-      if (id === requestId.current) setError(cause instanceof Error ? cause.message : 'Office lookup failed. Try again.');
+      setSelectedOffice(payload.matches?.[0] || null);
+    } catch {
+      if (id === requestId.current) setError('Exact office lookup is unavailable. Showing the address on the map.');
     } finally { if (id === requestId.current) setBusy(false); }
   }
 
@@ -54,21 +61,37 @@ export function CivicAssistance({ step, location }: Props) {
 
   return (
     <section className={styles.assistance} aria-label="Forms, office maps and helplines" lang="en" dir="ltr">
-      <details>
+      <details onToggle={(event) => setMapOpen(event.currentTarget.open)}>
         <summary>Find the service office</summary>
         <form onSubmit={lookup} className={styles.form}>
           <label htmlFor="office-query">Office name and city</label>
           <input id="office-query" value={query} maxLength={300} required onChange={(event) => {
             setQuery(event.target.value); ++requestId.current; setBusy(false); setMatches(null); setError('');
           }} aria-describedby="office-privacy" />
-          <p id="office-privacy">Search public office details only. This lookup sends your search to OpenStreetMap.</p>
+          <p id="office-privacy">The office name and address are sent to Google Maps and OpenStreetMap to show the location.</p>
           <button type="submit" disabled={busy}>{busy ? 'Finding offices…' : 'Find office on map'}</button>
         </form>
+        {mapOpen && mapUrls && (
+          <div className={styles.officeMap}>
+            <iframe
+              key={mapUrls.embedUrl}
+              src={mapUrls.embedUrl}
+              title={`Map of ${selectedOffice?.name || mapQuery}`}
+              className={styles.mapFrame}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+            />
+            <p>{selectedOffice?.address || mapQuery}</p>
+            <a href={mapUrls.directionsUrl} target="_blank" rel="noopener noreferrer">Open directions in Google Maps</a>
+          </div>
+        )}
         {error && <p role="alert">{error}</p>}
         {matches && <div role="status">
-          <p>{matches.length ? 'Map matches. Confirm the office serves your area before visiting.' : 'No office match found. Add the office address or check the official service page.'}</p>
+          <p>{matches.length ? 'Office matches. Choose the office to show on the map.' : 'Showing an address search. You can refine the office name and address above.'}</p>
           {matches.map((office) => <p key={`${office.coordinates.lat},${office.coordinates.lng}`}>
             <strong>{office.name}</strong><br />{office.address}<br />
+            <button type="button" className={styles.mapMatchButton} onClick={() => setSelectedOffice(office)}>Show this office on map</button>{' '}
             <a href={safeWebUrl(office.navigationUrl)} target="_blank" rel="noopener noreferrer">Open directions</a>
           </p>)}
           <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>

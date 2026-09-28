@@ -2,6 +2,20 @@ import { ProcessStep } from '@/types/roadmap';
 
 export interface ApplicantDetails { name: string; address: string; phone: string }
 
+export function buildOfficeMapUrls(address: string, coordinates?: { lat: number; lng: number }) {
+  const trimmed = address.trim();
+  if (!trimmed) return null;
+  const validCoordinates = coordinates && Number.isFinite(coordinates.lat) && Number.isFinite(coordinates.lng)
+    && Math.abs(coordinates.lat) <= 90 && Math.abs(coordinates.lng) <= 180;
+  const target = validCoordinates ? `${coordinates.lat},${coordinates.lng}` : trimmed;
+  const embedParams = new URLSearchParams({ q: target, output: 'embed', z: '16' });
+  const directionsParams = new URLSearchParams({ api: '1', destination: target });
+  return {
+    embedUrl: `https://www.google.com/maps?${embedParams}`,
+    directionsUrl: `https://www.google.com/maps/dir/?${directionsParams}`,
+  };
+}
+
 export function safeWebUrl(value?: string): string | undefined {
   try {
     const url = new URL(value || '');
