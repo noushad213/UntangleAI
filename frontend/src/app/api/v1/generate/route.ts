@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         requestId,
         code: insufficientEvidence ? 'NO_RELIABLE_SOURCES' : code,
         message: insufficientEvidence
-          ? 'We could not find enough official instructions for this task in your city. Try a more specific task or browse the sample roadmaps.'
+          ? 'We understood your task, but could not retrieve enough official instructions to build a roadmap. Please try again or browse the sample roadmaps.'
           : response.status === 504
             ? 'The roadmap service took too long to respond. Please try again.'
           : response.status >= 500

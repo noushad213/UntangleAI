@@ -18,7 +18,7 @@ import {
 import { useLanguage } from '@/context/LanguageContext';
 import { SearchResult } from '@/app/api/v1/search/route';
 import styles from './HeroQueryInput.module.css';
-import { getPromptAlert, UNSUPPORTED_LOCATION_MESSAGE } from '@/lib/prompt-guardrails';
+import { getPromptAlert, resolvePromptMunicipality, UNSUPPORTED_LOCATION_MESSAGE } from '@/lib/prompt-guardrails';
 import { generateRoadmap } from '@/lib/generate-roadmap';
 
 export interface QueryExample {
@@ -195,9 +195,12 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       const response = await fetch('/api/v1/municipalities');
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error);
-      setMunicipalities(payload.municipalities || []);
+      const cities: Array<{ slug: string; name: string }> = payload.municipalities || [];
+      setMunicipalities(cities);
+      return cities;
     } catch {
       setFeedback({ text: 'City list is unavailable. Retry loading cities shortly.', type: 'error' });
+      return null;
     }
   };
 
@@ -522,7 +525,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       return;
     }
 
-    const alert = getPromptAlert(effectiveQuery, municipalitySlug || undefined);
+    const alert = getPromptAlert(effectiveQuery);
     setPromptAlert(alert);
     if (alert) {
       setIsOpen(false);
@@ -531,26 +534,39 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       return;
     }
 
-    if (!municipalitySlug) {
-      setNeedsLocation(true);
-      setIsOpen(false);
-      setFeedback({ text: 'Choose the city where you need this service. We use its official sources.', type: 'info' });
-      await loadMunicipalities();
-      return;
-    }
-
     setIsOpen(false);
     setIsGenerating(true);
-    setFeedback({ text: 'Checking official sources and building your roadmap…', type: 'info' });
 
     try {
-      const workflowId = await generateRoadmap({ query: effectiveQuery, municipalitySlug }, () => {
+      const cities = municipalities.length ? municipalities : await loadMunicipalities();
+      if (!cities) {
+        setNeedsLocation(true);
+        return;
+      }
+      const selectedCity = resolvePromptMunicipality(effectiveQuery, cities) || municipalitySlug;
+      if (!selectedCity) {
+        setNeedsLocation(true);
+        setFeedback({ text: 'Choose the city where you need this service. We use its official sources.', type: 'info' });
+        return;
+      }
+      const cityAlert = getPromptAlert(effectiveQuery, selectedCity);
+      if (cityAlert) {
+        setPromptAlert(cityAlert);
+        setNeedsLocation(true);
+        setFeedback(null);
+        return;
+      }
+      setMunicipalitySlug(selectedCity);
+      setNeedsLocation(false);
+      const cityName = cities.find((city) => city.slug === selectedCity)?.name || selectedCity;
+      setFeedback({ text: `Checking official sources for ${cityName} and building your roadmap…`, type: 'info' });
+      const workflowId = await generateRoadmap({ query: effectiveQuery, municipalitySlug: selectedCity }, () => {
         setFeedback({ text: 'Retrying your roadmap request…', type: 'info' });
       });
 
       startTransition(() => {
         router.push(
-          `/roadmap/${encodeURIComponent(workflowId)}?generated=1&location=${encodeURIComponent(municipalitySlug)}`
+          `/roadmap/${encodeURIComponent(workflowId)}?generated=1&location=${encodeURIComponent(selectedCity)}`
         );
       });
     } catch (error) {

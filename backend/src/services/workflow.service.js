@@ -629,12 +629,25 @@ async function buildWorkflowFromScratch(
     primarySearchQuery
   );
 
+  // Search results can be empty or unreadable even when the intent is clear.
+  // Try concise procedural queries before declaring that evidence is unavailable.
+  if (sourceDocs.length === 0) {
+    const recoveryQueries = [
+      `${issue.label} application form required documents ${municipality.name}`,
+      `${issue.label} license permit procedure ${municipality.name}`,
+    ];
+    for (const recoveryQuery of recoveryQueries) {
+      await collectSources(recoveryQuery);
+      if (sourceDocs.length > 0) break;
+    }
+  }
+
   if (
     sourceDocs.length === 0
   ) {
     throw makeError(
       "NO_RELIABLE_SOURCES",
-      "No candidate sources found for this issue"
+      "No readable official sources could be collected after targeted searches"
     );
   }
 

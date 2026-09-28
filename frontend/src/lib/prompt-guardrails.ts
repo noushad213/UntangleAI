@@ -27,6 +27,34 @@ const FILLER_WORDS = new Set([
 
 const NON_WORD_CHARACTERS = new RegExp('[^\\p{L}\\p{M}\\p{N}\\s]', 'gu');
 
+const CITY_ALIASES: Record<string, string[]> = {
+  mumbai: ['मुंबई'], pune: ['पुणे'], nagpur: ['नागपुर', 'नागपूर'],
+  nashik: ['नाशिक'], 'navi-mumbai': ['Navi Mumbai', 'नवी मुंबई'],
+};
+
+export function resolvePromptMunicipality(
+  query: string,
+  municipalities: Array<{ slug: string; name: string }>
+): string | null {
+  const normalize = (value: string) => value.toLowerCase().replace(NON_WORD_CHARACTERS, ' ').replace(/\s+/g, ' ').trim();
+  const text = ` ${normalize(query)} `;
+  const names = new Map(Object.entries(CITY_NAMES));
+  names.set('navi-mumbai', 'Navi Mumbai');
+  for (const city of municipalities) names.set(city.slug, city.name);
+  const matches = Array.from(names).flatMap(([slug, name]) =>
+    [name, slug.replace(/-/g, ' '), ...(CITY_ALIASES[slug] || [])]
+      .map(normalize)
+      .filter((alias) => alias && text.includes(` ${alias} `))
+      .map((alias) => ({ slug, alias }))
+  );
+  // A longer city name takes precedence over a name contained inside it.
+  const slugs = new Set(matches.filter((match) => !matches.some((other) =>
+    other.slug !== match.slug && ` ${other.alias} `.includes(` ${match.alias} `)
+  )).map((match) => match.slug));
+  const [slug] = Array.from(slugs);
+  return slugs.size === 1 && municipalities.some((city) => city.slug === slug) ? slug : null;
+}
+
 export function getPromptAlert(query: string, municipalitySlug?: string): string | null {
   const normalized = query.toLowerCase().replace(NON_WORD_CHARACTERS, ' ').trim();
   const padded = ` ${normalized.replace(/\s+/g, ' ')} `;
@@ -44,6 +72,9 @@ export function getPromptAlert(query: string, municipalitySlug?: string): string
     return 'Which tax do you need help with? Specify property tax, income tax or GST, and whether you want to pay, register or correct a bill.';
   }
   const cities = Object.keys(CITY_NAMES).filter((city) => normalized.split(/\s+/).includes(city));
+  if (cities.length > 1) {
+    return 'Your request mentions more than one city. Keep the city where you need this service in your request.';
+  }
   if (municipalitySlug && cities.length && !cities.includes(municipalitySlug)) {
     return `Your request mentions ${cities.map((city) => CITY_NAMES[city]).join(', ')}, but your service city is ${CITY_NAMES[municipalitySlug] || municipalitySlug}. Change the city or correct your request before continuing.`;
   }

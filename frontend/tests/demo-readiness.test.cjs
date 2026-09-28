@@ -59,6 +59,19 @@ test('a city mismatch asks the user to correct their service city', () => {
   assert.match(getPromptAlert('birth certificate in Mumbai', 'pune'), /Mumbai.*Pune/);
   assert.equal(getPromptAlert('birth certificate in Mumbai', 'mumbai'), null);
   assert.equal(getPromptAlert('birth certificate', 'pune'), null);
+  assert.match(getPromptAlert('restaurant in Mumbai or Pune', 'pune'), /more than one city/);
+});
+
+test('a single city in the prompt resolves to a configured municipality', () => {
+  const { resolvePromptMunicipality } = load('lib/prompt-guardrails.ts');
+  const cities = [{ slug: 'mumbai', name: 'Mumbai' }, { slug: 'pune', name: 'Pune' }];
+  assert.equal(resolvePromptMunicipality('Open a restaurant in MUMBAI.', cities), 'mumbai');
+  assert.equal(resolvePromptMunicipality('मुंबई में रेस्टोरेंट खोलना है', cities), 'mumbai');
+  assert.equal(resolvePromptMunicipality('Birth certificate in Pune', cities), 'pune');
+  assert.equal(resolvePromptMunicipality('Open a restaurant', cities), null);
+  assert.equal(resolvePromptMunicipality('Open a restaurant in Mumbai or Pune', cities), null);
+  assert.equal(resolvePromptMunicipality('Open a restaurant in Mumbai', [{ slug: 'pune', name: 'Pune' }]), null);
+  assert.equal(resolvePromptMunicipality('Open a restaurant in Navi Mumbai', cities), null);
 });
 
 test('unsupported states are not submitted as a Maharashtra city', () => {
