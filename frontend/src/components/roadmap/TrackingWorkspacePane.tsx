@@ -150,9 +150,6 @@ export function TrackingWorkspacePane({
     if (!file || !onUploadDocument) return;
     try {
       await onUploadDocument(file, activeStep.id, activeUploadReqId);
-      if (activeUploadReqId) {
-        onToggleTask(activeUploadReqId, true);
-      }
     } catch (err) {
       console.error('File upload error:', err);
     } finally {
@@ -303,7 +300,7 @@ export function TrackingWorkspacePane({
           <div>
             <h2 className={styles.checklistTitle}>Action Items & Checklist</h2>
             <p className={styles.checklistSubtitle}>
-              Mark all checkboxes once completed. The step will complete and advance to the next step.
+              Attach supporting documents, then check each task after completing it. Completing all tasks advances to the next step.
             </p>
           </div>
 

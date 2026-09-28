@@ -83,27 +83,27 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
 
         {/* Category shortcuts */}
         <div className={styles.categories} role="region" aria-label="Process categories">
-          <Link href="/roadmap/pvt-ltd-delhi" className={styles.pill} id="cat-business-licenses">
+          <Link href="/roadmap/pvt-ltd-delhi?location=maharashtra" className={styles.pill} id="cat-business-licenses">
             <Briefcase size={13} />
             <span>{t.heroCategories.business}</span>
           </Link>
-          <Link href="/roadmap/pmay-housing" className={styles.pill} id="cat-property-land">
+          <Link href="/roadmap/pmay-housing?location=maharashtra" className={styles.pill} id="cat-property-land">
             <Home size={13} />
             <span>{t.heroCategories.property}</span>
           </Link>
-          <Link href="/roadmap/driving-license-delhi" className={styles.pill} id="cat-id-documents">
+          <Link href="/roadmap/driving-license-delhi?location=maharashtra" className={styles.pill} id="cat-id-documents">
             <FileText size={13} />
             <span>{t.heroCategories.idDocs}</span>
           </Link>
-          <Link href="/roadmap/pm-kisan-welfare" className={styles.pill} id="cat-social-welfare">
+          <Link href="/roadmap/pm-kisan-welfare?location=maharashtra" className={styles.pill} id="cat-social-welfare">
             <Users size={13} />
             <span>{t.heroCategories.welfare}</span>
           </Link>
-          <Link href="/roadmap/sukanya-samriddhi" className={styles.pill} id="cat-tax-finance">
+          <Link href="/roadmap/sukanya-samriddhi?location=maharashtra" className={styles.pill} id="cat-tax-finance">
             <Landmark size={13} />
             <span>{t.heroCategories.tax}</span>
           </Link>
-          <Link href="/roadmap/nsp-scholarship" className={styles.pill} id="cat-education">
+          <Link href="/roadmap/nsp-scholarship?location=maharashtra" className={styles.pill} id="cat-education">
             <GraduationCap size={13} />
             <span>{t.heroCategories.education}</span>
           </Link>
@@ -125,7 +125,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
               <div className={styles.dropdown} role="menu" id="cat-more-menu">
                 <div className={styles.dropdownTitle}>{t.nav.directory}</div>
                 <Link
-                  href="/roadmap/pvt-ltd-delhi"
+                  href="/roadmap/pvt-ltd-delhi?location=maharashtra"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
@@ -133,7 +133,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   <span>Company Incorporation (MCA)</span>
                 </Link>
                 <Link
-                  href="/roadmap/driving-license-delhi"
+                  href="/roadmap/driving-license-delhi?location=maharashtra"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
@@ -141,7 +141,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   <span>Driving License (Sarathi)</span>
                 </Link>
                 <Link
-                  href="/roadmap/fssai-food-license"
+                  href="/roadmap/fssai-food-license?location=maharashtra"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
@@ -149,7 +149,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   <span>Food Safety License (FSSAI)</span>
                 </Link>
                 <Link
-                  href="/roadmap/pmay-housing"
+                  href="/roadmap/pmay-housing?location=maharashtra"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
@@ -157,7 +157,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   <span>PMAY Housing for All</span>
                 </Link>
                 <Link
-                  href="/roadmap/pm-kisan-welfare"
+                  href="/roadmap/pm-kisan-welfare?location=maharashtra"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
@@ -165,7 +165,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   <span>PM-Kisan Farmer Direct Support</span>
                 </Link>
                 <Link
-                  href="/roadmap/ayushman-bharat"
+                  href="/roadmap/ayushman-bharat?location=maharashtra"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
@@ -173,7 +173,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   <span>Ayushman Bharat (PM-JAY)</span>
                 </Link>
                 <Link
-                  href="/roadmap/sukanya-samriddhi"
+                  href="/roadmap/sukanya-samriddhi?location=maharashtra"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >
@@ -181,7 +181,7 @@ export function LandingHero({ selectedLang }: LandingHeroProps) {
                   <span>Sukanya Samriddhi (Tax / SSY)</span>
                 </Link>
                 <Link
-                  href="/roadmap/nsp-scholarship"
+                  href="/roadmap/nsp-scholarship?location=maharashtra"
                   className={styles.dropdownItem}
                   onClick={() => setIsMoreMenuOpen(false)}
                 >

@@ -431,6 +431,116 @@
   color: #ffffff;
 }
 
+.locationPrompt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  width: 100%;
+  margin-top: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-text-tertiary);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-overlay);
+  color: var(--color-text-inverse);
+  backdrop-filter: blur(var(--space-3));
+  box-sizing: border-box;
+  text-align: start;
+}
+
+.locationLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.locationSelectWrap {
+  position: relative;
+  min-width: 0;
+}
+
+.locationSelect {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--space-12);
+  padding: var(--space-3) var(--space-12) var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+
+.locationSelect:hover {
+  border-color: var(--color-brand-400);
+}
+
+.locationSelect:focus-visible,
+.locationHelp a:focus-visible,
+.locationRetry:focus-visible {
+  outline: 2px solid var(--color-brand-300);
+  outline-offset: var(--space-1);
+}
+
+.locationSelect:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.locationChevron {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: var(--space-4);
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.locationHelp {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.locationHelp a,
+.locationRetry {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
+
+.locationRetry {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-height: var(--space-12);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+@media (min-width: 640px) {
+  .locationPrompt {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-6);
+    padding: var(--space-5) var(--space-6);
+  }
+}
+
+.statusBanner a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .recordingDot {
   width: 8px;
   height: 8px;

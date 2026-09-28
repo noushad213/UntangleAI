@@ -12,7 +12,7 @@ export interface LocationOption {
 
 export const INDIAN_LOCATIONS: LocationOption[] = [
   { id: 'delhi', name: 'Delhi NCT', stateCode: 'DL', tier: 'metro', rtoCode: 'DL-01 to DL-13', rocOffice: 'ROC Delhi & Haryana', landPortal: 'revenue.delhi.gov.in' },
-  { id: 'maharashtra', name: 'Maharashtra (Mumbai / Pune)', stateCode: 'MH', tier: 'metro', rtoCode: 'MH-01 to MH-14', rocOffice: 'ROC Mumbai', landPortal: 'bhulekh.mahabhumi.gov.in' },
+  { id: 'maharashtra', name: 'Maharashtra (Mumbai / Pune)', stateCode: 'MH', tier: 'metro', rtoCode: 'MH-01 to MH-14', rocOffice: 'ROC Mumbai / Pune (based on registered office)', landPortal: 'bhulekh.mahabhumi.gov.in' },
   { id: 'karnataka', name: 'Karnataka (Bengaluru)', stateCode: 'KA', tier: 'metro', rtoCode: 'KA-01 to KA-05', rocOffice: 'ROC Bangalore', landPortal: 'bhoomi.karnataka.gov.in' },
   { id: 'telangana', name: 'Telangana (Hyderabad)', stateCode: 'TS', tier: 'metro', rtoCode: 'TS-07 to TS-14', rocOffice: 'ROC Hyderabad', landPortal: 'dharani.telangana.gov.in' },
   { id: 'odisha', name: 'Odisha (Bhubaneswar / Cuttack)', stateCode: 'OR', tier: 'state', rtoCode: 'OD-02 / OD-05', rocOffice: 'ROC Cuttack', landPortal: 'bhulekh.ori.nic.in' },
@@ -22,6 +22,8 @@ export const INDIAN_LOCATIONS: LocationOption[] = [
   { id: 'gujarat', name: 'Gujarat (Ahmedabad / Gandhinagar)', stateCode: 'GJ', tier: 'state', rtoCode: 'GJ-01 / GJ-18', rocOffice: 'ROC Ahmedabad', landPortal: 'anyror.gujarat.gov.in' },
   { id: 'all-india', name: 'All India / Central Jurisdiction', stateCode: 'IN', tier: 'state' },
 ];
+
+export const DEFAULT_TEMPLATE_LOCATION = 'maharashtra';
 
 export interface ApplicantProfileOption {
   id: string;
@@ -69,10 +71,13 @@ export function adaptRoadmapForContext(
   process: CivicProcess,
   filters: RoadmapFilters
 ): AdaptationResult {
+  // Generated guidance belongs to the authority that supplied its sources.
+  if (process.review) return { adaptedProcess: process, appliedContexts: [] };
+
   const locObj =
     INDIAN_LOCATIONS.find((l) => l.id === filters.location) ||
-    INDIAN_LOCATIONS.find((l) => l.name.toLowerCase().includes(filters.location.toLowerCase())) ||
-    INDIAN_LOCATIONS[0];
+    INDIAN_LOCATIONS.find((l) => filters.location.trim() && l.name.toLowerCase().includes(filters.location.toLowerCase())) ||
+    INDIAN_LOCATIONS.find((l) => l.id === DEFAULT_TEMPLATE_LOCATION)!;
 
   const profileObj =
     APPLICANT_PROFILES.find((p) => p.id === filters.applicantProfile) || APPLICANT_PROFILES[0];
@@ -98,19 +103,21 @@ export function adaptRoadmapForContext(
   if (process.id === 'driving-license-delhi' || process.id.includes('driving-license')) {
     if (locObj.id === 'maharashtra') {
       appliedContexts.push('Maharashtra Motor Vehicles Dept (RTO MH-01 to MH-14) rules applied');
-      adaptedProcess.title = 'Renew Driving License (Maharashtra)';
-      adaptedProcess.estimatedTotalCost = '₹1,000 (Maharashtra State Motor Vehicle Rules)';
-      adaptedProcess.estimatedTotalTime = '35 - 50 Days';
+      adaptedProcess.title = 'Apply for Permanent Driving License (Maharashtra)';
 
       clonedSteps.forEach((step) => {
-        if (step.id === 'step-learner-app') {
+        if (step.id === 'step-ll-apply') {
           step.office = 'Motor Vehicles Department, Govt of Maharashtra';
           step.officeLocation = 'Sarathi Parivahan Maharashtra Portal';
           step.description = 'Submit Form 2 on Sarathi Parivahan with Aadhaar e-KYC for automated scrutiny by Maharashtra Transport Dept.';
-        } else if (step.id === 'step-dl-track-test' || step.id === 'step-dl-test-slot') {
-          step.office = 'Regional Transport Office (RTO MH-01 to MH-14)';
-          step.officeLocation = 'Designated RTO Ground — Andheri (West) / Tardeo / Pune Regional RTO';
-          step.description = 'Schedule practical driving skill test on camera-monitored automated test tracks at your regional Maharashtra RTO.';
+        } else if (step.id === 'step-dl-apply' || step.id === 'step-track-test') {
+          step.office = 'Regional Transport Office, Maharashtra';
+          step.officeLocation = 'Your selected Maharashtra RTO';
+          step.description = step.id === 'step-dl-apply'
+            ? 'Apply for a permanent driving licence on Sarathi, select Maharashtra, and book a driving test at your local RTO.'
+            : 'Attend the driving skill test at your selected Maharashtra RTO with your learner licence and required vehicle documents.';
+          step.sourceUrl = 'https://transport.maharashtra.gov.in/1136/Permanent-License';
+          step.sourceSnippet = 'Apply for the permanent driving test after holding a learner licence for at least 30 days.';
         }
       });
     } else if (locObj.id === 'karnataka') {
@@ -193,12 +200,23 @@ export function adaptRoadmapForContext(
       adaptedProcess.title = `Register a Private Limited Company (${locObj.name})`;
 
       clonedSteps.forEach((step) => {
+        if (locObj.id === 'maharashtra') {
+          if (step.id === 'step-dsc') {
+            step.officeLocation = 'Online / Authorized Certifying Agencies in Maharashtra';
+          }
+          if (step.id === 'step-din' || step.id === 'step-inc-20a') {
+            step.office = 'Registrar of Companies for your registered office in Maharashtra';
+          }
+          if (step.id === 'step-moa-aoa') {
+            step.fees = 'Maharashtra stamp duty calculated by MCA based on authorized capital';
+          }
+        }
         if (step.id === 'step-spice-name' || step.id === 'step-spice-part-b') {
           step.office = `Central Registration Centre (CRC) & ${locObj.rocOffice}`;
         }
         if (step.id === 'step-spice-part-b') {
           if (locObj.id === 'maharashtra') {
-            step.description += ' Automatically includes Maharashtra Stamp Duty (₹1,000 on MOA/AOA) and BMC Gumasta Shop Act registration.';
+            step.description += ' Maharashtra stamp duty is calculated during filing based on the registered office and authorized capital.';
           } else if (locObj.id === 'karnataka') {
             step.description += ' Automatically includes Karnataka Stamp Duty and BBMP Professional Tax Registration integration.';
           } else if (locObj.id === 'telangana') {

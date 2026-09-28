@@ -3,6 +3,7 @@ const Workflow = require("../models/Workflow");
 const { requireString, validateQueryRequest } = require("../validators/request.validator");
 const { makeError } = require("../utils/errors");
 const logger = require("../utils/logger");
+const { runPendingQuery } = require("../utils/pending-queries");
 
 /**
  * POST /api/query
@@ -14,10 +15,9 @@ async function query(req, res, next) {
     const { query: userQuery, municipalitySlug } = validateQueryRequest(req.body);
     const forceRefresh = req.body.forceRefresh === true;
 
-    const { workflow, classification, fromCache } = await workflowService.resolveWorkflowForQuery(
-      userQuery,
-      municipalitySlug,
-      { forceRefresh }
+    const { workflow, classification, fromCache } = await runPendingQuery(
+      JSON.stringify([municipalitySlug, userQuery, forceRefresh]),
+      () => workflowService.resolveWorkflowForQuery(userQuery, municipalitySlug, { forceRefresh })
     );
 
     logger.info("Query resolved", {

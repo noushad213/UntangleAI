@@ -56,7 +56,7 @@ export function HowItWorks() {
               <p className={styles.sideBlockText}>
                 {t.about.side1Text}
               </p>
-              <Link href="/roadmap/pvt-ltd-delhi" className={styles.sidePillBtn}>
+              <Link href="/roadmap/pvt-ltd-delhi?location=maharashtra" className={styles.sidePillBtn}>
                 <span>{t.about.side1Btn}</span>
                 <ArrowRight size={13} />
               </Link>
@@ -118,7 +118,7 @@ export function HowItWorks() {
               <p className={styles.sideBlockText}>
                 {t.about.side2Text}
               </p>
-              <Link href="/roadmap/fssai-food-license" className={styles.sidePillBtn}>
+              <Link href="/roadmap/fssai-food-license?location=maharashtra" className={styles.sidePillBtn}>
                 <span>{t.about.side2Btn}</span>
                 <ArrowRight size={13} />
               </Link>

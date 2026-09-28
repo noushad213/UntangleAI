@@ -6,6 +6,7 @@ import { getGeneratedRoadmap } from '@/lib/civicpath-api';
 import RoadmapClient from './RoadmapClient';
 
 export const dynamicParams = true;
+export const dynamic = 'force-dynamic';
 
 interface Props {
   params: { id: string };
@@ -51,7 +52,7 @@ export default async function RoadmapPage({ params }: Props) {
 
   return (
     <Suspense fallback={null}>
-      <RoadmapClient initialProcess={currentProcess} />
+      <RoadmapClient key={currentProcess.id} initialProcess={currentProcess} />
     </Suspense>
   );
 }

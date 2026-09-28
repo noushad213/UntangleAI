@@ -45,7 +45,7 @@ function backendUrl(path: string): string {
   return `${baseUrl.replace(/\/$/, '')}${path}`;
 }
 
-function mapWorkflow(workflow: BackendWorkflow): CivicProcess {
+function mapWorkflow(workflow: BackendWorkflow, municipalityName: string): CivicProcess {
   const steps: ProcessStep[] = workflow.nodes.map((node, index) => ({
     id: node.id,
     processId: workflow.id,
@@ -87,7 +87,7 @@ function mapWorkflow(workflow: BackendWorkflow): CivicProcess {
     title: workflow.title,
     description: 'Generated from official government sources. Review the status and citations before acting.',
     category: workflow.issueKey.replace(/[-_]/g, ' '),
-    location: 'Municipal service area',
+    location: municipalityName,
     officialPortal,
     estimatedTotalTime: 'See each step',
     estimatedTotalCost: 'See each step',
@@ -117,5 +117,19 @@ export async function getGeneratedRoadmap(id: string): Promise<CivicProcess | nu
   if (!response.ok) throw new Error('The civic workflow service is unavailable.');
 
   const payload = (await response.json()) as BackendWorkflowResponse;
-  return mapWorkflow(payload.workflow);
+  let municipalityName = 'Municipal service area';
+  try {
+    const municipalities = await fetch(backendUrl('/api/municipalities'), {
+      cache: 'no-store', signal: AbortSignal.timeout(5_000),
+    });
+    if (municipalities.ok) {
+      const directory = await municipalities.json();
+      municipalityName = directory.municipalities?.find(
+        (city: { _id: string; name: string }) => city._id === payload.workflow.municipalityId
+      )?.name || municipalityName;
+    }
+  } catch {
+    // The sourced workflow remains usable while the city directory is offline.
+  }
+  return mapWorkflow(payload.workflow, municipalityName);
 }

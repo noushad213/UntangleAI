@@ -7,6 +7,8 @@ import {
   ArrowRight,
   X,
   ChevronRight,
+  ChevronDown,
+  MapPin,
   Mic,
   MicOff,
   FileText,
@@ -16,6 +18,8 @@ import {
 import { useLanguage } from '@/context/LanguageContext';
 import { SearchResult } from '@/app/api/v1/search/route';
 import styles from './HeroQueryInput.module.css';
+import { getPromptAlert, UNSUPPORTED_LOCATION_MESSAGE } from '@/lib/prompt-guardrails';
+import { generateRoadmap } from '@/lib/generate-roadmap';
 
 export interface QueryExample {
   text: string;
@@ -181,6 +185,21 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
 
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [municipalitySlug, setMunicipalitySlug] = useState('');
+  const [municipalities, setMunicipalities] = useState<Array<{ slug: string; name: string }>>([]);
+  const [needsLocation, setNeedsLocation] = useState(false);
+  const [promptAlert, setPromptAlert] = useState<string | null>(null);
+
+  const loadMunicipalities = async () => {
+    try {
+      const response = await fetch('/api/v1/municipalities');
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error);
+      setMunicipalities(payload.municipalities || []);
+    } catch {
+      setFeedback({ text: 'City list is unavailable. Retry loading cities shortly.', type: 'error' });
+    }
+  };
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -271,19 +290,20 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       return;
     }
 
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/v1/search?q=${encodeURIComponent(query)}&lang=${encodeURIComponent(effectiveLang)}`);
+        const res = await fetch(`/api/v1/search?q=${encodeURIComponent(query)}&lang=${encodeURIComponent(effectiveLang)}`, { signal: controller.signal });
         const data = await res.json();
         setResults(data.results || []);
         setIsOpen(true);
         setActiveIndex(-1);
       } catch {
-        setResults([]);
+        if (!controller.signal.aborted) setResults([]);
       }
     }, 130);
 
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(timer); controller.abort(); };
   }, [query, effectiveLang]);
 
   // Close dropdown on outside click
@@ -483,13 +503,14 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isGenerating) return;
 
     if (isListening) {
       stopRecognition();
     }
 
-    if (isOpen && results.length > 0) {
-      const selected = activeIndex >= 0 ? results[activeIndex] : results[0];
+    if (isOpen && activeIndex >= 0 && results[activeIndex]) {
+      const selected = results[activeIndex];
       handleSelectResult(selected.id);
       return;
     }
@@ -501,30 +522,35 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       return;
     }
 
+    const alert = getPromptAlert(effectiveQuery, municipalitySlug || undefined);
+    setPromptAlert(alert);
+    if (alert) {
+      setIsOpen(false);
+      setFeedback(null);
+      inputRef.current?.focus();
+      return;
+    }
+
+    if (!municipalitySlug) {
+      setNeedsLocation(true);
+      setIsOpen(false);
+      setFeedback({ text: 'Choose the city where you need this service. We use its official sources.', type: 'info' });
+      await loadMunicipalities();
+      return;
+    }
+
     setIsOpen(false);
     setIsGenerating(true);
     setFeedback({ text: 'Checking official sources and building your roadmap…', type: 'info' });
 
     try {
-      const municipalitySlug =
-        process.env.NEXT_PUBLIC_DEFAULT_MUNICIPALITY_SLUG || 'pune';
-      const response = await fetch('/api/v1/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: effectiveQuery,
-          municipalitySlug,
-        }),
+      const workflowId = await generateRoadmap({ query: effectiveQuery, municipalitySlug }, () => {
+        setFeedback({ text: 'Retrying your roadmap request…', type: 'info' });
       });
-      const payload = await response.json();
-
-      if (!response.ok || !payload.workflow?.id) {
-        throw new Error(payload.error?.message || 'We could not build a reliable roadmap for that task.');
-      }
 
       startTransition(() => {
         router.push(
-          `/roadmap/${encodeURIComponent(payload.workflow.id)}?generated=1&location=${encodeURIComponent(municipalitySlug)}`
+          `/roadmap/${encodeURIComponent(workflowId)}?generated=1&location=${encodeURIComponent(municipalitySlug)}`
         );
       });
     } catch (error) {
@@ -558,6 +584,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
   };
 
   const handleClear = () => {
+    setPromptAlert(null);
     if (isListening) {
       stopRecognition();
     }
@@ -595,12 +622,16 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
           type="text"
           className={`${styles.inputField} ${isCurrentRtl ? styles.rtlField : ''}`}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => { setQuery(e.target.value); setPromptAlert(null); }}
           onKeyDown={handleKeyDown}
           placeholder={isListening ? 'Listening... Speak in any language or Hinglish' : query ? '' : displayText}
           autoComplete="off"
           dir={isCurrentRtl ? 'rtl' : 'ltr'}
           aria-label={t.search.placeholder}
+          maxLength={500}
+          disabled={isGenerating}
+          aria-invalid={Boolean(promptAlert)}
+          aria-describedby={promptAlert ? 'civic-prompt-guidance civic-prompt-alert' : 'civic-prompt-guidance'}
         />
 
         <div className={styles.actionsGroup}>
@@ -699,6 +730,47 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
       )}
 
       {/* Notification Feedback Banner */}
+      <div id="civic-prompt-guidance" className={`${styles.statusBanner} ${styles.statusInfo}`}>
+        <span>Name the exact service and where you need it. Say whether you are applying, renewing, paying or making a complaint. You can choose your service city before submission.</span>
+      </div>
+      {promptAlert && (
+        <div id="civic-prompt-alert" className={`${styles.statusBanner} ${styles.statusError}`} role="alert">
+          <AlertCircle size={14} aria-hidden="true" />
+          <span>{promptAlert}</span>
+          {promptAlert === UNSUPPORTED_LOCATION_MESSAGE && <a href="/roadmap">Browse sample guides</a>}
+        </div>
+      )}
+      {needsLocation && (
+        <div className={styles.locationPrompt}>
+          <label className={styles.locationLabel} htmlFor="civic-municipality">
+            <MapPin size={18} aria-hidden="true" />
+            Service city
+          </label>
+          <div className={styles.locationSelectWrap}>
+            <select
+              id="civic-municipality"
+              className={styles.locationSelect}
+              aria-describedby="civic-municipality-help"
+              value={municipalitySlug}
+              disabled={isGenerating}
+              onChange={(event) => {
+                setMunicipalitySlug(event.target.value);
+                setPromptAlert(event.target.value === '__other__' ? UNSUPPORTED_LOCATION_MESSAGE : null);
+              }}
+            >
+              <option value="">Choose a city</option>
+              {municipalities.map((city) => <option key={city.slug} value={city.slug}>{city.name}</option>)}
+              <option value="__other__">Other city / state — not supported yet</option>
+            </select>
+            <ChevronDown size={18} className={styles.locationChevron} aria-hidden="true" />
+          </div>
+          {municipalities.length === 0 && <button className={styles.locationRetry} type="button" onClick={loadMunicipalities}>Retry loading cities</button>}
+          <p id="civic-municipality-help" className={styles.locationHelp}>
+            Roadmap generation is available for supported Maharashtra cities.{' '}
+            <a href="/roadmap">Browse sample guides</a> for other locations.
+          </p>
+        </div>
+      )}
       {feedback && !isListening && (
         <div
           className={`${styles.statusBanner} ${

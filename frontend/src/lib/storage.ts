@@ -27,6 +27,7 @@ export interface SavedRoadmapSession {
   progressPercent: number;
   viewMode?: 'graph' | 'list';
   isTrackingMode?: boolean;
+  hasStartedTracking?: boolean;
   filters?: SavedRoadmapFilters;
   urlPath?: string;
 }
@@ -73,8 +74,11 @@ export function getLastVisitedSession(): SavedRoadmapSession | null {
   if (!isStorageAvailable()) return null;
   try {
     const data = window.localStorage.getItem(STORAGE_KEYS.LAST_SESSION);
-    if (!data) return null;
-    return JSON.parse(data) as SavedRoadmapSession;
+    if (!data) return getRecentRoadmapSessions()[0] || null;
+    const session = JSON.parse(data) as SavedRoadmapSession;
+    return session?.hasStartedTracking === true
+      ? session
+      : getRecentRoadmapSessions()[0] || null;
   } catch {
     return null;
   }
@@ -99,6 +103,7 @@ export function buildResumeUrl(session: { id: string; urlPath?: string; lastActi
  * Save the last visited roadmap session and add to recent roadmaps
  */
 export function saveLastVisitedSession(session: SavedRoadmapSession): void {
+  if (session.hasStartedTracking !== true) return;
   if (!isStorageAvailable()) return;
   try {
     window.localStorage.setItem(STORAGE_KEYS.LAST_SESSION, JSON.stringify(session));
@@ -126,7 +131,7 @@ export function getRecentRoadmapSessions(): SavedRoadmapSession[] {
     const data = window.localStorage.getItem(STORAGE_KEYS.RECENT_ROADMAPS);
     if (!data) return [];
     const list = JSON.parse(data) as SavedRoadmapSession[];
-    return Array.isArray(list) ? list : [];
+    return Array.isArray(list) ? list.filter((session) => session?.hasStartedTracking === true) : [];
   } catch {
     return [];
   }

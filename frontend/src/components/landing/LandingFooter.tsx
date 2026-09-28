@@ -73,13 +73,13 @@ export function LandingFooter() {
 
         <div className={styles.footerMetaBar}>
           <div className={styles.footerLinksRow}>
-            <Link href="/roadmap/pvt-ltd-delhi" className={styles.footerLink}>
+            <Link href="/roadmap/pvt-ltd-delhi?location=maharashtra" className={styles.footerLink}>
               {t.footer.mcaLink}
             </Link>
-            <Link href="/roadmap/driving-license-delhi" className={styles.footerLink}>
+            <Link href="/roadmap/driving-license-delhi?location=maharashtra" className={styles.footerLink}>
               {t.footer.sarathiLink}
             </Link>
-            <Link href="/roadmap/fssai-food-license" className={styles.footerLink}>
+            <Link href="/roadmap/fssai-food-license?location=maharashtra" className={styles.footerLink}>
               {t.footer.fssaiLink}
             </Link>
             <a

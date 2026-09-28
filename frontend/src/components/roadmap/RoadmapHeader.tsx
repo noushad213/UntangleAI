@@ -117,7 +117,7 @@ export function RoadmapHeader({
   const selectedLocation =
     INDIAN_LOCATIONS.find((l) => l.id === activeFilters.location) ||
     INDIAN_LOCATIONS.find((l) => l.name.toLowerCase() === currentProcess.location.toLowerCase()) ||
-    INDIAN_LOCATIONS[0];
+    { name: currentProcess.location };
 
   const selectedProfile =
     APPLICANT_PROFILES.find((p) => p.id === activeFilters.applicantProfile) ||
@@ -440,6 +440,7 @@ export function RoadmapHeader({
               id="filter-location-btn"
               aria-label="Filter by state or city"
               aria-expanded={activeFilter === 'location'}
+              disabled={Boolean(currentProcess.review)}
             >
               <MapPin size={12} className={styles.filterIcon} style={{ color: 'var(--color-brand-500)' }} />
               <span>{selectedLocation.name}</span>

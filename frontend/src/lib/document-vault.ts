@@ -14,6 +14,7 @@ export interface TrackedDocument {
 
 export interface RoadmapTrackingState {
   isTrackingActive: boolean;
+  hasStartedTracking?: boolean;
   startedAt?: string;
   lastActiveAt?: string;
   documents: TrackedDocument[];
@@ -29,7 +30,16 @@ export function getStoredTrackingState(roadmapId: string): RoadmapTrackingState 
   try {
     const raw = localStorage.getItem(`${TRACKING_PREFIX}${roadmapId}`);
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.isTrackingActive === 'boolean' && Array.isArray(parsed.documents)) {
+        return {
+          ...parsed,
+          documents: parsed.documents.filter((doc: unknown) =>
+            doc && typeof doc === 'object' && 'id' in doc && 'fileName' in doc &&
+            typeof doc.id === 'string' && typeof doc.fileName === 'string'
+          ),
+        };
+      }
     }
   } catch {
     // LocalStorage quota or access exception

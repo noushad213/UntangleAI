@@ -50,6 +50,7 @@ export function usePersistentSession() {
   }, [syncSessions]);
 
   const updateSession = useCallback((session: SavedRoadmapSession) => {
+    if (session.hasStartedTracking !== true) return;
     saveLastVisitedSession(session);
     setLastSession(session);
     setRecentRoadmaps((prev) => {

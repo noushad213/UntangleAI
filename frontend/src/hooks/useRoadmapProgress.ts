@@ -30,7 +30,10 @@ export function useRoadmapProgress(process: CivicProcess) {
     try {
       const stored = localStorage.getItem(`${STORAGE_PREFIX}${process.id}`);
       if (stored) {
-        setCompletedStepIds(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setCompletedStepIds(Array.isArray(parsed) ? parsed.filter((id): id is string =>
+          typeof id === 'string' && process.steps.some((step) => step.id === id)
+        ) : []);
       } else {
         setCompletedStepIds([]);
       }
@@ -43,7 +46,7 @@ export function useRoadmapProgress(process: CivicProcess) {
     setTrackingState(vaultState);
 
     setIsLoaded(true);
-  }, [process.id]);
+  }, [process.id, process.steps]);
 
   // Persist completed steps to localStorage
   const saveToStorage = useCallback(
@@ -59,11 +62,12 @@ export function useRoadmapProgress(process: CivicProcess) {
   );
 
   // Start tracking roadmap
-  const startTracking = useCallback(() => {
+  const startTracking = useCallback((enableResume = false) => {
     setTrackingState((prev) => {
       const next: RoadmapTrackingState = {
         ...prev,
         isTrackingActive: true,
+        hasStartedTracking: prev.hasStartedTracking === true || enableResume,
         startedAt: prev.startedAt || new Date().toISOString(),
         lastActiveAt: new Date().toISOString(),
       };
@@ -282,6 +286,7 @@ export function useRoadmapProgress(process: CivicProcess) {
     progressPercent,
     // Tracking & Document Vault
     isTrackingActive: trackingState.isTrackingActive,
+    hasStartedTracking: trackingState.hasStartedTracking === true,
     documents: trackingState.documents,
     startTracking,
     stopTracking,

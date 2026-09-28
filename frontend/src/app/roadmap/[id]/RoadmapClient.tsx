@@ -16,6 +16,7 @@ import { TrackingWorkspacePane } from '@/components/roadmap/TrackingWorkspacePan
 import {
   RoadmapFilters,
   INDIAN_LOCATIONS,
+  DEFAULT_TEMPLATE_LOCATION,
   adaptRoadmapForContext,
   requestAIRoadmapAdaptation,
 } from '@/lib/roadmap-adapters';
@@ -62,14 +63,15 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     if (locParam && INDIAN_LOCATIONS.some((l) => l.id === locParam)) {
       return locParam;
     }
+    if (!initialProcess.review) return DEFAULT_TEMPLATE_LOCATION;
     const match = INDIAN_LOCATIONS.find(
       (l) =>
         initialProcess.location.toLowerCase().includes(l.id) ||
         l.name.toLowerCase().includes(initialProcess.location.toLowerCase()) ||
         initialProcess.title.toLowerCase().includes(l.id)
     );
-    return match ? match.id : 'delhi';
-  }, [searchParams, initialProcess.location, initialProcess.title]);
+    return match ? match.id : 'all-india';
+  }, [searchParams, initialProcess.location, initialProcess.title, initialProcess.review]);
 
   const [filters, setFilters] = useState<RoadmapFilters>(() => ({
     location: searchParams?.get('location') || defaultLocation,
@@ -98,6 +100,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
 
   useEffect(() => {
     let cancelled = false;
+    if (currentProcessRaw.review) return;
     async function checkAIAdaptation() {
       setIsAdapting(true);
       try {
@@ -115,7 +118,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     return () => {
       cancelled = true;
     };
-  }, [currentProcessRaw.id, filters]);
+  }, [currentProcessRaw.id, currentProcessRaw.review, filters]);
 
   // Update filters and URL search params cleanly
   const handleUpdateFilters = useCallback((updates: Partial<RoadmapFilters>) => {
@@ -148,6 +151,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
   // Load progress engine and document vault for current process
   const {
     completedStepIds,
+    isLoaded,
     stepStatusMap,
     unmetDependenciesMap,
     toggleStep,
@@ -155,6 +159,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     resetProgress,
     progressPercent,
     isTrackingActive,
+    hasStartedTracking,
     documents,
     startTracking,
     uploadDocument,
@@ -321,6 +326,8 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
       },
     });
 
+    if (!isLoaded || !hasStartedTracking) return;
+
     saveLastVisitedSession({
       id: currentProcess.id,
       title: currentProcess.title,
@@ -331,6 +338,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
       completedCount: completedStepIds.length,
       totalSteps: currentProcess.steps.length,
       progressPercent,
+      hasStartedTracking,
       viewMode,
       isTrackingMode,
       filters: {
@@ -352,6 +360,8 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     filters,
     completedStepIds.length,
     progressPercent,
+    isLoaded,
+    hasStartedTracking,
   ]);
 
   const activeStep = useMemo(() => {
@@ -407,7 +417,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
 
   const handleStartTracking = useCallback(() => {
     closeTrackerDrawer();
-    startTracking();
+    startTracking(true);
     setIsPanelOpen(false);
     setShowRightPane(false);
     setIsTrackingMode(true);

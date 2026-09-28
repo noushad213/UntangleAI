@@ -116,7 +116,7 @@ export function LandingNav({
 
             {/* Desktop Center Links */}
             <div className={styles.navLinks}>
-              <Link href="/roadmap/pvt-ltd-delhi" className={styles.navLink}>
+              <Link href="/roadmap/pvt-ltd-delhi?location=maharashtra" className={styles.navLink}>
                 {t.nav.featuredRoadmap}
               </Link>
               <Link href="#about-section" className={styles.navLink}>
@@ -181,7 +181,7 @@ export function LandingNav({
 
               {/* Desktop CTA Button */}
               <Link
-                href={lastSession ? buildResumeUrl(lastSession) : '/roadmap/pvt-ltd-delhi'}
+                href={lastSession ? buildResumeUrl(lastSession) : '/roadmap/pvt-ltd-delhi?location=maharashtra'}
                 className={styles.ctaBtn}
                 id="landing-open-canvas-btn"
                 title={lastSession ? `Resume ${lastSession.title}` : t.nav.canvasBtn}
@@ -212,7 +212,7 @@ export function LandingNav({
             <div className={styles.mobileDrawer} role="menu" id="landing-mobile-menu">
               <div className={styles.mobileLinksList}>
                 <Link
-                  href="/roadmap/pvt-ltd-delhi"
+                  href="/roadmap/pvt-ltd-delhi?location=maharashtra"
                   className={styles.mobileNavLink}
                   onClick={handleLinkClick}
                 >
@@ -241,7 +241,7 @@ export function LandingNav({
 
               <div className={styles.mobileCtaWrapper}>
                 <Link
-                  href={lastSession ? buildResumeUrl(lastSession) : '/roadmap/pvt-ltd-delhi'}
+                  href={lastSession ? buildResumeUrl(lastSession) : '/roadmap/pvt-ltd-delhi?location=maharashtra'}
                   className={styles.mobileCtaBtn}
                   onClick={handleLinkClick}
                 >

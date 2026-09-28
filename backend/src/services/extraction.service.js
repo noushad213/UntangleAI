@@ -575,6 +575,7 @@ async function extractWithBrowser(url, allowedDomains) {
 
   const browser = await playwright.chromium.launch({
     headless: true,
+    channel: process.env.PLAYWRIGHT_CHANNEL || (process.platform === 'win32' ? 'msedge' : undefined),
   });
 
   try {

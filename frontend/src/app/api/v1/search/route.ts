@@ -43,7 +43,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ results });
   }
 
-  const queryTerms = query.split(/\s+/).filter(Boolean);
+  const fillerWords = new Set(['i', 'a', 'an', 'the', 'to', 'for', 'in', 'on', 'of', 'and', 'my', 'me', 'want', 'need', 'how', 'do', 'get', 'apply', 'please', 'is', 'it', 'we', 'you', 'hai', 'mujhe', 'karni']);
+  const queryTerms = query.split(/\s+/).filter((term) => term.length > 1 && !fillerWords.has(term));
+  const containsTerm = (text: string, term: string) =>
+    /^[a-z0-9 ]+$/.test(term)
+      ? (` ${text.replace(/[^a-z0-9]+/g, ' ')} `).includes(` ${term} `)
+      : text.includes(term);
 
   const MULTILINGUAL_ALIASES: Record<string, string[]> = {
     'fssai-food-license': [
@@ -129,22 +134,22 @@ export async function GET(request: NextRequest) {
     // Check multilingual aliases for this roadmap
     const aliases = MULTILINGUAL_ALIASES[p.id] || [];
     for (const alias of aliases) {
-      if (query.includes(alias.toLowerCase())) {
+      if (!fillerWords.has(alias) && containsTerm(query, alias.toLowerCase())) {
         score += 8;
       }
     }
 
     // Check individual query terms
     for (const term of queryTerms) {
-      if (titleLower.includes(term)) score += 5;
-      if (catLower.includes(term)) score += 3;
-      if (descLower.includes(term)) score += 2;
+      if (containsTerm(titleLower, term)) score += 5;
+      if (containsTerm(catLower, term)) score += 3;
+      if (containsTerm(descLower, term)) score += 2;
       for (const alias of aliases) {
-        if (alias.toLowerCase().includes(term)) score += 3;
+        if (containsTerm(alias.toLowerCase(), term)) score += 3;
       }
       // Also match step titles/keywords
       p.steps.forEach((s) => {
-        if (s.title.toLowerCase().includes(term) || (s.shortTitle && s.shortTitle.toLowerCase().includes(term))) {
+        if (containsTerm(s.title.toLowerCase(), term) || (s.shortTitle && containsTerm(s.shortTitle.toLowerCase(), term))) {
           score += 1.5;
         }
       });
