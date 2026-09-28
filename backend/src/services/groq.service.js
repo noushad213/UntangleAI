@@ -1,26 +1,75 @@
 const Groq = require("groq-sdk");
 
-let groqClient = null;
+const clientCache = new Map();
+let currentKeyIndex = 0;
 
-function getGroqClient() {
-  if (!groqClient) {
-    if (!process.env.GROQ_API_KEY) {
-      throw new Error("The GROQ_API_KEY environment variable is missing or empty.");
+function getGroqApiKeys() {
+  const keys = [];
+
+  const addKeys = (val) => {
+    if (!val) return;
+    const parts = String(val).split(",");
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (trimmed && !keys.includes(trimmed)) {
+        keys.push(trimmed);
+      }
     }
-    groqClient = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
-    });
+  };
+
+  addKeys(process.env.GROQ_API_KEY);
+  addKeys(process.env.GROQ_API_KEY_FALLBACK);
+  addKeys(process.env.GROQ_FALLBACK_API_KEY);
+  addKeys(process.env.GROQ_API_KEYS);
+
+  return keys;
+}
+
+function getGroqClient(apiKey) {
+  const key = apiKey || getActiveApiKey();
+  if (!key) {
+    throw new Error("The GROQ_API_KEY environment variable is missing or empty.");
   }
-  return groqClient;
+  if (!clientCache.has(key)) {
+    clientCache.set(key, new Groq({ apiKey: key }));
+  }
+  return clientCache.get(key);
+}
+
+function getActiveApiKey() {
+  const keys = getGroqApiKeys();
+  if (keys.length === 0) return null;
+  return keys[currentKeyIndex % keys.length];
+}
+
+function rotateApiKey() {
+  const keys = getGroqApiKeys();
+  if (keys.length > 1) {
+    currentKeyIndex = (currentKeyIndex + 1) % keys.length;
+    console.log(`Rotated Groq API key to backup key index ${currentKeyIndex + 1}/${keys.length}`);
+  }
 }
 
 function getRetryDecision(errorMessage = "") {
   const message = String(errorMessage).toLowerCase();
 
   if (
+    message.includes("invalid api key") ||
+    message.includes("invalid_api_key") ||
+    message.includes("unauthorized") ||
+    message.includes("401")
+  ) {
+    return {
+      retry: false,
+      reason: "auth_failure",
+    };
+  }
+
+  if (
     message.includes("rate limit") ||
     message.includes("too many requests") ||
-    message.includes("429")
+    message.includes("429") ||
+    message.includes("quota")
   ) {
     return {
       retry: true,
@@ -31,8 +80,10 @@ function getRetryDecision(errorMessage = "") {
   if (
     message.includes("timeout") ||
     message.includes("timed out") ||
+    message.includes("etimedout") ||
     message.includes("network") ||
     message.includes("econnreset") ||
+    message.includes("econnrefused") ||
     message.includes("enotfound")
   ) {
     return {
@@ -71,94 +122,96 @@ async function callGroq(
   messages,
   options = {}
 ) {
-  const maxAttempts =
-    options.maxAttempts || 2;
+  const apiKeys = getGroqApiKeys();
+  if (apiKeys.length === 0) {
+    throw new Error("The GROQ_API_KEY environment variable is missing or empty.");
+  }
 
-  for (
-    let attempt = 1;
-    attempt <= maxAttempts;
-    attempt++
-  ) {
-    try {
-      console.log(
-        `Groq request attempt ${attempt}`
-      );
+  const maxAttempts = options.maxAttempts || 2;
+  const totalKeys = apiKeys.length;
+  let lastError = null;
 
-      const client = getGroqClient();
-      const response =
-        await client.chat.completions.create({
-          model:
-            process.env.GROQ_MODEL ||
-            "openai/gpt-oss-120b",
+  for (let keyOffset = 0; keyOffset < totalKeys; keyOffset++) {
+    const keyIndex = (currentKeyIndex + keyOffset) % totalKeys;
+    const apiKey = apiKeys[keyIndex];
+    const client = getGroqClient(apiKey);
 
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        console.log(
+          `Groq request attempt ${attempt} (key ${keyIndex + 1}/${totalKeys})`
+        );
+
+        const response = await client.chat.completions.create({
+          model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
           messages,
-
-          temperature:
-            options.temperature ?? 0,
-
-          max_completion_tokens:
-            options.maxCompletionTokens ||
-            4096,
-
-          response_format:
-            options.responseFormat ||
-            {
-              type: "json_object",
-            },
+          temperature: options.temperature ?? 0,
+          max_completion_tokens: options.maxCompletionTokens || 4096,
+          response_format: options.responseFormat || { type: "json_object" },
         });
 
-      const content =
-        response?.choices?.[0]?.message
-          ?.content;
+        const content = response?.choices?.[0]?.message?.content;
+        if (!content) {
+          throw new Error("GROQ_EMPTY_RESPONSE");
+        }
 
-      if (!content) {
-        throw new Error(
-          "GROQ_EMPTY_RESPONSE"
-        );
-      }
+        currentKeyIndex = keyIndex;
+        console.log("Groq request successful");
+        return content;
+      } catch (error) {
+        lastError = error;
+        const errorMessage =
+          error?.message ||
+          error?.response?.data?.error?.message ||
+          String(error);
 
-      console.log(
-        "Groq request successful"
-      );
+        const decision = getRetryDecision(errorMessage);
 
-      return content;
-    } catch (error) {
-      const errorMessage =
-        error?.message ||
-        error?.response?.data?.error
-          ?.message ||
-        String(error);
-
-      const decision =
-        getRetryDecision(errorMessage);
-
-      console.error(
-        "GROQ_FAILED",
-        {
+        console.error("GROQ_FAILED", {
           attempt,
+          keyIndex: keyIndex + 1,
+          totalKeys,
           message: errorMessage,
           retry: decision.retry,
           reason: decision.reason,
+        });
+
+        const isKeyExhausted =
+          decision.reason === "rate_limit" ||
+          decision.reason === "auth_failure" ||
+          errorMessage.toLowerCase().includes("rate limit") ||
+          errorMessage.toLowerCase().includes("429") ||
+          errorMessage.toLowerCase().includes("quota") ||
+          errorMessage.toLowerCase().includes("unauthorized") ||
+          errorMessage.toLowerCase().includes("401");
+
+        if (isKeyExhausted && keyOffset < totalKeys - 1) {
+          console.warn(
+            `Groq key ${keyIndex + 1}/${totalKeys} failed (${decision.reason}), falling over to backup key...`
+          );
+          rotateApiKey();
+          break;
         }
-      );
 
-      if (
-        !decision.retry ||
-        attempt >= maxAttempts
-      ) {
-        throw error;
+        if (!decision.retry || attempt >= maxAttempts) {
+          if (keyOffset < totalKeys - 1) {
+            console.warn(
+              `Groq key ${keyIndex + 1}/${totalKeys} attempts exhausted, trying next backup key...`
+            );
+            rotateApiKey();
+            break;
+          }
+          throw error;
+        }
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, getRetryDelay(attempt))
+        );
       }
-
-      await new Promise((resolve) =>
-        setTimeout(
-          resolve,
-          getRetryDelay(attempt)
-        )
-      );
     }
   }
 
-  throw new Error("GROQ_FAILED");
+  throw lastError || new Error("GROQ_FAILED");
 }
 
 function parseJsonResponse(content) {

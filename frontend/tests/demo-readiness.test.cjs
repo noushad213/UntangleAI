@@ -9,7 +9,7 @@ function load(file, mocks = {}) {
   const filename = path.resolve(__dirname, '../src', file);
   const compiled = ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } });
   const loaded = new Module(filename, module);
-  loaded.require = (id) => id in mocks ? mocks[id] : module.require(id);
+  loaded.require = (id) => id in mocks ? mocks[id] : id.startsWith('./') ? load(path.relative(path.resolve(__dirname, '../src'), path.resolve(path.dirname(filename), id + '.ts')), mocks) : module.require(id);
   loaded._compile(compiled.outputText, filename);
   return loaded.exports;
 }
@@ -72,6 +72,26 @@ test('a single city in the prompt resolves to a configured municipality', () => 
   assert.equal(resolvePromptMunicipality('Open a restaurant in Mumbai or Pune', cities), null);
   assert.equal(resolvePromptMunicipality('Open a restaurant in Mumbai', [{ slug: 'pune', name: 'Pune' }]), null);
   assert.equal(resolvePromptMunicipality('Open a restaurant in Navi Mumbai', cities), null);
+});
+
+test('Maharashtra localities resolve without confusing neighbouring municipalities', () => {
+  const { resolvePromptMunicipality, getPromptAlert, classifyPromptLocation } = load('lib/prompt-guardrails.ts');
+  const cities = ['mumbai', 'pune', 'navi-mumbai', 'thane', 'pimpri-chinchwad'].map(slug => ({ slug, name: slug }));
+  assert.equal(resolvePromptMunicipality('i want to open a cloud kitchen in andheri west', cities), 'mumbai');
+  assert.equal(resolvePromptMunicipality('cloud kitchen in अंधेरी पश्चिम', cities), 'mumbai');
+  assert.equal(resolvePromptMunicipality('cloud kitchen in Vashi, Navi Mumbai', cities), 'navi-mumbai');
+  assert.equal(resolvePromptMunicipality('cloud kitchen in Vashi', cities), 'navi-mumbai');
+  assert.equal(resolvePromptMunicipality('cloud kitchen in Wakad, Pune district', cities), 'pimpri-chinchwad');
+  assert.equal(resolvePromptMunicipality('cloud kitchen in Thane', cities), 'thane');
+  assert.match(getPromptAlert('cloud kitchen in Thane', 'mumbai'), /Thane.*Mumbai/);
+  assert.match(getPromptAlert('cloud kitchen in Andheri or Pune'), /more than one/);
+  assert.equal(classifyPromptLocation('cloud kitchen in Andheri').region, 'mumbai');
+  assert.equal(classifyPromptLocation('cloud kitchen in Ratnagiri').region, 'maharashtra');
+  assert.equal(classifyPromptLocation('cloud kitchen').region, 'unknown');
+  assert.equal(classifyPromptLocation('cloud kitchen in Delhi').region, 'outside-maharashtra');
+  assert.match(getPromptAlert('cloud kitchen', 'delhi'), /not supported/);
+  assert.equal(resolvePromptMunicipality('cloud kitchen in Andheri', [{slug:'pune',name:'Pune'}]), null);
+  assert.equal(resolvePromptMunicipality('cloud kitchen in Navi Mumbai', [{slug:'mumbai',name:'Mumbai'}]), null);
 });
 
 test('unsupported states are not submitted as a Maharashtra city', () => {
