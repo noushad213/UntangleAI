@@ -1,0 +1,12 @@
+.assistance { display: grid; gap: var(--space-3); margin-block: var(--space-5); font-size: var(--type-sm); color: var(--color-text-secondary); overflow-wrap: anywhere; }
+.assistance details { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); }
+.assistance summary { cursor: pointer; font-weight: 600; color: var(--color-text-primary); }
+.form { display: grid; gap: var(--space-2); margin-block-start: var(--space-3); }
+.form input, .form textarea, .form select { width: 100%; min-width: 0; padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-primary); color: var(--color-text-primary); font: inherit; }
+.form textarea { resize: vertical; }
+.form button { padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-secondary); color: var(--color-text-primary); font: inherit; cursor: pointer; }
+.form button:disabled { opacity: 0.6; cursor: wait; }
+.form button:hover { background: var(--color-surface-tertiary); }
+.assistance a { color: var(--color-brand-600); text-decoration: underline; }
+.assistance :is(input, textarea, select, button, summary, a):focus-visible { outline: 2px solid var(--color-brand-600); outline-offset: 2px; }
+.assistance p { margin-block: var(--space-2); }
