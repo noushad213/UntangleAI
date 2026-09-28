@@ -51,6 +51,7 @@ const workflowSchema = new mongoose.Schema(
     ],
 
     missingInformation: [{ type: String }],
+    detailsRecoveryAttempted: { type: Boolean, default: false },
 
     status: {
       type: String,

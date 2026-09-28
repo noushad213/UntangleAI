@@ -14,6 +14,7 @@ const {
 } = require("./relevance.service");
 
 const logger = require("../utils/logger");
+const { recoverWorkflowDetails, needsDetailsRecovery } = require("./workflow-details-recovery");
 
 const MAX_TOTAL_GEMINI_CHUNKS = 10;
 const DEFAULT_WORKFLOW_FRESHNESS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -256,7 +257,7 @@ async function resolveWorkflowForQuery(
     if (
       cached &&
       cached.status !== "outdated" &&
-      isWorkflowFresh(cached)
+      isWorkflowFresh(cached) && !needsDetailsRecovery(cached)
     ) {
       logger.info(
         "Workflow cache hit",
@@ -376,7 +377,8 @@ async function buildWorkflowFromScratch(
   const maxSources = getMaxSourcesPerWorkflow();
 
   async function collectSources(
-    searchQuery
+    searchQuery,
+    sourceLimit = maxSources
   ) {
     logger.info(
       "Searching official government sources",
@@ -418,7 +420,7 @@ async function buildWorkflowFromScratch(
       const candidate of
         candidates
     ) {
-      if (sourceDocs.length >= maxSources) break;
+      if (sourceDocs.length >= sourceLimit) break;
       if (
         !candidate ||
         typeof candidate.url !==
@@ -641,7 +643,7 @@ async function buildWorkflowFromScratch(
    * RELEVANCE / AI INPUT HELPER
    * ============================================================
    */
-  function buildAiInput() {
+  function buildAiInput(rankingQuery = rawQuery) {
     const maxChunksPerSource =
       Number(
         process.env
@@ -695,7 +697,7 @@ async function buildWorkflowFromScratch(
           const selectedChunks =
             selectTopChunks(
               chunks,
-              rawQuery,
+              rankingQuery,
               issueKeywords,
               maxChunksPerSource
             );
@@ -985,6 +987,30 @@ async function buildWorkflowFromScratch(
    * STEP 7: VALIDATE SOURCE REFERENCES
    * ============================================================
    */
+  extraction = await recoverWorkflowDetails(extraction, {
+    issueLabel: issue.label,
+    cityName: municipality.name,
+    collectSources: (query) => collectSources(query, Math.min(maxSources + 2, 10)),
+    reextract: (gaps) => aiService.extractWorkflow(
+      `${issue.label}. Resolve these source gaps while preserving step IDs and existing facts: ${gaps.join('; ')}. Existing workflow: ${JSON.stringify(extraction)}`,
+      buildAiInput([rawQuery, ...gaps].join(' ')).aiInput
+    ),
+    validate: (candidate) => {
+      validateWorkflow(candidate, new Set(sourceDocs.map((source) => String(source._id))));
+      for (const step of candidate.steps) {
+        for (const evidence of step.evidence || []) {
+          if (!evidence.quote) continue;
+          const grounded = sourceDocs.some((source) => (step.sourceIds || []).map(String).includes(String(source._id))
+            && (source.chunks?.length ? source.chunks : [{ chunkId: 'legacy-1', text: String(source.extractedText || '').slice(0, 6000) }]).some((chunk) => chunk.chunkId === evidence.chunkId
+              && String(chunk.text || '').replace(/\s+/g, ' ').includes(evidence.quote.replace(/\s+/g, ' '))));
+          if (!grounded) throw makeError('VALIDATION_FAILED', 'Recovery evidence does not match the official source text');
+        }
+      }
+    },
+    onRecovered: (result) => logger.info('Additional official evidence filled roadmap details', { issueKey: issue.issueKey, ...result }),
+    onFailure: (error) => logger.warn('Keeping original roadmap after details recovery failed', { issueKey: issue.issueKey, error: error.message }),
+  });
+
   const validSourceIds =
     new Set(
       sourceDocs.map(
@@ -1210,6 +1236,8 @@ async function buildWorkflowFromScratch(
 
         missingInformation:
           extraction.missingInformation,
+
+        detailsRecoveryAttempted: true,
 
         status:
           "needs_review",

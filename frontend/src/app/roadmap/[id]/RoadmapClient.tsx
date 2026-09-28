@@ -8,6 +8,7 @@ import { CivicProcess, ProcessStep } from '@/types/roadmap';
 import { useLanguage } from '@/context/LanguageContext';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { RoadmapHeader } from '@/components/roadmap/RoadmapHeader';
+import { RoadmapReviewNotice } from '@/components/roadmap/RoadmapReviewNotice';
 import { RoadmapCanvas } from '@/components/roadmap/RoadmapCanvas';
 import { StepListView } from '@/components/roadmap/StepListView';
 import { DetailPanel } from '@/components/roadmap/DetailPanel';
@@ -516,36 +517,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
       />
 
       {currentProcess.review && (
-        <section
-          className={`${styles.reviewBanner} ${styles[`reviewBanner_${currentProcess.review.status}`]}`}
-          aria-label="Roadmap verification status"
-        >
-          <div>
-            <strong>
-              {currentProcess.review.status === 'verified'
-                ? 'Reviewed civic guidance'
-                : currentProcess.review.status === 'outdated'
-                  ? 'This roadmap needs an update'
-                  : 'Source-based draft awaiting review'}
-            </strong>
-            <p>
-              {currentProcess.review.status === 'verified'
-                ? `Reviewed by ${currentProcess.review.verifiedBy || 'an authorized reviewer'}.`
-                : 'Check each official source before submitting forms or paying fees.'}
-            </p>
-          </div>
-          {(currentProcess.review.conflicts.length > 0 ||
-            currentProcess.review.missingInformation.length > 0) && (
-            <div className={styles.reviewIssues}>
-              {currentProcess.review.conflicts.length > 0 && (
-                <span>{currentProcess.review.conflicts.length} source conflict(s)</span>
-              )}
-              {currentProcess.review.missingInformation.length > 0 && (
-                <span>{currentProcess.review.missingInformation.length} missing detail(s)</span>
-              )}
-            </div>
-          )}
-        </section>
+        <RoadmapReviewNotice review={currentProcess.review} />
       )}
 
       <main className={styles.contentArea}>
