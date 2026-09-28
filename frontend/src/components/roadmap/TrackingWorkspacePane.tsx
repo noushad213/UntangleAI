@@ -19,6 +19,7 @@ import {
 import { CivicProcess, ProcessStep, StepStatus } from '@/types/roadmap';
 import { TrackedDocument, formatFileSize } from '@/lib/document-vault';
 import styles from './TrackingWorkspacePane.module.css';
+import { CivicAssistance } from './CivicAssistance';
 
 interface TaskItem {
   id: string;
@@ -293,6 +294,8 @@ export function TrackingWorkspacePane({
           </a>
         </section>
       )}
+
+      {isOpen && <CivicAssistance key={`${activeStep.id}-${process.location}`} step={activeStep} location={process.location} />}
 
       {/* Action Items & Checklist */}
       <section className={styles.checklistCard}>
