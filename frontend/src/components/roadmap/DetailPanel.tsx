@@ -20,6 +20,7 @@ import {
 import { ProcessStep, StepStatus } from '@/types/roadmap';
 import { useLanguage } from '@/context/LanguageContext';
 import { TrackedDocument, formatFileSize } from '@/lib/document-vault';
+import { DocumentVerificationBadge } from './DocumentVerificationBadge';
 import styles from './DetailPanel.module.css';
 import { CivicAssistance } from './CivicAssistance';
 
@@ -35,6 +36,7 @@ interface DetailPanelProps {
   onToggleComplete: (stepId: string) => void;
   requirementDocumentsMap?: Map<string, TrackedDocument>;
   onUploadDocument?: (file: File, stepId: string, requirementId?: string) => Promise<any>;
+  onVerifyDocument?: (docId: string) => void;
   onRemoveDocument?: (docId: string) => void;
   onDownloadDocument?: (docId: string) => void;
   onOpenVault?: () => void;
@@ -52,6 +54,7 @@ export function DetailPanel({
   onToggleComplete,
   requirementDocumentsMap,
   onUploadDocument,
+  onVerifyDocument,
   onRemoveDocument,
   onDownloadDocument,
   onOpenVault,
@@ -244,10 +247,19 @@ export function DetailPanel({
                         {/* Uploaded doc preview or upload trigger */}
                         {attachedDoc ? (
                           <div className={styles.reqDocAttachmentRow}>
-                            <div className={styles.reqDocAttachedMeta} title={attachedDoc.fileName}>
-                              <CheckCircle2 size={12} style={{ color: 'var(--color-success-600)', flexShrink: 0 }} />
-                              <span>{attachedDoc.fileName}</span>
-                              <span>({formatFileSize(attachedDoc.fileSize)})</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 0 }}>
+                              <div className={styles.reqDocAttachedMeta} title={attachedDoc.fileName}>
+                                <CheckCircle2 size={12} style={{ color: 'var(--color-success-600)', flexShrink: 0 }} />
+                                <span>{attachedDoc.fileName}</span>
+                                <span>({formatFileSize(attachedDoc.fileSize)})</span>
+                              </div>
+                              <div>
+                                <DocumentVerificationBadge
+                                  document={attachedDoc}
+                                  onVerify={onVerifyDocument}
+                                  compact
+                                />
+                              </div>
                             </div>
                             <div className={styles.reqDocActions}>
                               <button

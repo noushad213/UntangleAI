@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
@@ -68,6 +68,24 @@ export default function RoadmapDirectoryClient() {
     return 'all';
   });
   const [recentSessions, setRecentSessions] = useState<Record<string, SavedRoadmapSession>>({});
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClearSearch = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setSearchQuery('');
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+    requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+    setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 0);
+  };
 
   // Synchronize theme with local storage & document attribute
   useEffect(() => {
@@ -217,9 +235,21 @@ export default function RoadmapDirectoryClient() {
             </h1>
 
             {/* Search Bar */}
-            <div className={styles.searchContainer}>
+            <div
+              className={styles.searchContainer}
+              onClick={(e) => {
+                if (
+                  searchInputRef.current &&
+                  e.target !== searchInputRef.current &&
+                  !(e.target as HTMLElement).closest('button')
+                ) {
+                  searchInputRef.current.focus();
+                }
+              }}
+            >
               <Search size={18} className={styles.searchIcon} aria-hidden="true" />
               <input
+                ref={searchInputRef}
                 type="text"
                 className={styles.searchInput}
                 placeholder="Search by keyword, procedure name, authority, or city..."
@@ -232,7 +262,11 @@ export default function RoadmapDirectoryClient() {
                 <button
                   type="button"
                   className={styles.clearButton}
-                  onClick={() => setSearchQuery('')}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={handleClearSearch}
                   aria-label="Clear search query"
                 >
                   <X size={16} />

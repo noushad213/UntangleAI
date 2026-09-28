@@ -54,6 +54,54 @@ test('vague requests ask for the service rather than generating a guessed roadma
   }
 });
 
+test('greetings, gibberish, chatbot chatter, and non-civic topics are rejected upfront without asking for a city', () => {
+  const { getPromptAlert } = load('lib/prompt-guardrails.ts');
+  // Greetings
+  for (const query of ['hello', 'hi', 'hey', 'namaste', 'good morning', 'hello untangle', 'hi there', 'namaste sir']) {
+    const alert = getPromptAlert(query);
+    assert.equal(typeof alert, 'string', `Expected alert for greeting: "${query}"`);
+    assert.match(alert, /service you need help with/i);
+  }
+
+  // Gibberish & noise
+  for (const query of ['asdf', 'test', '12345', 'qwerty', 'aaaa', 'sdfsdf', 'blah blah']) {
+    const alert = getPromptAlert(query);
+    assert.equal(typeof alert, 'string', `Expected alert for gibberish: "${query}"`);
+    assert.match(alert, /valid government service/i);
+  }
+
+  // Chatbot / small talk
+  for (const query of ['who are you', 'how are you', 'what can you do', 'tell me a joke', 'are you an ai']) {
+    const alert = getPromptAlert(query);
+    assert.equal(typeof alert, 'string', `Expected alert for chatbot chatter: "${query}"`);
+    assert.match(alert, /Untangle is a guide|navigate official/i);
+  }
+
+  // Out of scope
+  for (const query of ['order pizza', 'weather in pune', 'write a python code', 'buy shoes online']) {
+    const alert = getPromptAlert(query);
+    assert.equal(typeof alert, 'string', `Expected alert for out-of-scope query: "${query}"`);
+    assert.match(alert, /civic and government procedures/i);
+  }
+
+  // City-only input
+  for (const query of ['pune', 'mumbai']) {
+    const alert = getPromptAlert(query);
+    assert.equal(typeof alert, 'string', `Expected alert for city-only query: "${query}"`);
+    assert.match(alert, /service you need in this city/i);
+  }
+
+  // Greetings accompanied by an actual civic task should be ACCEPTED
+  for (const query of [
+    'hello, how to renew driving license',
+    'hi I want to open a restaurant',
+    'namaste, mujhe birth certificate chahiye',
+    'good morning, property tax payment in pune',
+  ]) {
+    assert.equal(getPromptAlert(query), null, `Expected valid query for greeting with task: "${query}"`);
+  }
+});
+
 test('a city mismatch asks the user to correct their service city', () => {
   const { getPromptAlert } = load('lib/prompt-guardrails.ts');
   assert.match(getPromptAlert('birth certificate in Mumbai', 'pune'), /Mumbai.*Pune/);

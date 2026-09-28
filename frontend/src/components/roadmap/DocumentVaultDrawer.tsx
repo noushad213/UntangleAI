@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { CivicProcess } from '@/types/roadmap';
 import { TrackedDocument, formatFileSize } from '@/lib/document-vault';
+import { DocumentVerificationBadge } from './DocumentVerificationBadge';
 import styles from './DocumentVaultDrawer.module.css';
 
 interface DocumentVaultDrawerProps {
@@ -24,6 +25,7 @@ interface DocumentVaultDrawerProps {
   completedStepIds: string[];
   documents: TrackedDocument[];
   onUploadDocument: (file: File, stepId: string, requirementId?: string) => Promise<TrackedDocument>;
+  onVerifyDocument?: (docId: string) => void;
   onRemoveDocument: (docId: string) => void;
   onDownloadDocument: (docId: string) => void;
   onExportDossier: () => void;
@@ -37,6 +39,7 @@ export function DocumentVaultDrawer({
   completedStepIds,
   documents,
   onUploadDocument,
+  onVerifyDocument,
   onRemoveDocument,
   onDownloadDocument,
   onExportDossier,
@@ -263,10 +266,19 @@ export function DocumentVaultDrawer({
 
                 {req.document ? (
                   <div className={styles.uploadedFileRow}>
-                    <div className={styles.fileNameMeta} title={req.document.fileName}>
-                      <CheckCircle2 size={13} style={{ color: 'var(--color-success-600)', flexShrink: 0 }} />
-                      <span>{req.document.fileName}</span>
-                      <span>({formatFileSize(req.document.fileSize)})</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 0 }}>
+                      <div className={styles.fileNameMeta} title={req.document.fileName}>
+                        <CheckCircle2 size={13} style={{ color: 'var(--color-success-600)', flexShrink: 0 }} />
+                        <span>{req.document.fileName}</span>
+                        <span>({formatFileSize(req.document.fileSize)})</span>
+                      </div>
+                      <div>
+                        <DocumentVerificationBadge
+                          document={req.document}
+                          onVerify={onVerifyDocument}
+                          compact
+                        />
+                      </div>
                     </div>
 
                     <div className={styles.fileActions}>
@@ -349,6 +361,13 @@ export function DocumentVaultDrawer({
                             {' · '}
                             {formatFileSize(document.fileSize)}
                           </small>
+                          <div style={{ marginTop: 4 }}>
+                            <DocumentVerificationBadge
+                              document={document}
+                              onVerify={onVerifyDocument}
+                              compact
+                            />
+                          </div>
                         </div>
                         <div className={styles.fileActions}>
                           <button

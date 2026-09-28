@@ -50,6 +50,7 @@ test('uploading one attachment leaves checklist completion unchanged', async () 
     '@/lib/document-vault': { formatFileSize: () => '' },
     './TrackingWorkspacePane.module.css': {},
     './CivicAssistance': { CivicAssistance: () => null },
+    './DocumentVerificationBadge': { DocumentVerificationBadge: () => null },
   });
   const step = { id: 'step1', title: 'Apply', sourceUrl: '', requirements: [{ id: 'req1', title: 'Identity' }, { id: 'req2', title: 'Address' }] };
   const tree = TrackingWorkspacePane({

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { CivicProcess, ProcessStep, StepStatus } from '@/types/roadmap';
 import { TrackedDocument, formatFileSize } from '@/lib/document-vault';
+import { DocumentVerificationBadge } from './DocumentVerificationBadge';
 import styles from './TrackingWorkspacePane.module.css';
 import { CivicAssistance } from './CivicAssistance';
 
@@ -46,6 +47,7 @@ interface TrackingWorkspacePaneProps {
   nextStep: ProcessStep | null;
   requirementDocumentsMap?: Map<string, TrackedDocument>;
   onUploadDocument?: (file: File, stepId: string, requirementId?: string) => Promise<TrackedDocument>;
+  onVerifyDocument?: (docId: string) => void;
   onRemoveDocument?: (docId: string) => void;
   onDownloadDocument?: (docId: string) => void;
   onOpenVault?: () => void;
@@ -69,6 +71,7 @@ export function TrackingWorkspacePane({
   nextStep,
   requirementDocumentsMap,
   onUploadDocument,
+  onVerifyDocument,
   onRemoveDocument,
   onDownloadDocument,
   onOpenVault,
@@ -375,11 +378,20 @@ export function TrackingWorkspacePane({
                   {task.isDoc && (
                     <div onClick={(e) => e.stopPropagation()}>
                       {attachedDoc ? (
-                        <div className={styles.attachedDocInfo}>
-                          <Check size={11} strokeWidth={2.5} />
-                          <span>
-                            {attachedDoc.fileName} ({formatFileSize(attachedDoc.fileSize)})
-                          </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4 }}>
+                          <div className={styles.attachedDocInfo}>
+                            <Check size={11} strokeWidth={2.5} />
+                            <span>
+                              {attachedDoc.fileName} ({formatFileSize(attachedDoc.fileSize)})
+                            </span>
+                          </div>
+                          <div>
+                            <DocumentVerificationBadge
+                              document={attachedDoc}
+                              onVerify={onVerifyDocument}
+                              compact
+                            />
+                          </div>
                         </div>
                       ) : (
                         <button

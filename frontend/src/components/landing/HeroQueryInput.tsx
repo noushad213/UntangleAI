@@ -530,6 +530,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
     if (alert) {
       setIsOpen(false);
       setFeedback(null);
+      setNeedsLocation(false);
       inputRef.current?.focus();
       return;
     }
@@ -599,7 +600,11 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
     }
   };
 
-  const handleClear = () => {
+  const handleClear = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setPromptAlert(null);
     if (isListening) {
       stopRecognition();
@@ -608,7 +613,26 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
     setIsOpen(false);
     setActiveIndex(-1);
     setFeedback(null);
-    if (inputRef.current) inputRef.current.focus();
+    setNeedsLocation(false);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  };
+
+  const handleSearchBarClick = (e: React.MouseEvent) => {
+    if (
+      inputRef.current &&
+      e.target !== inputRef.current &&
+      !(e.target as HTMLElement).closest('button, [role="button"]')
+    ) {
+      inputRef.current.focus();
+    }
   };
 
   const hasTyped = query.trim().length > 0;
@@ -628,6 +652,7 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
           isListening ? styles.searchBarListening : ''
         }`}
         onSubmit={handleSubmit}
+        onClick={handleSearchBarClick}
         role="search"
       >
         <Search size={22} className={styles.searchIcon} />
@@ -656,6 +681,13 @@ export function HeroQueryInput({ selectedLang }: HeroQueryInputProps) {
             <button
               type="button"
               className={styles.clearBtn}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+              }}
               onClick={handleClear}
               aria-label={t.search.clearQuery}
               title={t.search.clearQuery}

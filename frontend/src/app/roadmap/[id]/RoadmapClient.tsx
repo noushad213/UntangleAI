@@ -164,6 +164,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
     documents,
     startTracking,
     uploadDocument,
+    verifyDocument,
     removeDocument,
     downloadDoc,
     exportDossier,
@@ -552,6 +553,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
               nextStep={nextStep}
               requirementDocumentsMap={requirementDocumentsMap}
               onUploadDocument={uploadDocument}
+              onVerifyDocument={verifyDocument}
               onRemoveDocument={removeDocument}
               onDownloadDocument={downloadDoc}
               onOpenVault={openTrackerDrawer}
@@ -581,6 +583,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
           onToggleComplete={toggleStep}
           requirementDocumentsMap={requirementDocumentsMap}
           onUploadDocument={uploadDocument}
+          onVerifyDocument={verifyDocument}
           onRemoveDocument={removeDocument}
           onDownloadDocument={downloadDoc}
           onOpenVault={openTrackerDrawer}
@@ -626,6 +629,7 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
         completedStepIds={completedStepIds}
         documents={documents}
         onUploadDocument={uploadDocument}
+        onVerifyDocument={verifyDocument}
         onRemoveDocument={removeDocument}
         onDownloadDocument={downloadDoc}
         onExportDossier={exportDossier}

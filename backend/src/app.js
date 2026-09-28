@@ -8,6 +8,7 @@ const municipalityRoutes = require("./routes/municipality.routes");
 const workflowRoutes = require("./routes/workflow.routes");
 const queryRoutes = require("./routes/query.routes");
 const officeRoutes = require("./routes/office.routes");
+const { createDocumentVerificationRouter } = require("./features/document-verification");
 const { notFoundHandler, errorHandler } = require("./utils/errorHandler");
 const { createCorsOptions } = require("./middleware/security");
 
@@ -24,6 +25,7 @@ function createApp() {
   app.use("/api/workflows", workflowRoutes);
   app.use("/api/query", queryRoutes);
   app.use("/api/offices", officeRoutes);
+  app.use("/api/documents", createDocumentVerificationRouter());
 
   app.use(notFoundHandler);
   app.use(errorHandler);

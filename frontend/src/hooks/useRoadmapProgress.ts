@@ -11,6 +11,12 @@ import {
   downloadTrackedDocument,
   exportDossierJSON,
 } from '@/lib/document-vault';
+import {
+  verifyDocumentType,
+  guessVerifiableDocumentType,
+  dataUrlToBlob,
+  VerificationResult,
+} from '@/lib/document-verification';
 
 const STORAGE_PREFIX = 'untangle_progress_';
 
@@ -88,10 +94,15 @@ export function useRoadmapProgress(process: CivicProcess) {
     });
   }, [process.id]);
 
-  // Upload and persist document
+  // Upload and persist document (with auto-OCR verification when requirement type is known)
   const uploadDocument = useCallback(
     async (file: File, stepId: string, requirementId?: string): Promise<TrackedDocument> => {
       const base64 = await fileToBase64(file);
+
+      const req = requirementId
+        ? process.steps.flatMap((s) => s.requirements || []).find((r) => r.id === requirementId)
+        : undefined;
+      const guessedType = guessVerifiableDocumentType(req?.title);
 
       const newDoc: TrackedDocument = {
         id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
@@ -104,6 +115,8 @@ export function useRoadmapProgress(process: CivicProcess) {
         uploadedAt: new Date().toISOString(),
         dataUrl: base64,
         status: 'attached_locally',
+        verificationStatus: guessedType ? 'checking' : undefined,
+        expectedType: guessedType || undefined,
       };
 
       setTrackingState((prev) => {
@@ -123,9 +136,122 @@ export function useRoadmapProgress(process: CivicProcess) {
         return next;
       });
 
+      // If document type is identifiable, run OCR verification in background
+      if (guessedType) {
+        verifyDocumentType(file, file.name, guessedType, true)
+          .then((res) => {
+            setTrackingState((prev) => {
+              const next: RoadmapTrackingState = {
+                ...prev,
+                documents: prev.documents.map((d) => {
+                  if (d.id !== newDoc.id) return d;
+                  return {
+                    ...d,
+                    verificationStatus: res.valid
+                      ? 'verified'
+                      : res.status === 'mismatch'
+                      ? 'mismatch'
+                      : 'unverified',
+                    detectedType: res.detectedDocumentType || undefined,
+                    expectedType: res.expectedDocumentType || guessedType,
+                    verificationMessage: res.message,
+                    verificationConfidence: res.confidence,
+                  };
+                }),
+              };
+              saveTrackingState(process.id, next);
+              return next;
+            });
+          })
+          .catch(() => {
+            // Keep local document intact even if OCR is offline
+            setTrackingState((prev) => {
+              const next: RoadmapTrackingState = {
+                ...prev,
+                documents: prev.documents.map((d) =>
+                  d.id === newDoc.id ? { ...d, verificationStatus: 'unverified' } : d
+                ),
+              };
+              saveTrackingState(process.id, next);
+              return next;
+            });
+          });
+      }
+
       return newDoc;
     },
-    [process.id]
+    [process.id, process.steps]
+  );
+
+  // Manually verify or re-verify a document
+  const verifyDocument = useCallback(
+    async (docId: string, customExpectedType?: string): Promise<VerificationResult | null> => {
+      const doc = trackingState.documents.find((d) => d.id === docId);
+      if (!doc || !doc.dataUrl) return null;
+
+      let expectedType = customExpectedType;
+      if (!expectedType && doc.requirementId) {
+        const req = process.steps
+          .flatMap((s) => s.requirements || [])
+          .find((r) => r.id === doc.requirementId);
+        expectedType = guessVerifiableDocumentType(req?.title) || undefined;
+      }
+      if (!expectedType) return null;
+
+      setTrackingState((prev) => {
+        const next: RoadmapTrackingState = {
+          ...prev,
+          documents: prev.documents.map((d) =>
+            d.id === docId ? { ...d, verificationStatus: 'checking' } : d
+          ),
+        };
+        saveTrackingState(process.id, next);
+        return next;
+      });
+
+      try {
+        const blob = dataUrlToBlob(doc.dataUrl);
+        const result = await verifyDocumentType(blob, doc.fileName, expectedType, true);
+
+        setTrackingState((prev) => {
+          const next: RoadmapTrackingState = {
+            ...prev,
+            documents: prev.documents.map((d) => {
+              if (d.id !== docId) return d;
+              return {
+                ...d,
+                verificationStatus: result.valid
+                  ? 'verified'
+                  : result.status === 'mismatch'
+                  ? 'mismatch'
+                  : 'unverified',
+                detectedType: result.detectedDocumentType || undefined,
+                expectedType: result.expectedDocumentType || expectedType,
+                verificationMessage: result.message,
+                verificationConfidence: result.confidence,
+              };
+            }),
+          };
+          saveTrackingState(process.id, next);
+          return next;
+        });
+
+        return result;
+      } catch (err) {
+        setTrackingState((prev) => {
+          const next: RoadmapTrackingState = {
+            ...prev,
+            documents: prev.documents.map((d) =>
+              d.id === docId ? { ...d, verificationStatus: 'failed' } : d
+            ),
+          };
+          saveTrackingState(process.id, next);
+          return next;
+        });
+        return null;
+      }
+    },
+    [process.id, process.steps, trackingState.documents]
   );
 
   // Remove document
@@ -291,6 +417,7 @@ export function useRoadmapProgress(process: CivicProcess) {
     startTracking,
     stopTracking,
     uploadDocument,
+    verifyDocument,
     removeDocument,
     downloadDoc,
     exportDossier,

@@ -10,6 +10,11 @@ export interface TrackedDocument {
   dataUrl?: string; // Base64 data URI for offline persistence and preview
   status?: 'attached_locally';
   notes?: string;
+  verificationStatus?: 'verified' | 'mismatch' | 'unverified' | 'failed' | 'checking';
+  detectedType?: string | null;
+  expectedType?: string | null;
+  verificationMessage?: string;
+  verificationConfidence?: number;
 }
 
 export interface RoadmapTrackingState {

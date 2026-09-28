@@ -1,9 +1,11 @@
-import { CivicProcess, ProcessStep, StepDependency } from '@/types/roadmap';
+import { CivicProcess, NodeType, ProcessStep, StepDependency } from '@/types/roadmap';
 
 interface BackendNode {
   id: string;
   label: string;
   data: {
+    nodeType?: NodeType;
+    stepType?: NodeType;
     description?: string;
     fee?: string | null;
     deadline?: string | null;
