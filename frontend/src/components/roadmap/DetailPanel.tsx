@@ -21,8 +21,10 @@ import { ProcessStep, StepStatus } from '@/types/roadmap';
 import { useLanguage } from '@/context/LanguageContext';
 import { TrackedDocument, formatFileSize } from '@/lib/document-vault';
 import styles from './DetailPanel.module.css';
+import { CivicAssistance } from './CivicAssistance';
 
 interface DetailPanelProps {
+  location: string;
   step: ProcessStep | null;
   status: StepStatus;
   isCompleted: boolean;
@@ -39,6 +41,7 @@ interface DetailPanelProps {
 }
 
 export function DetailPanel({
+  location,
   step,
   status,
   isCompleted,
@@ -297,6 +300,8 @@ export function DetailPanel({
               )}
             </section>
           )}
+
+          {isOpen && <CivicAssistance key={`${step.id}-${location}`} step={step} location={location} />}
 
           {step.sourceUrl && (
             <section className={styles.section}>
