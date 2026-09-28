@@ -1,0 +1,218 @@
+.listContainer {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.introSection {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.introTitle {
+  font-size: var(--type-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.introDesc {
+  font-size: var(--type-sm);
+  color: var(--color-text-secondary);
+}
+
+.stepsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: relative;
+}
+
+.stepCard {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+  outline: none;
+}
+
+.stepCard:hover {
+  border-color: var(--color-brand-500);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+.stepCard.completed {
+  border-color: var(--color-node-complete-border);
+  background-color: var(--color-node-complete-bg);
+}
+
+.stepCard.locked {
+  background-color: var(--color-node-locked-bg);
+  border-color: var(--color-node-locked-border);
+  opacity: 0.85;
+}
+
+.checkboxContainer {
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.checkboxBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border-hover);
+  background: var(--color-surface-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.checkboxBtn:hover {
+  border-color: var(--color-brand-500);
+}
+
+.stepCard.completed .checkboxBtn {
+  background: var(--color-node-complete);
+  border-color: var(--color-node-complete);
+  color: var(--color-text-inverse);
+}
+
+.contentBlock {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.topLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.badgeGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.typeBadge {
+  font-size: var(--type-xs);
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badgeAction {
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-600);
+}
+
+.badgeDocument {
+  background-color: var(--color-warning-50);
+  color: var(--color-warning-600);
+}
+
+.badgePrerequisite {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+}
+
+.stepIndex {
+  font-size: var(--type-xs);
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+}
+
+.stepTitle {
+  font-size: var(--type-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.35;
+}
+
+.stepDesc {
+  font-size: var(--type-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--type-xs);
+  color: var(--color-text-tertiary);
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lockedAlert {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-warning-600);
+  font-weight: 500;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 640px) {
+  .listContainer {
+    padding: var(--space-4) var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .introSection {
+    padding: var(--space-4);
+  }
+
+  .introTitle {
+    font-size: var(--type-lg);
+  }
+
+  .stepCard {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .stepTitle {
+    font-size: var(--type-sm);
+  }
+
+  .metaRow {
+    gap: var(--space-2);
+    font-size: 11px;
+  }
+}
+
+@media (hover: none) {
+  .stepCard:hover {
+    transform: none;
+  }
+}

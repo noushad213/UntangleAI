@@ -1,0 +1,129 @@
+[
+  {
+    "name": "Pune Municipal Corporation",
+    "slug": "pune",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "allowedDomains": [
+      "punecorporation.org",
+      "services.punecorporation.org",
+      "propertytax.punecorporation.org",
+      "aaplesarkar.mahaonline.gov.in",
+      "rts.maharashtra.gov.in",
+      "mahabhumi.gov.in",
+      "bhulekh.mahabhumi.gov.in",
+      "digitalsatbara.mahabhumi.gov.in",
+      "parivahan.gov.in",
+      "transport.maharashtra.gov.in",
+      "mahafood.gov.in",
+      "rcms.mahafood.gov.in",
+      "igrmaharashtra.gov.in"
+    ]
+  },
+  {
+    "name": "Brihanmumbai Municipal Corporation",
+    "slug": "mumbai",
+    "state": "Maharashtra",
+    "district": "Mumbai City",
+    "allowedDomains": [
+      "portal.mcgm.gov.in",
+      "ptaxportal.mcgm.gov.in",
+      "aquatax.mcgm.gov.in",
+      "aaplesarkar.mahaonline.gov.in",
+      "rts.maharashtra.gov.in",
+      "mahabhumi.gov.in",
+      "bhulekh.mahabhumi.gov.in",
+      "parivahan.gov.in",
+      "transport.maharashtra.gov.in",
+      "mahafood.gov.in",
+      "rcms.mahafood.gov.in",
+      "lms.mahaonline.gov.in",
+      "igrmaharashtra.gov.in"
+    ]
+  },
+  {
+    "name": "Nagpur Municipal Corporation",
+    "slug": "nagpur",
+    "state": "Maharashtra",
+    "district": "Nagpur",
+    "allowedDomains": [
+      "nmcnagpur.gov.in",
+      "aaplesarkar.mahaonline.gov.in",
+      "rts.maharashtra.gov.in",
+      "mahabhumi.gov.in",
+      "bhulekh.mahabhumi.gov.in",
+      "parivahan.gov.in",
+      "transport.maharashtra.gov.in",
+      "mahafood.gov.in",
+      "rcms.mahafood.gov.in"
+    ]
+  },
+  {
+    "name": "Nashik Municipal Corporation",
+    "slug": "nashik",
+    "state": "Maharashtra",
+    "district": "Nashik",
+    "allowedDomains": [
+      "nmc.gov.in",
+      "aaplesarkar.mahaonline.gov.in",
+      "rts.maharashtra.gov.in",
+      "mahabhumi.gov.in",
+      "bhulekh.mahabhumi.gov.in",
+      "parivahan.gov.in",
+      "transport.maharashtra.gov.in",
+      "mahafood.gov.in",
+      "rcms.mahafood.gov.in"
+    ]
+  },
+  {
+    "name": "Thane Municipal Corporation",
+    "slug": "thane",
+    "state": "Maharashtra",
+    "district": "Thane",
+    "allowedDomains": [
+      "thanecity.gov.in",
+      "aaplesarkar.mahaonline.gov.in",
+      "rts.maharashtra.gov.in",
+      "mahabhumi.gov.in",
+      "bhulekh.mahabhumi.gov.in",
+      "parivahan.gov.in",
+      "transport.maharashtra.gov.in",
+      "mahafood.gov.in",
+      "rcms.mahafood.gov.in"
+    ]
+  },
+  {
+    "name": "Pimpri Chinchwad Municipal Corporation",
+    "slug": "pcmc",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "allowedDomains": [
+      "pcmcindia.gov.in",
+      "aaplesarkar.mahaonline.gov.in",
+      "rts.maharashtra.gov.in",
+      "mahabhumi.gov.in",
+      "bhulekh.mahabhumi.gov.in",
+      "parivahan.gov.in",
+      "transport.maharashtra.gov.in",
+      "mahafood.gov.in",
+      "rcms.mahafood.gov.in"
+    ]
+  },
+  {
+    "name": "Navi Mumbai Municipal Corporation",
+    "slug": "navi-mumbai",
+    "state": "Maharashtra",
+    "district": "Thane",
+    "allowedDomains": [
+      "nmmc.gov.in",
+      "aaplesarkar.mahaonline.gov.in",
+      "rts.maharashtra.gov.in",
+      "mahabhumi.gov.in",
+      "bhulekh.mahabhumi.gov.in",
+      "parivahan.gov.in",
+      "transport.maharashtra.gov.in",
+      "mahafood.gov.in",
+      "rcms.mahafood.gov.in"
+    ]
+  }
+]

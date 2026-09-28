@@ -1,0 +1,588 @@
+const Groq = require("groq-sdk");
+
+const clientCache = new Map();
+let currentKeyIndex = 0;
+
+function getGroqApiKeys() {
+  const keys = [];
+
+  const addKeys = (val) => {
+    if (!val) return;
+    const parts = String(val).split(",");
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (trimmed && !keys.includes(trimmed)) {
+        keys.push(trimmed);
+      }
+    }
+  };
+
+  addKeys(process.env.GROQ_API_KEY);
+  addKeys(process.env.GROQ_API_KEY_FALLBACK);
+  addKeys(process.env.GROQ_FALLBACK_API_KEY);
+  addKeys(process.env.GROQ_API_KEYS);
+
+  return keys;
+}
+
+function getGroqClient(apiKey) {
+  const key = apiKey || getActiveApiKey();
+  if (!key) {
+    throw new Error("The GROQ_API_KEY environment variable is missing or empty.");
+  }
+  if (!clientCache.has(key)) {
+    clientCache.set(key, new Groq({ apiKey: key }));
+  }
+  return clientCache.get(key);
+}
+
+function getActiveApiKey() {
+  const keys = getGroqApiKeys();
+  if (keys.length === 0) return null;
+  return keys[currentKeyIndex % keys.length];
+}
+
+function rotateApiKey() {
+  const keys = getGroqApiKeys();
+  if (keys.length > 1) {
+    currentKeyIndex = (currentKeyIndex + 1) % keys.length;
+    console.log(`Rotated Groq API key to backup key index ${currentKeyIndex + 1}/${keys.length}`);
+  }
+}
+
+function getRetryDecision(errorMessage = "") {
+  const message = String(errorMessage).toLowerCase();
+
+  if (
+    message.includes("invalid api key") ||
+    message.includes("invalid_api_key") ||
+    message.includes("unauthorized") ||
+    message.includes("401")
+  ) {
+    return {
+      retry: false,
+      reason: "auth_failure",
+    };
+  }
+
+  if (
+    message.includes("rate limit") ||
+    message.includes("too many requests") ||
+    message.includes("429") ||
+    message.includes("quota")
+  ) {
+    return {
+      retry: true,
+      reason: "rate_limit",
+    };
+  }
+
+  if (
+    message.includes("timeout") ||
+    message.includes("timed out") ||
+    message.includes("etimedout") ||
+    message.includes("network") ||
+    message.includes("econnreset") ||
+    message.includes("econnrefused") ||
+    message.includes("enotfound")
+  ) {
+    return {
+      retry: true,
+      reason: "network_or_timeout",
+    };
+  }
+
+  if (
+    message.includes("500") ||
+    message.includes("502") ||
+    message.includes("503") ||
+    message.includes("504") ||
+    message.includes("service unavailable")
+  ) {
+    return {
+      retry: true,
+      reason: "server_error",
+    };
+  }
+
+  return {
+    retry: false,
+    reason: "non_retryable",
+  };
+}
+
+function getRetryDelay(attempt) {
+  return Math.min(
+    1000 * Math.pow(2, attempt - 1),
+    8000
+  );
+}
+
+async function callGroq(
+  messages,
+  options = {}
+) {
+  const apiKeys = getGroqApiKeys();
+  if (apiKeys.length === 0) {
+    throw new Error("The GROQ_API_KEY environment variable is missing or empty.");
+  }
+
+  const maxAttempts = options.maxAttempts || 2;
+  const totalKeys = apiKeys.length;
+  let lastError = null;
+
+  for (let keyOffset = 0; keyOffset < totalKeys; keyOffset++) {
+    const keyIndex = (currentKeyIndex + keyOffset) % totalKeys;
+    const apiKey = apiKeys[keyIndex];
+    const client = getGroqClient(apiKey);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        console.log(
+          `Groq request attempt ${attempt} (key ${keyIndex + 1}/${totalKeys})`
+        );
+
+        const response = await client.chat.completions.create({
+          model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
+          messages,
+          temperature: options.temperature ?? 0,
+          max_completion_tokens: options.maxCompletionTokens || 4096,
+          response_format: options.responseFormat || { type: "json_object" },
+        });
+
+        const content = response?.choices?.[0]?.message?.content;
+        if (!content) {
+          throw new Error("GROQ_EMPTY_RESPONSE");
+        }
+
+        currentKeyIndex = keyIndex;
+        console.log("Groq request successful");
+        return content;
+      } catch (error) {
+        lastError = error;
+        const errorMessage =
+          error?.message ||
+          error?.response?.data?.error?.message ||
+          String(error);
+
+        const decision = getRetryDecision(errorMessage);
+
+        console.error("GROQ_FAILED", {
+          attempt,
+          keyIndex: keyIndex + 1,
+          totalKeys,
+          message: errorMessage,
+          retry: decision.retry,
+          reason: decision.reason,
+        });
+
+        const isKeyExhausted =
+          decision.reason === "rate_limit" ||
+          decision.reason === "auth_failure" ||
+          errorMessage.toLowerCase().includes("rate limit") ||
+          errorMessage.toLowerCase().includes("429") ||
+          errorMessage.toLowerCase().includes("quota") ||
+          errorMessage.toLowerCase().includes("unauthorized") ||
+          errorMessage.toLowerCase().includes("401");
+
+        if (isKeyExhausted && keyOffset < totalKeys - 1) {
+          console.warn(
+            `Groq key ${keyIndex + 1}/${totalKeys} failed (${decision.reason}), falling over to backup key...`
+          );
+          rotateApiKey();
+          break;
+        }
+
+        if (!decision.retry || attempt >= maxAttempts) {
+          if (keyOffset < totalKeys - 1) {
+            console.warn(
+              `Groq key ${keyIndex + 1}/${totalKeys} attempts exhausted, trying next backup key...`
+            );
+            rotateApiKey();
+            break;
+          }
+          throw error;
+        }
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, getRetryDelay(attempt))
+        );
+      }
+    }
+  }
+
+  throw lastError || new Error("GROQ_FAILED");
+}
+
+function parseJsonResponse(content) {
+  const cleaned = String(content)
+    .replace(/```json|```/g, "")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (error) {
+    throw new Error(
+      "GROQ_INVALID_JSON_RESPONSE"
+    );
+  }
+}
+
+/**
+ * Understands a natural-language civic query.
+ *
+ * The issue catalog is optional context only.
+ * It is NOT a restriction.
+ *
+ * The classifier can identify completely new
+ * civic issues that are not present in the catalog.
+ */
+async function classifyIntent(
+  query,
+  municipalityName,
+  issueCatalog = []
+) {
+  const messages = [
+    {
+      role: "system",
+
+      content: `
+You are a civic-service intent classifier.
+
+Understand the user's natural-language civic request for the specified municipality.
+
+The user may ask about ANY civic issue or government service.
+
+Do NOT restrict the answer to a predefined catalog.
+
+The issue catalog, if supplied, is only optional context for recognizing common known issues.
+
+If the requested issue is not present in the catalog, create a new normalized issue representation.
+
+Return ONLY valid JSON.
+
+Return exactly:
+
+{
+  "issueKey": "string",
+  "intent": "string",
+  "keywords": ["string"],
+  "confidence": 0
+}
+
+Rules:
+
+- issueKey must be a short, stable, lowercase kebab-case identifier.
+- issueKey must describe the core civic service or issue.
+- Do not include municipality names in issueKey.
+- Do not include dates, names, addresses, or temporary details.
+- intent must be a concise human-readable name for the civic service.
+- keywords must contain useful search terms related to the issue.
+- confidence must be between 0 and 1.
+- If the issue is not in the supplied catalog, still create the appropriate issueKey.
+- Do not invent random or unrelated issue keys.
+- Do not explain the answer.
+
+Examples:
+
+"How do I get a dog license?"
+-> "dog-license"
+
+"How can I pay my house tax?"
+-> "property-tax-payment"
+
+"How do I get a birth certificate?"
+-> "birth-certificate"
+
+"How can I apply for a new water connection?"
+-> "water-connection"
+`,
+    },
+
+    {
+      role: "user",
+
+      content: JSON.stringify({
+        municipality:
+          municipalityName,
+
+        query,
+
+        optionalIssueCatalog:
+          Array.isArray(issueCatalog)
+            ? issueCatalog.map((item) => ({
+                issueKey:
+                  item.issueKey,
+
+                label:
+                  item.label,
+
+                keywords:
+                  item.keywords,
+              }))
+            : [],
+      }),
+    },
+  ];
+
+  const content =
+    await callGroq(messages, {
+      temperature: 0,
+
+      responseFormat: {
+        type: "json_object",
+      },
+    });
+
+  const parsed =
+    parseJsonResponse(content);
+
+  if (
+    typeof parsed.issueKey !==
+      "string" ||
+    !parsed.issueKey.trim() ||
+    typeof parsed.intent !==
+      "string" ||
+    !parsed.intent.trim() ||
+    !Array.isArray(
+      parsed.keywords
+    ) ||
+    typeof parsed.confidence !==
+      "number"
+  ) {
+    throw new Error(
+      "GROQ_INVALID_INTENT_OUTPUT"
+    );
+  }
+
+  return {
+    issueKey:
+      parsed.issueKey
+        .trim()
+        .toLowerCase(),
+
+    intent:
+      parsed.intent.trim(),
+
+    keywords:
+      parsed.keywords
+        .filter(
+          (keyword) =>
+            typeof keyword ===
+              "string" &&
+            keyword.trim()
+        )
+        .map(
+          (keyword) =>
+            keyword.trim()
+        ),
+
+    confidence:
+      Math.max(
+        0,
+        Math.min(
+          1,
+          parsed.confidence
+        )
+      ),
+  };
+}
+
+/**
+ * Extracts a source-grounded civic workflow.
+ *
+ * IMPORTANT:
+ * Groq must NOT generate official URLs.
+ * The backend owns URL resolution.
+ */
+async function extractWorkflow(
+  issueLabel,
+  sources
+) {
+  const messages = [
+    {
+      role: "system",
+
+      content: `
+You extract a step-by-step civic procedure ONLY from the supplied official source material.
+
+You must never fabricate:
+- fees
+- deadlines
+- documents
+- eligibility
+- offices
+- URLs
+- procedural steps
+
+If a fact is not explicitly present in the sources:
+- use null for that field
+- add the missing information to missingInformation
+
+Every concrete factual step must include the sourceId values supporting it.
+
+Every source-grounded factual statement should include evidence containing:
+- chunkId
+- pageStart
+- pageEnd
+- short verbatim quote
+
+Do not invent:
+- sourceIds
+- chunkIds
+- page numbers
+- quotes
+- evidence
+
+IMPORTANT URL RULE:
+
+Never generate, guess, reconstruct, modify, shorten, or invent a URL.
+
+Do not create a URL from:
+- a website name
+- a page title
+- a service name
+- your own knowledge
+
+Do not transform a PDF URL into another URL.
+
+Do not transform a webpage URL into another URL.
+
+The field officialUrl MUST ALWAYS be null.
+
+The backend will assign the real official URL from the original source record.
+
+Use sourceIds to identify which source supports each step.
+
+If sources disagree, add an entry to conflicts with:
+- description
+- sourceIds
+
+If the supplied source material does NOT contain enough evidence to establish at least one genuine procedural step, return:
+
+{
+  "steps": [],
+  "conflicts": [],
+  "missingInformation": [
+    "insufficient official procedural evidence"
+  ]
+}
+
+Do NOT invent a step merely to avoid returning an empty steps array.
+
+Return ONLY valid JSON matching this structure:
+
+{
+  "steps": [
+    {
+      "stepId": "string",
+      "title": "string",
+      "description": "string",
+      "dependsOn": ["string"],
+      "sourceIds": ["string"],
+      "evidence": [
+        {
+          "chunkId": "string",
+          "pageStart": "number or null",
+          "pageEnd": "number or null",
+          "quote": "string or null"
+        }
+      ],
+      "fee": "string or null",
+      "deadline": "string or null",
+      "documentsRequired": ["string"],
+      "eligibility": "string or null",
+      "office": "string or null",
+      "officialUrl": null,
+      "isUncertain": true,
+      "uncertaintyNote": "string or null"
+    }
+  ],
+  "conflicts": [
+    {
+      "description": "string",
+      "sourceIds": ["string"]
+    }
+  ],
+  "missingInformation": ["string"]
+}
+`,
+    },
+
+    {
+      role: "user",
+
+      content: JSON.stringify({
+        issue:
+          issueLabel,
+
+        sources,
+      }),
+    },
+  ];
+
+  const content =
+    await callGroq(messages, {
+      temperature: 0,
+
+      maxCompletionTokens:
+        4096,
+
+      responseFormat: {
+        type: "json_object",
+      },
+    });
+
+  const parsed =
+    parseJsonResponse(content);
+
+  if (!Array.isArray(parsed.steps)) {
+    throw new Error(
+      "GROQ_INVALID_WORKFLOW_OUTPUT"
+    );
+  }
+
+  /*
+   * IMPORTANT:
+   * Groq successfully returned JSON, but it
+   * could not construct a source-supported
+   * workflow from the supplied evidence.
+   *
+   * Do NOT allow an empty workflow to reach
+   * the normal workflow validator.
+   *
+   * workflow.service.js will use this error
+   * to trigger the next evidence-retrieval step.
+   */
+  if (parsed.steps.length === 0) {
+    throw new Error(
+      "GROQ_INSUFFICIENT_EVIDENCE"
+    );
+  }
+
+  return {
+    steps:
+      parsed.steps,
+
+    conflicts:
+      Array.isArray(
+        parsed.conflicts
+      )
+        ? parsed.conflicts
+        : [],
+
+    missingInformation:
+      Array.isArray(
+        parsed.missingInformation
+      )
+        ? parsed.missingInformation
+        : [],
+  };
+}
+
+module.exports = {
+  callGroq,
+  classifyIntent,
+  extractWorkflow,
+  getRetryDecision,
+};

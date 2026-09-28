@@ -1,0 +1,372 @@
+/* Design System Tokens — UntangleAI */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
+@import '@xyflow/react/dist/style.css';
+
+:root {
+  /* Brand Palette — richer, more dimensional */
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+
+  /* Accent — warm violet for gradient pairing */
+  --color-accent-400: #c084fc;
+  --color-accent-500: #a855f7;
+  --color-accent-600: #9333ea;
+
+  /* Semantic Colors */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-500: #ef4444;
+
+  --color-info-50: #ecfeff;
+  --color-info-100: #cffafe;
+  --color-info-500: #06b6d4;
+
+  /* Surface Colors — Light Mode */
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #fafbfe;
+  --color-surface-tertiary: #f1f3f9;
+  --color-surface-elevated: #ffffff;
+  --color-surface-overlay: rgba(15, 23, 42, 0.45);
+  --color-border: #e5e7eb;
+  --color-border-subtle: #f3f4f6;
+  --color-border-hover: #d1d5db;
+
+  /* Text Colors — Light Mode */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #94a3b8;
+  --color-text-inverse: #ffffff;
+
+  /* Gradient Tokens */
+  --gradient-brand: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  --gradient-brand-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.06) 50%, rgba(236, 72, 153, 0.04) 100%);
+  --gradient-hero-bg: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.08) 40%, transparent 70%);
+  --gradient-glow: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.25), transparent 70%);
+
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-blur: 16px;
+
+  /* Graph Node Tokens */
+  --color-node-action: #6366f1;
+  --color-node-action-bg: #eef2ff;
+  --color-node-action-border: #c7d2fe;
+
+  --color-node-document: #f59e0b;
+  --color-node-document-bg: #fffbeb;
+  --color-node-document-border: #fde68a;
+
+  --color-node-prerequisite: #a855f7;
+  --color-node-prerequisite-bg: #faf5ff;
+  --color-node-prerequisite-border: #e9d5ff;
+
+  --color-node-complete: #22c55e;
+  --color-node-complete-bg: #f0fdf4;
+  --color-node-complete-border: #bbf7d0;
+
+  --color-node-locked: #94a3b8;
+  --color-node-locked-bg: #f8fafc;
+  --color-node-locked-border: #e2e8f0;
+
+  /* Typography */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family-display: 'Cinzel', serif;
+  --type-display: 2.25rem;
+  --type-3xl: 1.875rem;
+  --type-2xl: 1.5rem;
+  --type-xl: 1.25rem;
+  --type-lg: 1.125rem;
+  --type-base: 1rem;
+  --type-sm: 0.875rem;
+  --type-xs: 0.75rem;
+
+  /* Spacing Grid (4px base) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
+
+  /* Shadows — more layered for depth */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.04);
+  --shadow-glow-brand: 0 0 40px rgba(99, 102, 241, 0.15), 0 0 80px rgba(168, 85, 247, 0.08);
+  --shadow-glow-sm: 0 0 20px rgba(99, 102, 241, 0.12);
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-normal: 250ms;
+  --duration-slow: 500ms;
+  --duration-entrance: 800ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Dark Mode Tokens */
+[data-theme='dark'] {
+  --color-brand-50: #1e1b4b;
+  --color-brand-100: #312e81;
+  --color-brand-200: #3730a3;
+  --color-brand-500: #818cf8;
+  --color-brand-600: #6366f1;
+  --color-brand-700: #4f46e5;
+
+  --color-accent-400: #d8b4fe;
+  --color-accent-500: #c084fc;
+  --color-accent-600: #a855f7;
+
+  --color-success-50: #052e16;
+  --color-success-100: #14532d;
+  --color-success-500: #4ade80;
+  --color-success-600: #22c55e;
+
+  --color-warning-50: #422006;
+  --color-warning-100: #713f12;
+  --color-warning-500: #fbbf24;
+  --color-warning-600: #f59e0b;
+
+  --color-error-50: #450a0a;
+  --color-error-100: #7f1d1d;
+  --color-error-500: #f87171;
+
+  --color-info-50: #083344;
+  --color-info-100: #155e75;
+  --color-info-500: #22d3ee;
+
+  --color-surface-primary: #0b0f1a;
+  --color-surface-secondary: #111827;
+  --color-surface-tertiary: #1f2937;
+  --color-surface-elevated: rgba(17, 24, 39, 0.8);
+  --color-surface-overlay: rgba(0, 0, 0, 0.75);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-subtle: rgba(255, 255, 255, 0.04);
+  --color-border-hover: rgba(255, 255, 255, 0.15);
+
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-tertiary: #64748b;
+  --color-text-inverse: #0f172a;
+
+  --gradient-brand: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+  --gradient-brand-subtle: linear-gradient(135deg, rgba(129, 140, 248, 0.12) 0%, rgba(192, 132, 252, 0.08) 50%, rgba(244, 114, 182, 0.05) 100%);
+  --gradient-hero-bg: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.1) 40%, transparent 70%);
+  --gradient-glow: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.3), transparent 70%);
+
+  --glass-bg: rgba(17, 24, 39, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 20px;
+
+  --color-node-action-bg: #1e1b4b;
+  --color-node-action-border: #312e81;
+
+  --color-node-document-bg: #422006;
+  --color-node-document-border: #78350f;
+
+  --color-node-prerequisite-bg: #3b0764;
+  --color-node-prerequisite-border: #581c87;
+
+  --color-node-complete-bg: #052e16;
+  --color-node-complete-border: #14532d;
+
+  --color-node-locked-bg: #1e293b;
+  --color-node-locked-border: #334155;
+
+  --shadow-glow-brand: 0 0 60px rgba(99, 102, 241, 0.2), 0 0 120px rgba(168, 85, 247, 0.1);
+  --shadow-glow-sm: 0 0 30px rgba(99, 102, 241, 0.15);
+}
+
+/* Base Reset & Document Setup */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: var(--font-family-sans);
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-hover);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* Entrance Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes orbitSlow {
+  from { transform: rotate(0deg) translateX(160px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(160px) rotate(-360deg); }
+}
+
+/* React Flow Overrides */
+.react-flow__background {
+  background-color: var(--color-surface-secondary);
+}
+
+.react-flow__controls {
+  box-shadow: var(--shadow-md) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden;
+  border: 1px solid var(--color-border) !important;
+  background: var(--color-surface-elevated) !important;
+}
+
+.react-flow__controls-button {
+  background: var(--color-surface-elevated) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+  fill: var(--color-text-secondary) !important;
+  transition: background var(--duration-fast) var(--ease-default), color var(--duration-fast) var(--ease-default);
+}
+
+.react-flow__controls-button:hover {
+  background: var(--color-surface-tertiary) !important;
+  color: var(--color-brand-600) !important;
+  fill: var(--color-brand-600) !important;
+}
+
+.react-flow__attribution {
+  display: none !important;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

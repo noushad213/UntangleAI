@@ -1,0 +1,9 @@
+.notice { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-border); background: var(--color-surface-secondary); color: var(--color-text-primary); font-size: var(--type-sm); max-height: 35vh; overflow-y: auto; flex-shrink: 0; }
+.heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); }
+.reviewStatus { color: var(--color-text-secondary); font-size: var(--type-xs); }
+.notice p { margin: 0; color: var(--color-text-secondary); line-height: 1.5; }
+.issues { display: grid; gap: var(--space-2); }
+.issues summary { cursor: pointer; padding-block: var(--space-2); color: var(--color-text-primary); font-weight: 600; }
+.issues summary:focus-visible { outline: 2px solid var(--color-brand-600); outline-offset: var(--space-1); border-radius: var(--radius-sm); }
+.issues ul { margin: var(--space-2) 0; padding-inline-start: var(--space-5); line-height: 1.6; overflow-wrap: anywhere; }
+.issues li + li { margin-block-start: var(--space-2); }

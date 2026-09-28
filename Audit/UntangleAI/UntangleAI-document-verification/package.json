@@ -1,0 +1,13 @@
+{
+  "name": "untangleai-document-verification-feature",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Drop-in Express module for OCR-based civic document-type checks",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
