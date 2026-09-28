@@ -575,22 +575,6 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
               onOpenVault={openTrackerDrawer}
               onClose={() => setShowRightPane(false)}
             />
-
-            <DetailPanel
-              step={selectedStep}
-              status={selectedStepStatus}
-              isCompleted={isSelectedCompleted}
-              unmetPrereqs={selectedStepUnmet}
-              totalStepsCount={currentProcess.steps.length}
-              isOpen={isPanelOpen && !isTrackingMode}
-              onClose={handleClosePanel}
-              onToggleComplete={toggleStep}
-              requirementDocumentsMap={requirementDocumentsMap}
-              onUploadDocument={uploadDocument}
-              onRemoveDocument={removeDocument}
-              onDownloadDocument={downloadDoc}
-              onOpenVault={openTrackerDrawer}
-            />
           </>
         ) : (
           <StepListView
@@ -602,6 +586,23 @@ export default function RoadmapClient({ initialProcess }: RoadmapClientProps) {
             onToggleComplete={toggleStep}
           />
         )}
+
+        <DetailPanel
+          location={currentProcess.location}
+          step={selectedStep}
+          status={selectedStepStatus}
+          isCompleted={isSelectedCompleted}
+          unmetPrereqs={selectedStepUnmet}
+          totalStepsCount={currentProcess.steps.length}
+          isOpen={isPanelOpen && (!isTrackingMode || viewMode === 'list')}
+          onClose={handleClosePanel}
+          onToggleComplete={toggleStep}
+          requirementDocumentsMap={requirementDocumentsMap}
+          onUploadDocument={uploadDocument}
+          onRemoveDocument={removeDocument}
+          onDownloadDocument={downloadDoc}
+          onOpenVault={openTrackerDrawer}
+        />
 
         {/* Floating pill-shaped button in bottom middle */}
         <div className={styles.floatingTrackerContainer}>
