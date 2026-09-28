@@ -1,0 +1,372 @@
+[
+  {
+    "issueKey": "birth_certificate",
+    "intentLabel": "Birth Certificate Application",
+    "category": "Vital Records",
+    "queries": [
+      "how to apply for birth certificate online",
+      "birth certificate for baby born at home",
+      "hospital did not issue birth certificate",
+      "delayed birth certificate registration after one year",
+      "janma dakhla online maharashtra",
+      "जन्म दाखला कसा काढायचा",
+      "newborn baby birth certificate documents needed",
+      "birth proof certificate municipal corporation",
+      "how to correct name in birth certificate",
+      "duplicate birth certificate application",
+      "apply birth certificate in pune pmc",
+      "mcgm birth certificate online download mumbai",
+      "how much fee for birth certificate",
+      "time limit to register birth in maharashtra"
+    ]
+  },
+  {
+    "issueKey": "death_certificate",
+    "intentLabel": "Death Certificate Application",
+    "category": "Vital Records",
+    "queries": [
+      "how to apply for death certificate online",
+      "mrutyu dakhla online application",
+      "मृत्यू दाखला कसा मिळवायचा",
+      "documents required for death certificate in maharashtra",
+      "cremation slip to death certificate conversion",
+      "delayed death registration procedure",
+      "apply death certificate in pune corporation",
+      "how to get death certificate copy bmc mumbai",
+      "who can apply for death certificate of parents",
+      "death certificate correction in municipal records"
+    ]
+  },
+  {
+    "issueKey": "marriage_registration",
+    "intentLabel": "Marriage Registration Certificate",
+    "category": "Vital Records",
+    "queries": [
+      "how to register marriage online in maharashtra",
+      "marriage certificate appointment slot booking",
+      "vivah nondani online form",
+      "विवाह नोंदणी प्रमाणपत्र कसे काढायचे",
+      "documents required for court marriage registration",
+      "special marriage act registration process pune",
+      "bmc marriage certificate appointment mumbai",
+      "marriage registration fees and witness requirements",
+      "tatkal marriage certificate procedure maharashtra",
+      "register wedding after 1 year penalty rules"
+    ]
+  },
+  {
+    "issueKey": "property_tax_payment",
+    "intentLabel": "Property Tax Payment & Assessment",
+    "category": "Property & Revenue",
+    "queries": [
+      "how to pay property tax online pune pmc",
+      "milkat kar online payment portal",
+      "मालमत्ता कर कसा भरायचा",
+      "download property tax receipt bmc mumbai",
+      "check outstanding property tax bill by property id",
+      "property tax discount early payment rebate",
+      "house tax payment nagpur municipal corporation",
+      "property tax assessment for new flat",
+      "dispute incorrect property tax bill amount",
+      "pcmc property tax self assessment online"
+    ]
+  },
+  {
+    "issueKey": "property_tax_transfer_mutation",
+    "intentLabel": "Property Tax Name Transfer / Mutation",
+    "category": "Property & Revenue",
+    "queries": [
+      "how to transfer name in property tax bill after purchase",
+      "milkat kar nav badal form maharashtra",
+      "मालमत्ता करामध्ये नाव कसे बदलावे",
+      "documents needed for property tax transfer in municipality",
+      "transfer property tax bill after death of father",
+      "mutation ferfar in municipal tax records",
+      "name change fee in municipal property tax bill",
+      "online application for property tax ownership change"
+    ]
+  },
+  {
+    "issueKey": "water_connection_new",
+    "intentLabel": "New Water Connection Application",
+    "category": "Utilities",
+    "queries": [
+      "how to apply for new water connection pune pmc",
+      "nal connection online form maharashtra",
+      "नवीन नळ जोडणी कशी घ्यावी",
+      "residential water meter connection procedure",
+      "commercial water connection fees and documents",
+      "bmc new water pipeline application mumbai",
+      "water supply connection charges for housing society",
+      "steps to get drinking water connection from corporation"
+    ]
+  },
+  {
+    "issueKey": "water_bill_payment_complaint",
+    "intentLabel": "Water Bill Payment & Meter Dispute",
+    "category": "Utilities",
+    "queries": [
+      "pay water bill online pune corporation",
+      "pani patti payment portal",
+      "पाणी बिल कसे भरायचे",
+      "high water bill complaint municipal corporation",
+      "water meter running fast complaint",
+      "download water bill receipt mcgm aquatax",
+      "no water supply in tap complaint helpline",
+      "dirty muddy water coming from municipal tap"
+    ]
+  },
+  {
+    "issueKey": "trade_license_gumasta",
+    "intentLabel": "Shop and Establishment Registration (Gumasta License)",
+    "category": "Commercial & Trade",
+    "queries": [
+      "how to apply for gumasta license online",
+      "shop and establishment certificate maharashtra",
+      "गुमास्ता परवाना कसा काढायचा",
+      "gumasta license fees and documents needed",
+      "shop act intimation for less than 10 workers",
+      "gumasta registration for commercial shop in pune",
+      "lms mahaonline gumasta renewal process",
+      "is gumasta license mandatory for office home business",
+      "download gumasta certificate online aaple sarkar"
+    ]
+  },
+  {
+    "issueKey": "land_records_7_12_ferfar",
+    "intentLabel": "7/12 Extract (Saat Bara) & Ferfar Application",
+    "category": "Land & Revenue",
+    "queries": [
+      "how to download digital 7 12 online maharashtra",
+      "saat bara utara download with digital signature",
+      "७/१२ उतारा ऑनलाईन कसा काढायचा",
+      "ferfar nod application online e hakk",
+      "फेरफार नोंद कशी तपासावी",
+      "how to apply for mutation entry in land records",
+      "8A extract online download mahabhulekh",
+      "check land ownership record by survey number",
+      "how to add name in 7 12 after registered sale deed",
+      "property card malmatta patrak download urban area"
+    ]
+  },
+  {
+    "issueKey": "caste_certificate",
+    "intentLabel": "Caste Certificate & Caste Validity Application",
+    "category": "Social & Revenue",
+    "queries": [
+      "how to apply for caste certificate online aaple sarkar",
+      "jaat pramanpatra online form maharashtra",
+      "जात प्रमाणपत्र कसे काढायचे",
+      "documents required for obc caste certificate",
+      "sc st caste certificate application tahsildar",
+      "caste validity certificate application procedure barti",
+      "how to prove 1967 proof for sc caste certificate",
+      "caste certificate tracking application status",
+      "affidavit format for caste certificate maharashtra"
+    ]
+  },
+  {
+    "issueKey": "income_certificate",
+    "intentLabel": "Income Certificate Application",
+    "category": "Social & Revenue",
+    "queries": [
+      "how to apply for income certificate online in maharashtra",
+      "utpannacha dakhla online form",
+      "उत्पन्नाचा दाखला कसा मिळवायचा",
+      "tahsildar income certificate for scholarship",
+      "documents needed for 1 year income certificate",
+      "income certificate for college fee concession",
+      "income certificate delivery time on aaple sarkar",
+      "ration card based income proof certificate"
+    ]
+  },
+  {
+    "issueKey": "domicile_nationality_certificate",
+    "intentLabel": "Age, Nationality & Domicile Certificate",
+    "category": "Social & Revenue",
+    "queries": [
+      "how to apply for domicile certificate in maharashtra",
+      "adhavas pramanpatra online application",
+      "अधिवास प्रमाणपत्र कसे काढायचे",
+      "documents required for maharashtra domicile proof",
+      "15 years resident proof needed for domicile",
+      "domicile certificate for mht cet engineering admission",
+      "combined age nationality and domicile certificate form"
+    ]
+  },
+  {
+    "issueKey": "non_creamy_layer_certificate",
+    "intentLabel": "Non-Creamy Layer (NCL) Certificate",
+    "category": "Social & Revenue",
+    "queries": [
+      "how to apply for non creamy layer certificate online",
+      "ncl certificate documents required maharashtra",
+      "नॉन क्रिमीलेअर प्रमाणपत्र कसे काढायचे",
+      "three years income proof for non creamy layer",
+      "obc non creamy layer validity renewal process",
+      "non creamy layer certificate download aaple sarkar"
+    ]
+  },
+  {
+    "issueKey": "ration_card_new_member",
+    "intentLabel": "New Ration Card & Member Addition",
+    "category": "Food & Civil Supplies",
+    "queries": [
+      "how to apply for new ration card in maharashtra",
+      "add newborn baby name to ration card online rcms",
+      "नवीन रेशन कार्ड कसे काढायचे",
+      "ration card madhe nav kase samavisht karave",
+      "रेशन कार्ड मध्ये नाव कसे वाढवावे",
+      "remove name from ration card after marriage",
+      "yellow bpl ration card eligibility criteria",
+      "transfer ration card to new address in same district",
+      "rcms mahafood ration card status check"
+    ]
+  },
+  {
+    "issueKey": "driving_license_learner_permanent",
+    "intentLabel": "Learner's & Permanent Driving License",
+    "category": "Transport",
+    "queries": [
+      "how to apply for learner license online parivahan",
+      "rto driving license test appointment slot booking",
+      "वाहन चालक परवाना कसा काढायचा",
+      "online learner license exam at home maharashtra",
+      "documents required for two wheeler driving license",
+      "permanent dl application after learner license",
+      "commercial heavy vehicle license procedure rto pune",
+      "duplicate driving license download if lost"
+    ]
+  },
+  {
+    "issueKey": "vehicle_rc_transfer_hypothecation",
+    "intentLabel": "Vehicle RC Transfer & Hypothecation Removal",
+    "category": "Transport",
+    "queries": [
+      "how to transfer bike rc ownership in maharashtra",
+      "car rc transfer form 29 30 submission process",
+      "remove bank hypothecation from vehicle rc parivahan",
+      "वाहन मालकी हक्क हस्तांतरण कसे करावे",
+      "noc required for vehicle transfer between rto offices",
+      "fees for two wheeler ownership transfer rto",
+      "online rc status check parivahan vahan"
+    ]
+  },
+  {
+    "issueKey": "building_permission_plan_sanction",
+    "intentLabel": "Building Plan Approval & Commencement Certificate",
+    "category": "Building & Urban Planning",
+    "queries": [
+      "how to get building permission for house in pune",
+      "commencement certificate cc application autodcr",
+      "बांधकाम परवानगी कशी मिळवावी",
+      "documents required for residential building plan sanction",
+      "architect plan approval timeline under rts act",
+      "building permission fees per square foot municipal corporation"
+    ]
+  },
+  {
+    "issueKey": "occupancy_certificate_oc",
+    "intentLabel": "Occupancy Certificate (OC)",
+    "category": "Building & Urban Planning",
+    "queries": [
+      "how to check if building has occupancy certificate",
+      "apply for oc certificate in municipal corporation",
+      "भोगवटा प्रमाणपत्र कसे मिळवावे",
+      "documents needed for builder completion certificate",
+      "is it legal to occupy flat without oc in maharashtra",
+      "penalty for building occupancy without municipal oc"
+    ]
+  },
+  {
+    "issueKey": "garbage_collection_complaint",
+    "intentLabel": "Garbage Collection Complaint",
+    "category": "Civic Complaints",
+    "queries": [
+      "garbage not collected in my society complaint pune",
+      "kachra complaint online bmc mumbai portal",
+      "कचरा गाडी येत नाही तक्रार",
+      "overflowing community dustbin complaint number",
+      "solid waste management department complaint helpline",
+      "dead animal on road removal complaint municipal"
+    ]
+  },
+  {
+    "issueKey": "streetlight_repair_complaint",
+    "intentLabel": "Streetlight Repair Complaint",
+    "category": "Civic Complaints",
+    "queries": [
+      "street light not working complaint pune corporation",
+      "road light broken dark street complaint helpline",
+      "रस्त्यावरील दिवा बंद तक्रार",
+      "pole light repair complaint bmc mumbai app",
+      "flickering streetlight complaint registration"
+    ]
+  },
+  {
+    "issueKey": "drainage_sewage_blockage_complaint",
+    "intentLabel": "Drainage Overflow Complaint",
+    "category": "Civic Complaints",
+    "queries": [
+      "drainage line overflowing on road complaint",
+      "gutter leakage in front of house complaint pune",
+      "सांडपाणी तुंबणे तक्रार",
+      "sewage water mixed with tap water urgent complaint",
+      "open manhole danger complaint municipal corporation"
+    ]
+  },
+  {
+    "issueKey": "tree_trimming_permission_complaint",
+    "intentLabel": "Tree Trimming & Cutting Permission",
+    "category": "Civic Services",
+    "queries": [
+      "how to get permission to trim tree branches near balcony",
+      "dangerous tree falling risk complaint pune",
+      "झाड छाटणी परवानगी अर्ज",
+      "tree authority noc for dangerous dry tree cutting",
+      "bmc tree trimming helpline and application form"
+    ]
+  },
+  {
+    "issueKey": "fire_noc_commercial",
+    "intentLabel": "Fire Safety NOC",
+    "category": "Safety & Licensing",
+    "queries": [
+      "fire safety noc application for commercial building",
+      "agnishamak parwana online maharashtra",
+      "अग्निशामक ना हरकत प्रमाणपत्र",
+      "fire brigade noc renewal fees and checklist",
+      "hospital fire compliance certificate requirements"
+    ]
+  },
+  {
+    "issueKey": "food_safety_fssai_registration",
+    "intentLabel": "Food Safety Registration (FSSAI)",
+    "category": "Commercial & Trade",
+    "queries": [
+      "i am selling vada pav and i have to do quality testing how do i",
+      "vada pav stall food quality testing procedure",
+      "street food vendor food safety and quality testing in maharashtra",
+      "food testing lab for small food stall fssai",
+      "how to test food quality for stall fssai lab",
+      "cooking oil quality testing tpc limit for street food vendors",
+      "how to apply for fssai food license for restaurant in maharashtra",
+      "ann suraksha parwana registration online",
+      "अन्न सुरक्षा परवाना कसा काढावा",
+      "food business registration fees for small stall vendor",
+      "fssai license renewal procedure foscos maharashtra"
+    ]
+  },
+  {
+    "issueKey": "rti_application_first_appeal",
+    "intentLabel": "Right to Information (RTI) Application",
+    "category": "Public Transparency",
+    "queries": [
+      "how to file rti online in maharashtra government",
+      "maharti portal online application form",
+      "माहितीचा अधिकार अर्ज कसा करावा",
+      "rti application fee 10 rupees online payment",
+      "first appeal rti application procedure if no reply in 30 days"
+    ]
+  }
+]

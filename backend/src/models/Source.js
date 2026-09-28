@@ -46,6 +46,9 @@ const sourceSchema = new mongoose.Schema(
     },
     attemptedUrls: { type: [mongoose.Schema.Types.Mixed], default: [] },
 
+    issueKeys: [{ type: String, trim: true, index: true }],
+    title: { type: String, default: null },
+
     fetchedAt: { type: Date, default: null },
     lastCheckedAt: { type: Date, default: null },
 
@@ -60,5 +63,6 @@ const sourceSchema = new mongoose.Schema(
 );
 
 sourceSchema.index({ municipalityId: 1, url: 1 }, { unique: true });
+sourceSchema.index({ municipalityId: 1, issueKeys: 1 });
 
 module.exports = mongoose.model("Source", sourceSchema);

@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Workflow = require("../models/Workflow");
 const Source = require("../models/Source");
 const { makeError } = require("../utils/errors");
@@ -7,6 +8,7 @@ const {
 
 const municipalityService = require("./municipality.service");
 const aiService = require("./ai.service");
+const queryRouterService = require("./queryRouter.service");
 const searchService = require("./search.service");
 const extractionService = require("./extraction.service");
 const {
@@ -15,6 +17,7 @@ const {
 
 const logger = require("../utils/logger");
 const { recoverWorkflowDetails, needsDetailsRecovery } = require("./workflow-details-recovery");
+const { evaluateQueryGuardrail } = require("../utils/civic-query-guardrail");
 
 const MAX_TOTAL_GEMINI_CHUNKS = 10;
 const DEFAULT_WORKFLOW_FRESHNESS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -96,6 +99,55 @@ async function getCachedSource(
 }
 
 /**
+ * Finds pre-ingested local sources for a civic issue in MongoDB.
+ * Looks for sources tagged with issueKey for the municipality, or state-wide sources.
+ */
+async function getLocalSourcesForIssue(
+  municipalityId,
+  issueKey
+) {
+  if (
+    !issueKey ||
+    !mongoose.connection ||
+    mongoose.connection.readyState !== 1 ||
+    typeof Source.find !== "function"
+  ) {
+    return [];
+  }
+
+  try {
+    let sources = await Source.find({
+      municipalityId,
+      issueKeys: issueKey,
+      extractionStatus: "success",
+      "quality.usable": true,
+    })
+      .sort({ "quality.score": -1, updatedAt: -1 })
+      .limit(10);
+
+    if (sources.length < 5 && Source.find) {
+      const stateSources = await Source.find({
+        issueKeys: issueKey,
+        extractionStatus: "success",
+        "quality.usable": true,
+        _id: { $nin: sources.map((s) => s._id) },
+      })
+        .sort({ "quality.score": -1, updatedAt: -1 })
+        .limit(5);
+
+      if (Array.isArray(stateSources) && stateSources.length > 0) {
+        sources = [...sources, ...stateSources];
+      }
+    }
+
+    return Array.isArray(sources) ? sources : [];
+  } catch (err) {
+    logger.warn("Could not query local pre-ingested sources", { error: err.message });
+    return [];
+  }
+}
+
+/**
  * Main end-to-end pipeline:
  *
  * Natural language query
@@ -154,6 +206,15 @@ async function resolveWorkflowForQuery(
       municipalitySlug
     );
 
+  const guardrailCheck = evaluateQueryGuardrail(rawQuery);
+  if (guardrailCheck.type !== "VALID") {
+    throw makeError(
+      guardrailCheck.code,
+      guardrailCheck.message,
+      { suggestions: guardrailCheck.suggestions }
+    );
+  }
+
   /*
    * ============================================================
    * STEP 1: UNDERSTAND THE USER'S ISSUE
@@ -162,13 +223,29 @@ async function resolveWorkflowForQuery(
    * The catalog is optional context only.
    * New civic issues are allowed.
    */
-  const classification =
-    matchCatalogIssue(rawQuery, municipality.issueCatalog || []) ||
-    await aiService.classifyIntent(
+  let classification = matchCatalogIssue(rawQuery, municipality.issueCatalog || []);
+
+  if (!classification) {
+    classification = await queryRouterService.matchCivicQuery(rawQuery, municipality.slug);
+  }
+
+  if (!classification) {
+    classification = await aiService.classifyIntent(
       rawQuery,
       municipality.name,
       municipality.issueCatalog || []
     );
+
+    if (classification && classification.confidence >= 0.8 && classification.issueKey) {
+      queryRouterService.recordLearnedQuery({
+        queryText: rawQuery,
+        issueKey: classification.issueKey,
+        intentLabel: classification.intent,
+        municipalitySlug: municipality.slug,
+        keywords: Array.isArray(classification.keywords) ? classification.keywords : [],
+      });
+    }
+  }
 
   logger.info(
     "Civic issue classified",
@@ -376,19 +453,79 @@ async function buildWorkflowFromScratch(
   const processedUrls = new Set();
   const maxSources = getMaxSourcesPerWorkflow();
 
+  async function processCandidateUrl(normalizedUrl) {
+    const domain = new URL(normalizedUrl).hostname;
+    let sourceDoc = await getCachedSource(municipality._id, normalizedUrl);
+
+    if (
+      !sourceDoc ||
+      sourceDoc.extractionStatus !== "success" ||
+      !sourceDoc.quality?.usable
+    ) {
+      const extracted = await extractionService.fetchAndExtract(
+        normalizedUrl,
+        municipality.allowedDomains
+      );
+
+      sourceDoc = await Source.findOneAndUpdate(
+        {
+          municipalityId: municipality._id,
+          url: normalizedUrl,
+        },
+        {
+          municipalityId: municipality._id,
+          url: normalizedUrl,
+          domain,
+          documentType: extracted.documentType,
+          extractedText: extracted.extractedText,
+          contentHash: extracted.contentHash,
+          resolvedUrl: extracted.finalUrl,
+          retrievalMethod: extracted.retrievalMethod,
+          extractionMethod: extracted.extractionMethod,
+          pages: extracted.pages,
+          chunks: extracted.chunks,
+          quality: extracted.quality,
+          attemptedUrls: extracted.attemptedUrls,
+          $addToSet: { issueKeys: issue.issueKey },
+          fetchedAt: new Date(),
+          lastCheckedAt: new Date(),
+          extractionStatus: "success",
+          extractionError: null,
+        },
+        {
+          upsert: true,
+          new: true,
+        }
+      );
+    } else if (
+      sourceDoc &&
+      !sourceDoc.issueKeys?.includes(issue.issueKey) &&
+      mongoose.connection?.readyState === 1 &&
+      typeof Source.updateOne === "function"
+    ) {
+      Source.updateOne(
+        { _id: sourceDoc._id },
+        { $addToSet: { issueKeys: issue.issueKey } }
+      ).catch(() => {});
+    }
+
+    if (sourceDoc?.extractionStatus === "success" && sourceDoc?.quality?.usable) {
+      return sourceDoc;
+    }
+    return null;
+  }
+
   async function collectSources(
     searchQuery,
     sourceLimit = maxSources
   ) {
+    if (sourceDocs.length >= sourceLimit) return;
+
     logger.info(
       "Searching official government sources",
       {
-        municipality:
-          municipality.slug,
-
-        issueKey:
-          issue.issueKey,
-
+        municipality: municipality.slug,
+        issueKey: issue.issueKey,
         searchQuery,
       }
     );
@@ -403,242 +540,169 @@ async function buildWorkflowFromScratch(
     logger.info(
       "Government source discovery completed",
       {
-        municipality:
-          municipality.slug,
-
-        issueKey:
-          issue.issueKey,
-
+        municipality: municipality.slug,
+        issueKey: issue.issueKey,
         searchQuery,
-
-        candidateCount:
-          candidates.length,
+        candidateCount: candidates.length,
       }
     );
 
-    for (
-      const candidate of
-        candidates
-    ) {
-      if (sourceDocs.length >= sourceLimit) break;
-      if (
-        !candidate ||
-        typeof candidate.url !==
-          "string" ||
-        !candidate.url.trim()
-      ) {
+    const validUrls = [];
+    for (const candidate of candidates) {
+      if (!candidate || typeof candidate.url !== "string" || !candidate.url.trim()) {
         continue;
       }
 
-      const normalizedUrl =
-        candidate.url.trim();
-
-      /*
-       * Do not process the same URL twice,
-       * even if multiple searches return it.
-       */
-      if (
-        processedUrls.has(
-          normalizedUrl
-        )
-      ) {
+      const normalizedUrl = candidate.url.trim();
+      if (processedUrls.has(normalizedUrl)) {
         continue;
       }
-
-      processedUrls.add(
-        normalizedUrl
-      );
 
       try {
-        const domain =
-          new URL(
-            normalizedUrl
-          ).hostname;
+        new URL(normalizedUrl);
+      } catch {
+        continue;
+      }
 
-        /*
-         * First check MongoDB source cache.
-         */
-        let sourceDoc =
-          await getCachedSource(
-            municipality._id,
-            normalizedUrl
-          );
+      processedUrls.add(normalizedUrl);
+      validUrls.push(normalizedUrl);
+    }
 
-        /*
-         * Reuse only a successful, usable
-         * source.
-         */
-        if (
-          !sourceDoc ||
-          sourceDoc.extractionStatus !==
-            "success" ||
-          !sourceDoc.quality?.usable
-        ) {
-          const extracted =
-            await extractionService.fetchAndExtract(
-              normalizedUrl,
-              municipality.allowedDomains
-            );
+    if (validUrls.length === 0) return;
 
-          sourceDoc =
-            await Source.findOneAndUpdate(
-              {
-                municipalityId:
-                  municipality._id,
+    const CONCURRENCY = 3;
+    let nextCandidateIndex = 0;
+    let inFlight = 0;
+    let uncommittedUsable = 0;
+    const completedResults = new Map();
+    let nextCommitIndex = 0;
 
-                url:
-                  normalizedUrl,
-              },
+    return new Promise((resolve) => {
+      function commitInOrder() {
+        while (completedResults.has(nextCommitIndex)) {
+          const doc = completedResults.get(nextCommitIndex);
+          completedResults.delete(nextCommitIndex);
+          nextCommitIndex++;
 
-              {
-                municipalityId:
-                  municipality._id,
+          if (doc) {
+            uncommittedUsable--;
+            if (sourceDocs.length < sourceLimit) {
+              sourceDocs.push(doc);
+              logger.info("Usable official source collected", {
+                url: doc.url,
+                sourceId: String(doc._id),
+                extractionMethod: doc.extractionMethod,
+              });
+            }
+          }
+        }
+      }
 
-                url:
-                  normalizedUrl,
+      function pump() {
+        commitInOrder();
 
-                domain,
-
-                documentType:
-                  extracted.documentType,
-
-                extractedText:
-                  extracted.extractedText,
-
-                contentHash:
-                  extracted.contentHash,
-
-                resolvedUrl:
-                  extracted.finalUrl,
-
-                retrievalMethod:
-                  extracted.retrievalMethod,
-
-                extractionMethod:
-                  extracted.extractionMethod,
-
-                pages:
-                  extracted.pages,
-
-                chunks:
-                  extracted.chunks,
-
-                quality:
-                  extracted.quality,
-
-                attemptedUrls:
-                  extracted.attemptedUrls,
-
-                fetchedAt:
-                  new Date(),
-
-                lastCheckedAt:
-                  new Date(),
-
-                extractionStatus:
-                  "success",
-
-                extractionError:
-                  null,
-              },
-
-              {
-                upsert:
-                  true,
-
-                new:
-                  true,
-              }
-            );
+        if (sourceDocs.length >= sourceLimit) {
+          return resolve();
         }
 
-        sourceDocs.push(
-          sourceDoc
-        );
+        while (
+          inFlight < CONCURRENCY &&
+          nextCandidateIndex < validUrls.length &&
+          sourceDocs.length + uncommittedUsable + inFlight < sourceLimit
+        ) {
+          const currentIndex = nextCandidateIndex++;
+          const url = validUrls[currentIndex];
+          inFlight++;
 
-        logger.info(
-          "Usable official source collected",
-          {
-            url:
-              normalizedUrl,
+          processCandidateUrl(url)
+            .then((doc) => {
+              inFlight--;
+              if (doc) {
+                uncommittedUsable++;
+              }
+              completedResults.set(currentIndex, doc);
+              pump();
+            })
+            .catch((err) => {
+              inFlight--;
+              logger.warn("Skipping unusable source", {
+                url,
+                error: err.message,
+              });
+              completedResults.set(currentIndex, null);
+              pump();
+            });
+        }
 
-            sourceId:
-              String(
-                sourceDoc._id
-              ),
+        if (
+          inFlight === 0 &&
+          (nextCandidateIndex >= validUrls.length ||
+            sourceDocs.length + uncommittedUsable >= sourceLimit)
+        ) {
+          commitInOrder();
+          resolve();
+        }
+      }
 
-            extractionMethod:
-              sourceDoc.extractionMethod,
-          }
-        );
-      } catch (err) {
-        logger.warn(
-          "Skipping unusable source",
-          {
-            url:
-              normalizedUrl,
+      pump();
+    });
+  }
 
-            error:
-              err.message,
-          }
-        );
+  /*
+   * ============================================================
+   * STEP 1: LOCAL PRE-INGESTED KNOWLEDGE BASE LOOKUP (TIER 2)
+   * ============================================================
+   * Fast path: check MongoDB for pre-scraped, verified sources
+   * tagged with this issueKey before reaching out to live websites.
+   */
+  const localSources = await getLocalSourcesForIssue(
+    municipality._id,
+    issue.issueKey
+  );
 
-        /*
-         * One bad source must not destroy
-         * the entire workflow search.
-         */
-        continue;
+  if (Array.isArray(localSources) && localSources.length > 0) {
+    logger.info("Local pre-ingested sources found for civic issue", {
+      municipality: municipality.slug,
+      issueKey: issue.issueKey,
+      count: localSources.length,
+    });
+
+    for (const doc of localSources) {
+      if (sourceDocs.length >= maxSources) break;
+      if (!processedUrls.has(doc.url)) {
+        processedUrls.add(doc.url);
+        sourceDocs.push(doc);
       }
     }
   }
 
   /*
    * ============================================================
-   * STEP 1: FIRST OFFICIAL SEARCH
+   * STEP 2: JUST-IN-TIME OFFICIAL LIVE SEARCH (TIER 3 FALLBACK)
    * ============================================================
-   *
-   * Search using:
-   *
-   * - issue label
-   * - original user query
-   * - AI-generated keywords
-   *
-   * This gives the search engine more context.
+   * Executed when local pre-ingested knowledge is absent or insufficient.
    */
-  const primarySearchQuery =
-    [
-      issue.label,
-
-      rawQuery,
-
-      ...(Array.isArray(
-        issue.keywords
-      )
-        ? issue.keywords
-        : []),
-    ]
-      .filter(
-        (value) =>
-          typeof value ===
-            "string" &&
-          value.trim()
-      )
-      .join(" ");
-
-  await collectSources(
-    primarySearchQuery
-  );
-
-  // Search results can be empty or unreadable even when the intent is clear.
-  // Try concise procedural queries before declaring that evidence is unavailable.
   if (sourceDocs.length === 0) {
-    const recoveryQueries = [
-      `${issue.label} application form required documents ${municipality.name}`,
-      `${issue.label} license permit procedure ${municipality.name}`,
-    ];
-    for (const recoveryQuery of recoveryQueries) {
-      await collectSources(recoveryQuery);
-      if (sourceDocs.length > 0) break;
+    const primarySearchQuery =
+      [
+        issue.label,
+        rawQuery,
+        ...(Array.isArray(issue.keywords) ? issue.keywords : []),
+      ]
+        .filter((value) => typeof value === "string" && value.trim())
+        .join(" ");
+
+    await collectSources(primarySearchQuery);
+
+    if (sourceDocs.length === 0) {
+      const recoveryQueries = [
+        `${issue.label} application form required documents ${municipality.name}`,
+        `${issue.label} license permit procedure ${municipality.name}`,
+      ];
+      for (const recoveryQuery of recoveryQueries) {
+        await collectSources(recoveryQuery);
+        if (sourceDocs.length > 0) break;
+      }
     }
   }
 
@@ -1391,26 +1455,29 @@ function toGraphJson(
 
             evidence:
               s.evidence,
+
+            stepType:
+              s.stepType || null,
+
+            nodeType:
+              s.stepType || null,
           },
         })
       ),
 
-    edges:
-      workflow.steps.flatMap(
-        (s) =>
-          (
-            s.dependsOn ||
-            []
-          ).map(
-            (dep) => ({
-              from:
-                dep,
-
-              to:
-                s.stepId,
-            })
-          )
-      ),
+    edges: (() => {
+      const explicitEdges = (workflow.steps || []).flatMap((s) =>
+        (s.dependsOn || []).map((dep) => ({
+          from: dep,
+          to: s.stepId,
+        }))
+      );
+      if (explicitEdges.length > 0) return explicitEdges;
+      return (workflow.steps || []).slice(0, -1).map((s, idx) => ({
+        from: s.stepId,
+        to: workflow.steps[idx + 1].stepId,
+      }));
+    })(),
 
     conflicts:
       workflow.conflicts,

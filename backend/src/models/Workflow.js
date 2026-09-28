@@ -5,6 +5,11 @@ const stepSchema = new mongoose.Schema(
     stepId: { type: String, required: true }, // stable within the workflow, e.g. "step_1"
     title: { type: String, required: true },
     description: { type: String, default: "" },
+    stepType: {
+      type: String,
+      enum: ["action", "document", "prerequisite", "info"],
+      default: null,
+    },
     dependsOn: [{ type: String }], // stepIds this step depends on
     sourceIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Source" }],
     evidence: [

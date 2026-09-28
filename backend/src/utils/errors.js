@@ -30,6 +30,8 @@ const Codes = {
   NOT_FOUND: 404,
   INTERNAL_ERROR: 500,
   SERVICE_UNAVAILABLE: 503,
+  CLARIFICATION_REQUIRED: 422,
+  OUT_OF_SCOPE: 400,
 };
 
 function makeError(code, message, details) {

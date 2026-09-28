@@ -45,14 +45,104 @@ function backendUrl(path: string): string {
   return `${baseUrl.replace(/\/$/, '')}${path}`;
 }
 
+export function inferNodeType(
+  node: BackendNode,
+  index: number,
+  totalNodes: number
+): NodeType {
+  if (node.data.nodeType) return node.data.nodeType;
+  if (node.data.stepType) return node.data.stepType;
+
+  const text = `${node.label} ${node.data.description || ''} ${(node.data.documentsRequired || []).join(' ')}`.toLowerCase();
+
+  const isPrereqKeyword =
+    text.includes('gather') ||
+    text.includes('collect') ||
+    text.includes('prerequisite') ||
+    text.includes('eligibility') ||
+    text.includes('proof') ||
+    text.includes('prior to') ||
+    text.includes('before applying') ||
+    text.includes('obtain non-availability') ||
+    text.includes('obtain crematorium') ||
+    text.includes('obtain dsc') ||
+    text.includes('residence proof') ||
+    text.includes('income proof') ||
+    text.includes('age proof') ||
+    text.includes('threshold') ||
+    text.includes('ration card copy') ||
+    text.includes('aadhaar card');
+
+  const isDocKeyword =
+    text.includes('form') ||
+    text.includes('document') ||
+    text.includes('affidavit') ||
+    text.includes('declaration') ||
+    text.includes('upload') ||
+    text.includes('apply online') ||
+    text.includes('submit online') ||
+    text.includes('online application') ||
+    text.includes('memorandum') ||
+    text.includes('portal registration') ||
+    text.includes('kyc');
+
+  const isActionKeyword =
+    text.includes('issuance') ||
+    text.includes('issue') ||
+    text.includes('download certificate') ||
+    text.includes('e-epic download') ||
+    text.includes('approval') ||
+    text.includes('appearance') ||
+    text.includes('verification by') ||
+    text.includes('scrutiny by') ||
+    text.includes('inquiry by') ||
+    text.includes('visit') ||
+    text.includes('slot booking') ||
+    text.includes('appointment') ||
+    text.includes('payment') ||
+    text.includes('pay fee');
+
+  // Step 1: Typically prerequisite (gathering required documents / proofs / checking eligibility)
+  if (index === 0) {
+    if (isPrereqKeyword || (node.data.documentsRequired && node.data.documentsRequired.length > 0)) {
+      return 'prerequisite';
+    }
+    if (isDocKeyword) {
+      return 'document';
+    }
+  }
+
+  // Final step: Typically action (authority review, certificate issuance, or digital download)
+  if (index === totalNodes - 1 && totalNodes > 1) {
+    if (isActionKeyword || text.includes('certificate') || text.includes('issuance') || text.includes('download')) {
+      return 'action';
+    }
+  }
+
+  if (isDocKeyword) {
+    return 'document';
+  }
+
+  if (isPrereqKeyword) {
+    return 'prerequisite';
+  }
+
+  if (isActionKeyword) {
+    return 'action';
+  }
+
+  return 'action';
+}
+
 function mapWorkflow(workflow: BackendWorkflow, municipalityName: string): CivicProcess {
+  const totalNodes = workflow.nodes.length;
   const steps: ProcessStep[] = workflow.nodes.map((node, index) => ({
     id: node.id,
     processId: workflow.id,
     title: node.label,
     shortTitle: node.label,
     description: node.data.description || 'Follow the instructions on the official service page.',
-    nodeType: 'action',
+    nodeType: inferNodeType(node, index, totalNodes),
     stepOrder: index + 1,
     office: node.data.office || undefined,
     fees: node.data.fee || undefined,
@@ -73,12 +163,31 @@ function mapWorkflow(workflow: BackendWorkflow, municipalityName: string): Civic
     },
   }));
 
-  const dependencies: StepDependency[] = workflow.edges.map((edge, index) => ({
-    id: `dependency-${index + 1}`,
-    stepId: edge.to,
-    dependsOnStepId: edge.from,
-    dependencyType: 'required',
-  }));
+  // Ensure edges are present: use workflow.edges if non-empty, otherwise chain sequential steps
+  const rawEdges =
+    workflow.edges && workflow.edges.length > 0
+      ? workflow.edges
+      : steps.slice(0, -1).map((s, idx) => ({
+          from: s.id,
+          to: steps[idx + 1].id,
+        }));
+
+  const dependencies: StepDependency[] = rawEdges.map((edge, index) => {
+    const targetStep = steps.find((s) => s.id === edge.to);
+    const targetText = `${targetStep?.title || ''} ${targetStep?.description || ''}`.toLowerCase();
+    const isRecommended =
+      targetText.includes('optional') ||
+      targetText.includes('recommended') ||
+      targetText.includes('if applicable') ||
+      targetText.includes('voluntary');
+
+    return {
+      id: `dependency-${index + 1}`,
+      stepId: edge.to,
+      dependsOnStepId: edge.from,
+      dependencyType: isRecommended ? 'recommended' : 'required',
+    };
+  });
 
   const officialPortal = steps.find((step) => step.sourceUrl)?.sourceUrl || 'https://www.india.gov.in';
 

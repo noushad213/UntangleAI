@@ -1,0 +1,750 @@
+[
+  {
+    "issueKey": "birth_certificate",
+    "label": "Birth Certificate Application",
+    "category": "Vital Records",
+    "department": "Health Department / Registrar of Births and Deaths",
+    "statutoryTimelineDays": 7,
+    "keywords": [
+      "birth certificate",
+      "birth registration",
+      "newborn certificate",
+      "janma dakhla",
+      "जन्म दाखला",
+      "baby birth certificate",
+      "register birth",
+      "delayed birth registration",
+      "birth proof"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/birth-death-registration",
+      "https://portal.mcgm.gov.in/irj/portal/anonymous/qlbirthcertificate",
+      "https://aaplesarkar.mahaonline.gov.in",
+      "https://services.punecorporation.org",
+      "https://nmcnagpur.gov.in"
+    ]
+  },
+  {
+    "issueKey": "death_certificate",
+    "label": "Death Certificate Application",
+    "category": "Vital Records",
+    "department": "Health Department / Registrar of Births and Deaths",
+    "statutoryTimelineDays": 7,
+    "keywords": [
+      "death certificate",
+      "death registration",
+      "mrutyu dakhla",
+      "मृत्यू दाखला",
+      "register death",
+      "certificate of death",
+      "cremation certificate to death certificate"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/birth-death-registration",
+      "https://portal.mcgm.gov.in/irj/portal/anonymous/qldeathcertificate",
+      "https://aaplesarkar.mahaonline.gov.in",
+      "https://nmcnagpur.gov.in"
+    ]
+  },
+  {
+    "issueKey": "marriage_registration",
+    "label": "Marriage Registration Certificate",
+    "category": "Vital Records",
+    "department": "Registrar of Marriages / Urban Local Body",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "marriage certificate",
+      "marriage registration",
+      "vivah nondani",
+      "विवाह नोंदणी",
+      "court marriage registration",
+      "marriage proof",
+      "register wedding",
+      "special marriage act certificate"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/marriage-registration",
+      "https://portal.mcgm.gov.in",
+      "https://igrmaharashtra.gov.in",
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "property_tax_payment",
+    "label": "Property Tax Payment & Assessment",
+    "category": "Property & Revenue",
+    "department": "Property Tax Department",
+    "statutoryTimelineDays": 3,
+    "keywords": [
+      "property tax",
+      "property tax payment",
+      "tax bill",
+      "pay property tax online",
+      "milkat kar",
+      "मालमत्ता कर",
+      "house tax",
+      "ptax receipt",
+      "property tax receipt download",
+      "self assessment property tax"
+    ],
+    "canonicalUrls": [
+      "https://propertytax.punecorporation.org",
+      "https://ptaxportal.mcgm.gov.in",
+      "https://nmcnagpur.gov.in/property-tax",
+      "https://nmc.gov.in",
+      "https://pcmcindia.gov.in"
+    ]
+  },
+  {
+    "issueKey": "property_tax_transfer_mutation",
+    "label": "Property Tax Name Transfer / Mutation (Ferfar in Municipal Records)",
+    "category": "Property & Revenue",
+    "department": "Property Tax Department / Assessment & Collection",
+    "statutoryTimelineDays": 30,
+    "keywords": [
+      "property tax name transfer",
+      "property tax transfer",
+      "mutation of property",
+      "ferfar in municipal records",
+      "change name in property tax bill",
+      "milkat kar nav badal",
+      "मालमत्ता कर नाव बदल",
+      "property ownership transfer in municipality"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/property-tax-name-transfer",
+      "https://portal.mcgm.gov.in",
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "water_connection_new",
+    "label": "New Water Connection Application",
+    "category": "Utilities",
+    "department": "Water Supply & Sewerage Department",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "new water connection",
+      "water supply application",
+      "nal connection",
+      "नळ जोडणी",
+      "water meter",
+      "drinking water pipe connection",
+      "commercial water connection",
+      "residential water connection"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/water-supply",
+      "https://portal.mcgm.gov.in/irj/portal/anonymous/qlwaterconnection",
+      "https://nmcnagpur.gov.in",
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "water_bill_payment_complaint",
+    "label": "Water Bill Payment & Meter Dispute",
+    "category": "Utilities",
+    "department": "Water Supply Department",
+    "statutoryTimelineDays": 7,
+    "keywords": [
+      "water bill payment",
+      "pay water bill",
+      "high water bill dispute",
+      "pani patti",
+      "पाणी पट्टी",
+      "faulty water meter complaint",
+      "water bill receipt"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org",
+      "https://portal.mcgm.gov.in",
+      "https://nmcnagpur.gov.in"
+    ]
+  },
+  {
+    "issueKey": "trade_license_gumasta",
+    "label": "Shop and Establishment Registration (Gumasta License)",
+    "category": "Commercial & Trade",
+    "department": "Shops and Establishments Department / Labor Department",
+    "statutoryTimelineDays": 7,
+    "keywords": [
+      "gumasta license",
+      "shop and establishment license",
+      "trade license",
+      "gumasta certificate",
+      "गुमास्ता परवाना",
+      "shop act license",
+      "start a shop license",
+      "commercial establishment registration",
+      "gumasta renewal",
+      "sell clothes",
+      "selling clothes",
+      "clothing shop",
+      "garment shop",
+      "retail shop",
+      "open a shop",
+      "retail store registration",
+      "कपडे दुकान परवाना"
+    ],
+    "canonicalUrls": [
+      "https://lms.mahaonline.gov.in",
+      "https://punecorporation.org/en/trade-licence",
+      "https://portal.mcgm.gov.in/irj/portal/anonymous/qlgumasta",
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "land_records_7_12_ferfar",
+    "label": "7/12 Extract (Saat Bara) & Ferfar (Mutation) Application",
+    "category": "Land & Revenue",
+    "department": "Revenue and Forest Department / Talathi & Tahsildar",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "7/12 extract",
+      "saat bara utara",
+      "७/१२ उतारा",
+      "8A extract",
+      "ferfar nod",
+      "फेरफार नोंद",
+      "digital 7/12 download",
+      "e-hakk mutation online",
+      "land title record maharashtra",
+      "mahabhulekh online"
+    ],
+    "canonicalUrls": [
+      "https://bhulekh.mahabhumi.gov.in",
+      "https://digitalsatbara.mahabhumi.gov.in",
+      "https://aaplesarkar.mahaonline.gov.in",
+      "https://mahabhumi.gov.in"
+    ]
+  },
+  {
+    "issueKey": "caste_certificate",
+    "label": "Caste Certificate & Caste Validity Application",
+    "category": "Social & Revenue",
+    "department": "Revenue Department (SDO / Sub-Divisional Magistrate)",
+    "statutoryTimelineDays": 21,
+    "keywords": [
+      "caste certificate",
+      "jaat pramanpatra",
+      "जात प्रमाणपत्र",
+      "caste validity certificate",
+      "sc caste certificate",
+      "st caste certificate",
+      "obc certificate",
+      "vjnt certificate",
+      "sub divisional magistrate caste verification"
+    ],
+    "canonicalUrls": [
+      "https://aaplesarkar.mahaonline.gov.in",
+      "https://barti.maharashtra.gov.in"
+    ]
+  },
+  {
+    "issueKey": "income_certificate",
+    "label": "Income Certificate Application",
+    "category": "Social & Revenue",
+    "department": "Revenue Department (Tahsildar Office)",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "income certificate",
+      "utpannacha dakhla",
+      "उत्पन्नाचा दाखला",
+      "tahsildar income proof",
+      "annual family income certificate",
+      "income certificate for scholarship",
+      "income proof for ration card"
+    ],
+    "canonicalUrls": [
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "domicile_nationality_certificate",
+    "label": "Age, Nationality & Domicile Certificate",
+    "category": "Social & Revenue",
+    "department": "Revenue Department (Tahsildar / SDO)",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "domicile certificate",
+      "nationality certificate",
+      "adhavas pramanpatra",
+      "अधिवास प्रमाणपत्र",
+      "maharashtra domicile proof",
+      "maharashtra resident certificate",
+      "domicile for admission"
+    ],
+    "canonicalUrls": [
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "non_creamy_layer_certificate",
+    "label": "Non-Creamy Layer (NCL) Certificate",
+    "category": "Social & Revenue",
+    "department": "Revenue Department (Tahsildar / Sub-Divisional Officer)",
+    "statutoryTimelineDays": 21,
+    "keywords": [
+      "non creamy layer",
+      "ncl certificate",
+      "non creamy layer pramanpatra",
+      "नॉन क्रिमीलेअर प्रमाणपत्र",
+      "obc non creamy layer",
+      "ncl certificate renewal"
+    ],
+    "canonicalUrls": [
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "ration_card_new_member",
+    "label": "New Ration Card & Member Addition / Deletion",
+    "category": "Food & Civil Supplies",
+    "department": "Food, Civil Supplies and Consumer Protection Department",
+    "statutoryTimelineDays": 30,
+    "keywords": [
+      "ration card",
+      "new ration card application",
+      "ration patrika",
+      "रेशन पत्रिका",
+      "add member to ration card",
+      "remove name from ration card",
+      "yellow ration card",
+      "saffron ration card",
+      "bpl ration card maharashtra",
+      "ration card address change"
+    ],
+    "canonicalUrls": [
+      "https://rcms.mahafood.gov.in",
+      "https://mahafood.gov.in",
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "driving_license_learner_permanent",
+    "label": "Learner's & Permanent Driving License (Sarathi)",
+    "category": "Transport",
+    "department": "Motor Vehicles Department (RTO Maharashtra)",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "driving license",
+      "learner license",
+      "parivahan sarathi driving license",
+      "vahan rto license",
+      "vahan chalak parwana",
+      "वाहन चालक परवाना",
+      "two wheeler license test",
+      "four wheeler license test",
+      "rto learner test appointment",
+      "dl slot booking"
+    ],
+    "canonicalUrls": [
+      "https://parivahan.gov.in",
+      "https://transport.maharashtra.gov.in"
+    ]
+  },
+  {
+    "issueKey": "vehicle_rc_transfer_hypothecation",
+    "label": "Vehicle RC Transfer of Ownership & Hypothecation Removal",
+    "category": "Transport",
+    "department": "Motor Vehicles Department (RTO Maharashtra)",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "rc transfer",
+      "vehicle ownership transfer",
+      "bike rc transfer",
+      "car rc transfer",
+      "hypothecation cancellation",
+      "remove loan from rc",
+      "vahan transfer maharashtra",
+      "form 29 form 30 rto"
+    ],
+    "canonicalUrls": [
+      "https://parivahan.gov.in",
+      "https://transport.maharashtra.gov.in"
+    ]
+  },
+  {
+    "issueKey": "building_permission_plan_sanction",
+    "label": "Building Plan Approval & Commencement Certificate (CC)",
+    "category": "Building & Urban Planning",
+    "department": "Building Permission Department / Town Planning",
+    "statutoryTimelineDays": 30,
+    "keywords": [
+      "building permission",
+      "building plan sanction",
+      "commencement certificate",
+      "cc for construction",
+      "autodcr approval",
+      "vastu arakhada",
+      "बांधकाम परवानगी",
+      "residential construction permission",
+      "architect layout approval"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/building-permission",
+      "https://portal.mcgm.gov.in",
+      "https://mahavastu.maharashtra.gov.in",
+      "https://pcmcindia.gov.in"
+    ]
+  },
+  {
+    "issueKey": "occupancy_certificate_oc",
+    "label": "Occupancy Certificate (OC) / Completion Certificate",
+    "category": "Building & Urban Planning",
+    "department": "Building Permission Department",
+    "statutoryTimelineDays": 21,
+    "keywords": [
+      "occupancy certificate",
+      "oc certificate",
+      "completion certificate",
+      "bhogwata pramanpatra",
+      "भोगवटा प्रमाणपत्र",
+      "flat oc status",
+      "apply oc building",
+      "building completion verification"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/building-permission",
+      "https://portal.mcgm.gov.in",
+      "https://pcmcindia.gov.in"
+    ]
+  },
+  {
+    "issueKey": "garbage_collection_complaint",
+    "label": "Garbage Collection & Solid Waste Complaint",
+    "category": "Civic Complaints",
+    "department": "Solid Waste Management Department",
+    "statutoryTimelineDays": 2,
+    "keywords": [
+      "garbage complaint",
+      "trash not collected",
+      "waste collection issue",
+      "kachra complaint",
+      "कचरा तक्रार",
+      "overflowing dustbin",
+      "swachhata complaint",
+      "garbage van not arriving"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/complaints",
+      "https://portal.mcgm.gov.in",
+      "https://nmcnagpur.gov.in"
+    ]
+  },
+  {
+    "issueKey": "streetlight_repair_complaint",
+    "label": "Streetlight Repair Complaint",
+    "category": "Civic Complaints",
+    "department": "Electrical Department",
+    "statutoryTimelineDays": 3,
+    "keywords": [
+      "streetlight not working",
+      "street light repair",
+      "road light broken",
+      "diva bandh complaint",
+      "रस्त्यावरील दिवा बंद तक्रार",
+      "dark street complaint",
+      "flickering streetlight"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/complaints",
+      "https://portal.mcgm.gov.in",
+      "https://nmc.gov.in"
+    ]
+  },
+  {
+    "issueKey": "drainage_sewage_blockage_complaint",
+    "label": "Drainage Overflow & Sewage Blockage Complaint",
+    "category": "Civic Complaints",
+    "department": "Drainage & Sewerage Department",
+    "statutoryTimelineDays": 2,
+    "keywords": [
+      "drainage blockage",
+      "drain overflow",
+      "gutter overflow complaint",
+      "manhole overflowing",
+      "sandpani complaint",
+      "सांडपाणी तुंबणे तक्रार",
+      "sewage water leakage"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/complaints",
+      "https://portal.mcgm.gov.in"
+    ]
+  },
+  {
+    "issueKey": "tree_trimming_permission_complaint",
+    "label": "Dangerous Tree Trimming & Cutting Permission",
+    "category": "Civic Services",
+    "department": "Tree Authority / Garden Department",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "tree trimming permission",
+      "tree branch cutting",
+      "dangerous tree complaint",
+      "falling tree branch",
+      "vruksha todani parwana",
+      "झाड छाटणी परवानगी",
+      "tree falling risk"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/tree-authority",
+      "https://portal.mcgm.gov.in"
+    ]
+  },
+  {
+    "issueKey": "fire_noc_commercial",
+    "label": "Fire Safety NOC & Compliance Certificate",
+    "category": "Safety & Licensing",
+    "department": "Fire Brigade / Fire Prevention Department",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "fire noc",
+      "fire safety certificate",
+      "fire brigade noc",
+      "agnishamak noc",
+      "अग्निशामक परवाना",
+      "commercial building fire noc",
+      "hospital fire compliance noc"
+    ],
+    "canonicalUrls": [
+      "https://punecorporation.org/en/fire-department",
+      "https://portal.mcgm.gov.in",
+      "https://mahafireservice.gov.in"
+    ]
+  },
+  {
+    "issueKey": "food_safety_fssai_registration",
+    "label": "Food Safety Registration & License (FSSAI Maharashtra)",
+    "category": "Commercial & Trade",
+    "department": "Food and Drug Administration (FDA Maharashtra)",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "fssai license",
+      "food license",
+      "food business registration",
+      "ann suraksha parwana",
+      "अन्न सुरक्षा परवाना",
+      "restaurant food license",
+      "catering fssai license",
+      "street food vendor registration",
+      "vada pav",
+      "quality testing",
+      "food quality testing",
+      "street food testing"
+    ],
+    "canonicalUrls": [
+      "https://foscos.fssai.gov.in",
+      "https://fda.maharashtra.gov.in",
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "rti_application_first_appeal",
+    "label": "Right to Information (RTI) Application & First Appeal",
+    "category": "Public Transparency",
+    "department": "Public Information Officer (PIO) / First Appellate Authority",
+    "statutoryTimelineDays": 30,
+    "keywords": [
+      "rti application",
+      "right to information",
+      "file rti online maharashtra",
+      "maharti",
+      "माहितीचा अधिकार",
+      "rti status",
+      "first appeal rti maharashtra",
+      "rti fee payment"
+    ],
+    "canonicalUrls": [
+      "https://rtionline.maharashtra.gov.in",
+      "https://punecorporation.org",
+      "https://portal.mcgm.gov.in"
+    ]
+  },
+  {
+    "issueKey": "commercial_kitchen_cloud_kitchen_approval",
+    "label": "Commercial Kitchen, Cloud Kitchen & Dhaba FSSAI & Municipal Approval",
+    "category": "Commercial & Food",
+    "department": "FSSAI & Municipal Health Department",
+    "statutoryTimelineDays": 30,
+    "keywords": [
+      "commercial kitchen",
+      "cloud kitchen",
+      "dhaba",
+      "kitchen approval",
+      "cloud kitchen license",
+      "dark kitchen",
+      "ghost kitchen",
+      "tiffin service",
+      "kitchen permission",
+      "dhaba license",
+      "eating house license",
+      "commercial cooking setup"
+    ],
+    "canonicalUrls": [
+      "https://foscos.fssai.gov.in",
+      "https://aaplesarkar.mahaonline.gov.in",
+      "https://lms.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "saas_tech_business_setup",
+    "label": "SaaS, Tech Startup & IT Company Registration & Licensing",
+    "category": "Commercial & Trade",
+    "department": "Industries Department / Labour Department (Shop Act)",
+    "statutoryTimelineDays": 7,
+    "keywords": [
+      "saas",
+      "saas startup",
+      "software company registration",
+      "start saas",
+      "it company license",
+      "software business maharashtra",
+      "tech startup gumasta",
+      "udyam saas",
+      "cloud software company setup"
+    ],
+    "canonicalUrls": [
+      "https://lms.mahaonline.gov.in",
+      "https://udyamregistration.gov.in",
+      "https://aaplesarkar.mahaonline.gov.in"
+    ]
+  },
+  {
+    "issueKey": "commercial_transport_delivery_permit",
+    "label": "Commercial Goods Transport & Delivery Fleet Permit",
+    "category": "Transport & Logistics",
+    "department": "Motor Vehicles Department (RTO Maharashtra)",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "deliveries",
+      "delivery permit",
+      "goods delivery",
+      "commercial goods delivery",
+      "delivery service license",
+      "courier delivery permit",
+      "goods carriage permit",
+      "e-commerce delivery fleet",
+      "commercial transport permit",
+      "delivery vehicle rto permit",
+      "logistics business permit"
+    ],
+    "canonicalUrls": [
+      "https://parivahan.gov.in",
+      "https://transport.maharashtra.gov.in"
+    ]
+  },
+  {
+    "issueKey": "visa_and_frro_guidance",
+    "label": "Visa Application & Foreigners Regional Registration (FRRO)",
+    "category": "Central & Foreign Affairs",
+    "department": "Ministry of External Affairs / Bureau of Immigration",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "visa",
+      "apply for visa",
+      "how to apply for visa",
+      "foreign visa",
+      "student visa",
+      "tourist visa",
+      "frro registration",
+      "visa extension",
+      "foreign travel visa",
+      "vfs global appointment"
+    ],
+    "canonicalUrls": [
+      "https://indianfrro.gov.in",
+      "https://mea.gov.in"
+    ]
+  },
+  {
+    "issueKey": "passport_application_renewal",
+    "label": "Indian Passport Application, Renewal & Police Verification",
+    "category": "Central & External Affairs",
+    "department": "Passport Seva / Ministry of External Affairs",
+    "statutoryTimelineDays": 21,
+    "keywords": [
+      "passport",
+      "apply for passport",
+      "how to get passport",
+      "passport renewal",
+      "tatkal passport appointment",
+      "passport police verification",
+      "psk appointment slot",
+      "passport documents needed"
+    ],
+    "canonicalUrls": [
+      "https://passportindia.gov.in"
+    ]
+  },
+  {
+    "issueKey": "aadhaar_card_update",
+    "label": "Aadhaar Card Update, Address Change & Enrollment",
+    "category": "Central & Foreign Services",
+    "department": "Unique Identification Authority of India (UIDAI)",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "aadhaar card",
+      "aadhaar card address update enrollment center official link",
+      "aadhaar update",
+      "aadhaar address change",
+      "uidai",
+      "myaadhaar",
+      "aadhaar enrollment",
+      "update aadhaar",
+      "aadhaar mobile link",
+      "download aadhaar"
+    ],
+    "canonicalUrls": [
+      "https://myaadhaar.uidai.gov.in",
+      "https://uidai.gov.in"
+    ]
+  },
+  {
+    "issueKey": "pan_card_application",
+    "label": "PAN Card Application & Correction (Form 49A / NSDL / UTIITSL)",
+    "category": "Central & Foreign Services",
+    "department": "Income Tax Department / NSDL / Protean",
+    "statutoryTimelineDays": 15,
+    "keywords": [
+      "pan card",
+      "pan card application form 49a nsdl uti official link",
+      "apply pan card",
+      "pan card form 49a",
+      "nsdl pan",
+      "uti pan",
+      "instant e-pan",
+      "pan correction",
+      "pan aadhaar link"
+    ],
+    "canonicalUrls": [
+      "https://www.onlineservices.nsdl.com",
+      "https://www.pan.utiitsl.com",
+      "https://incometax.gov.in"
+    ]
+  },
+  {
+    "issueKey": "voter_id_epic_registration",
+    "label": "Voter ID Card Registration & EPIC Download (Form 6 / ECI / NVSP)",
+    "category": "Central & Foreign Services",
+    "department": "Election Commission of India / Chief Electoral Officer Maharashtra",
+    "statutoryTimelineDays": 30,
+    "keywords": [
+      "voter id",
+      "voter id card registration form 6 nvsp official link",
+      "voter registration",
+      "form 6",
+      "epic download",
+      "nvsp",
+      "voters.eci.gov.in",
+      "voter card online",
+      "matdar nondani"
+    ],
+    "canonicalUrls": [
+      "https://voters.eci.gov.in",
+      "https://ceo.maharashtra.gov.in"
+    ]
+  }
+]
+

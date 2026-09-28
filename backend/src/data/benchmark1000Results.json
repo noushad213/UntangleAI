@@ -1,0 +1,113 @@
+{
+  "totalQueries": 1000,
+  "passed": 1000,
+  "failed": 0,
+  "passRate": "100.0%",
+  "cacheHits": 960,
+  "clarifications": 20,
+  "outOfScope": 20,
+  "avgLatencyMs": 254,
+  "totalTimeSeconds": "253.82",
+  "batchStats": [
+    {
+      "batchNum": 1,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 100,
+      "clarifications": 0,
+      "outOfScope": 0,
+      "avgDurationMs": 104
+    },
+    {
+      "batchNum": 2,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 100,
+      "clarifications": 0,
+      "outOfScope": 0,
+      "avgDurationMs": 103
+    },
+    {
+      "batchNum": 3,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 100,
+      "clarifications": 0,
+      "outOfScope": 0,
+      "avgDurationMs": 87
+    },
+    {
+      "batchNum": 4,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 100,
+      "clarifications": 0,
+      "outOfScope": 0,
+      "avgDurationMs": 168
+    },
+    {
+      "batchNum": 5,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 100,
+      "clarifications": 0,
+      "outOfScope": 0,
+      "avgDurationMs": 400
+    },
+    {
+      "batchNum": 6,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 100,
+      "clarifications": 0,
+      "outOfScope": 0,
+      "avgDurationMs": 85
+    },
+    {
+      "batchNum": 7,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 100,
+      "clarifications": 0,
+      "outOfScope": 0,
+      "avgDurationMs": 81
+    },
+    {
+      "batchNum": 8,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 100,
+      "clarifications": 0,
+      "outOfScope": 0,
+      "avgDurationMs": 284
+    },
+    {
+      "batchNum": 9,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 100,
+      "clarifications": 0,
+      "outOfScope": 0,
+      "avgDurationMs": 219
+    },
+    {
+      "batchNum": 10,
+      "queriesCount": 100,
+      "passed": 100,
+      "failed": 0,
+      "cacheHits": 60,
+      "clarifications": 20,
+      "outOfScope": 20,
+      "avgDurationMs": 1008
+    }
+  ]
+}
