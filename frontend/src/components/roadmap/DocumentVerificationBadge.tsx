@@ -19,7 +19,17 @@ interface DocumentVerificationBadgeProps {
 
 function formatDocTypeName(type?: string | null): string {
   if (!type) return '';
-  return type.replace(/_/g, ' ').toUpperCase();
+  const names: Record<string, string> = {
+    aadhaar: 'Aadhaar card',
+    pan: 'PAN card',
+    passport: 'passport',
+    driving_license: 'driving licence',
+    voter_id: 'Voter ID',
+    domicile_certificate: 'domicile certificate',
+    birth_certificate: 'birth certificate',
+    income_certificate: 'income certificate',
+  };
+  return names[type] || type.replace(/_/g, ' ');
 }
 
 export function DocumentVerificationBadge({
@@ -28,6 +38,9 @@ export function DocumentVerificationBadge({
   compact = false,
 }: DocumentVerificationBadgeProps) {
   const { verificationStatus, detectedType, expectedType, verificationMessage } = document;
+  const mismatchMessage = detectedType && expectedType
+    ? `This looks like a ${formatDocTypeName(detectedType)}. Upload the required ${formatDocTypeName(expectedType)} instead.`
+    : verificationMessage || 'This document does not match the required type. Upload the correct document.';
 
   if (verificationStatus === 'checking') {
     return (
@@ -57,18 +70,11 @@ export function DocumentVerificationBadge({
   if (verificationStatus === 'mismatch') {
     return (
       <span
-        className={`${styles.badgeContainer} ${styles.mismatch}`}
-        title={
-          verificationMessage ||
-          `Detected ${formatDocTypeName(detectedType)}, but expected ${formatDocTypeName(expectedType)}.`
-        }
+        className={`${styles.badgeContainer} ${styles.mismatch} ${styles.mismatchMessage}`}
+        title={mismatchMessage}
       >
         <AlertTriangle size={11} />
-        <span>
-          {compact
-            ? `Mismatch: Detected ${formatDocTypeName(detectedType)}`
-            : `Mismatch: Upload appears to be ${formatDocTypeName(detectedType)} (expected ${formatDocTypeName(expectedType)})`}
-        </span>
+        <span>{mismatchMessage}</span>
       </span>
     );
   }
@@ -80,7 +86,7 @@ export function DocumentVerificationBadge({
         title={verificationMessage || 'Could not confidently identify document type from scan.'}
       >
         <HelpCircle size={11} />
-        <span>Unclear Document</span>
+        <span>{verificationMessage || 'We couldn’t confirm the document type. Upload a clear image or PDF, then verify again.'}</span>
       </span>
     );
   }

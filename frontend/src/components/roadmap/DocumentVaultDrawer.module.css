@@ -36,6 +36,74 @@
   transform: translateX(0);
 }
 
+.scanOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.scanDialog {
+  width: min(100%, 320px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-elevated);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.2);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--type-sm);
+}
+
+.scanDialog strong {
+  color: var(--color-text-primary);
+  font-size: var(--type-base);
+}
+
+.scanPreview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 104px;
+  margin-bottom: var(--space-2);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+  color: var(--color-brand-600);
+}
+
+.scanLine {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background: var(--color-brand-500);
+  box-shadow: 0 0 12px var(--color-brand-500);
+  animation: scanDocument 1.7s ease-in-out infinite alternate;
+}
+
+@keyframes scanDocument {
+  from { transform: translateY(-32px); }
+  to { transform: translateY(32px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanLine {
+    animation: none;
+    top: 50%;
+  }
+}
+
 .header {
   display: flex;
   align-items: flex-start;

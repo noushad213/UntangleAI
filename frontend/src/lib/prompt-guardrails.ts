@@ -46,6 +46,30 @@ export function hasCivicIntent(text: string): boolean {
   return CIVIC_INTENT_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+export function getMultipleServiceAlert(query: string): string | null {
+  const normalized = query.toLowerCase().replace(NON_WORD_CHARACTERS, ' ').replace(/\s+/g, ' ').trim();
+  const independentTask = /\b(and|also|plus|then)\b|और|तथा|साथ में|அல்லது/;
+  const conjunction = normalized.search(independentTask);
+  if (conjunction < 0) return null;
+
+  const taskSignals = [
+    /\b(birth|death|marriage|caste|income|domicile)\s+certificates?\b|\bcertificates?\b/i,
+    /\b(driving|learner)\s+(?:licen[sc]e|permit)|\b(?:renew|apply for|get)\s+(?:my\s+)?(?:driving\s+)?licen[sc]e/i,
+    /\b(?:property|water|professional|income)\s+tax\b/i,
+    /\b(?:food|trade|factory|fire)\s+licen[sc]e\b|\bfssai\b/i,
+    /\b(?:import|export)\b/i,
+    /\b(?:company|business|firm)\s+(?:registration|register)|\bincorporat(?:e|ion)\b/i,
+  ];
+  const before = normalized.slice(0, conjunction);
+  const after = normalized.slice(conjunction).replace(independentTask, ' ');
+  const hasTaskBefore = taskSignals.some((pattern) => pattern.test(before));
+  const hasTaskAfter = taskSignals.some((pattern) => pattern.test(after));
+  if (hasTaskBefore && hasTaskAfter) {
+    return 'This request includes more than one service. Submit one service at a time so each roadmap covers the right steps.';
+  }
+  return null;
+}
+
 const GREETING_WORDS = new Set([
   'hello', 'hi', 'hey', 'helo', 'hlo', 'hii', 'hiii', 'heyy', 'howdy', 'hola',
   'greetings', 'namaste', 'namaskar', 'namaskara', 'namaskaram', 'salaam', 'salam',
@@ -200,6 +224,9 @@ export function getPromptAlert(query: string, municipalitySlug?: string): string
   if (!rawTrimmed) {
     return 'Which service do you need? Name the task, for example: “pay property tax” or “apply for a birth certificate”.';
   }
+
+  const multipleServiceAlert = getMultipleServiceAlert(rawTrimmed);
+  if (multipleServiceAlert) return multipleServiceAlert;
 
   const normalized = query.toLowerCase().replace(NON_WORD_CHARACTERS, ' ').trim();
   const padded = ` ${normalized.replace(/\s+/g, ' ')} `;

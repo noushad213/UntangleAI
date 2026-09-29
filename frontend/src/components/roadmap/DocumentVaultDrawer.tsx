@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   FileCheck,
   CalendarClock,
+  ScanLine,
 } from 'lucide-react';
 import { CivicProcess } from '@/types/roadmap';
 import { TrackedDocument, formatFileSize } from '@/lib/document-vault';
@@ -50,6 +51,7 @@ export function DocumentVaultDrawer({
     requirementId?: string;
   } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [scanningFileName, setScanningFileName] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'checklist' | 'documents'>('checklist');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -121,9 +123,11 @@ export function DocumentVaultDrawer({
 
     try {
       setIsUploading(true);
+      setScanningFileName(file.name);
       await onUploadDocument(file, activeUploadTarget.stepId, activeUploadTarget.requirementId);
     } finally {
       setIsUploading(false);
+      setScanningFileName(null);
       setActiveUploadTarget(null);
     }
   };
@@ -135,6 +139,19 @@ export function DocumentVaultDrawer({
         onClick={onClose}
         aria-hidden="true"
       />
+
+      {scanningFileName && (
+        <div className={styles.scanOverlay} role="status" aria-live="polite">
+          <div className={styles.scanDialog}>
+            <div className={styles.scanPreview} aria-hidden="true">
+              <FileText size={48} strokeWidth={1.4} />
+              <span className={styles.scanLine} />
+            </div>
+            <strong>Scanning your document</strong>
+            <span>Checking {scanningFileName} with OCR…</span>
+          </div>
+        </div>
+      )}
 
       <aside
         className={`${styles.drawerContainer} ${isOpen ? styles.open : ''}`}
@@ -230,7 +247,7 @@ export function DocumentVaultDrawer({
 
           <div className={styles.sectionHeader}>
             <span className={styles.sectionTitle}>
-              {activeView === 'checklist' ? 'Required documents' : 'Documents added by step'}
+              {activeView === 'checklist' ? 'Verify your required documents' : 'Documents added by step'}
             </span>
             <button
               type="button"

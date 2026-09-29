@@ -63,10 +63,10 @@ function findUncoveredTradeTasks(query, steps) {
   const gaps = [];
   const coversGstRegistration = steps.some((step) => /(?:\bGST\b|goods and services tax).{0,60}(?:registr|eligib)|(?:registr|eligib).{0,60}(?:\bGST\b|goods and services tax)/i.test(`${step.title || ''} ${step.description || ''}`));
   if (!coversGstRegistration) {
-    gaps.push('Whether GST registration applies to selling these goods, and the applicable procedure, remains unresolved.');
+    gaps.push('Selling the imported goods: GST registration eligibility and the applicable procedure remain unresolved.');
   }
   if (!/\bshop\b|\bestablishments?\b|\bgumasta\b/i.test(text)) {
-    gaps.push('Whether shop and establishment registration applies to the resale business, and the applicable procedure, remains unresolved.');
+    gaps.push('Selling the imported goods: shop and establishment registration applicability and the applicable procedure remain unresolved.');
   }
   return gaps;
 }

@@ -28,7 +28,7 @@ export function guessVerifiableDocumentType(title?: string): string | null {
   const lower = title.toLowerCase();
 
   if (lower.includes('pan') && !lower.includes('company')) return 'pan';
-  if (lower.includes('aadhaar') || lower.includes('aadhar') || lower.includes('uidai')) return 'aadhaar';
+  if (/\b(aadhaar|aadhar|adhar|uidai)\b/.test(lower)) return 'aadhaar';
   if (lower.includes('passport')) return 'passport';
   if (lower.includes('driving') || lower.includes('licence') || lower.includes('license') || lower.includes('dl')) return 'driving_license';
   if (lower.includes('voter') || lower.includes('epic') || lower.includes('election')) return 'voter_id';
@@ -82,8 +82,17 @@ export async function verifyDocumentType(
       body: formData,
     });
 
-    const data = await response.json();
-    const errorMessage = data?.error?.message;
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return {
+        valid: false,
+        status: 'error',
+        code: typeof data.code === 'string' ? data.code : 'VERIFICATION_UNAVAILABLE',
+        expectedDocumentType: data.expectedDocumentType,
+        message: 'We couldn’t check this document right now. Try again in a moment.',
+      };
+    }
+
     return {
       valid: Boolean(data.valid),
       status: (data.status as 'match' | 'mismatch' | 'unverified') || (data.valid ? 'match' : 'error'),
@@ -92,14 +101,16 @@ export async function verifyDocumentType(
       detectedDocumentType: data.detectedDocumentType,
       confidence: data.confidence,
       verificationLevel: data.verificationLevel,
-      message: data.message || errorMessage || (data.valid ? 'Document type verified.' : 'Verification failed.'),
+      message: typeof data.message === 'string'
+        ? data.message
+        : data.valid ? 'Document type verified.' : 'We couldn’t confirm the document type. Upload a clear image or PDF, then try again.',
     };
   } catch (error) {
     return {
       valid: false,
       status: 'error',
       code: 'NETWORK_ERROR',
-      message: error instanceof Error ? error.message : 'Document verification service is offline.',
+      message: 'We couldn’t check this document right now. Try again in a moment.',
     };
   }
 }

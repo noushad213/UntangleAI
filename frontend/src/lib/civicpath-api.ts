@@ -137,6 +137,28 @@ export function inferNodeType(
 }
 
 export function mapWorkflow(workflow: BackendWorkflow, municipalityName: string): CivicProcess {
+  if (!workflow || typeof workflow.id !== 'string' || !workflow.id ||
+      typeof workflow.title !== 'string' || !workflow.title.trim() ||
+      typeof workflow.municipalityId !== 'string' || !workflow.municipalityId ||
+      typeof workflow.issueKey !== 'string' || !workflow.issueKey ||
+      !['needs_review', 'verified', 'outdated'].includes(workflow.status) ||
+      !Array.isArray(workflow.nodes) || workflow.nodes.length === 0 ||
+      !Array.isArray(workflow.edges)) {
+    throw new Error('The roadmap service returned an incomplete workflow.');
+  }
+  const nodeIds = new Set<string>();
+  for (const node of workflow.nodes) {
+    if (!node || typeof node.id !== 'string' || !node.id || nodeIds.has(node.id) ||
+        typeof node.label !== 'string' || !node.label.trim() || !node.data || typeof node.data !== 'object') {
+      throw new Error('The roadmap service returned an incomplete workflow.');
+    }
+    nodeIds.add(node.id);
+  }
+  if (workflow.edges.some((edge) => !edge || typeof edge.from !== 'string' || typeof edge.to !== 'string' ||
+      !nodeIds.has(edge.from) || !nodeIds.has(edge.to) || edge.from === edge.to)) {
+    throw new Error('The roadmap service returned an incomplete workflow.');
+  }
+
   const totalNodes = workflow.nodes.length;
   const steps: ProcessStep[] = workflow.nodes.map((node, index) => ({
     id: node.id,

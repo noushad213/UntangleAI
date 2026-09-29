@@ -24,3 +24,12 @@ test('generated steps default to medium confidence until evidence is calibrated'
   }, 'Pune');
   assert.equal(process.steps[0].confidence, 'medium');
 });
+
+test('generated workflow mapping rejects empty nodes and dangling edges', () => {
+  const { mapWorkflow } = load('lib/civicpath-api.ts');
+  const base = { id: 'workflow-1', title: 'Test', municipalityId: 'city-1', issueKey: 'test',
+    status: 'needs_review', conflicts: [], missingInformation: [] };
+  assert.throws(() => mapWorkflow({ ...base, nodes: [], edges: [] }, 'Pune'), /incomplete workflow/i);
+  assert.throws(() => mapWorkflow({ ...base, nodes: [{ id: 'step-1', label: 'Apply', data: {} }],
+    edges: [{ from: 'missing', to: 'step-1' }] }, 'Pune'), /incomplete workflow/i);
+});

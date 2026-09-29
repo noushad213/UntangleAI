@@ -71,6 +71,22 @@ test('an import-only result cannot silently claim to cover the requested resale 
   ]), []);
 });
 
+test('uncovered resale steps block roadmap verification', () => {
+  const { assertWorkflowIntentCoverage } = require('../src/services/workflow.service');
+  assert.throws(
+    () => assertWorkflowIntentCoverage({ title: 'import clothes and sell them', steps: [{ title: 'Obtain IEC', description: 'Import goods' }] }),
+    (error) => error.code === 'VALIDATION_FAILED' && /cannot be marked verified/i.test(error.message) && error.details.length === 2
+  );
+  assert.doesNotThrow(() => assertWorkflowIntentCoverage({
+    title: 'import clothes and sell them',
+    steps: [
+      { title: 'Obtain IEC', description: 'Import goods' },
+      { title: 'Check GST registration eligibility', description: 'GST registration requirements' },
+      { title: 'Check shop and establishment registration', description: 'Shop establishment service' },
+    ],
+  }));
+});
+
 test('GST paid on imports does not establish resale registration eligibility', () => {
   const gaps = findUncoveredTradeTasks('import clothes and sell them', [
     { title: 'Pay customs duty and GST', description: 'Pay the taxes due on imported goods.' },

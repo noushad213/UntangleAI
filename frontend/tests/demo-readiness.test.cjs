@@ -54,6 +54,13 @@ test('vague requests ask for the service rather than generating a guessed roadma
   }
 });
 
+test('multiple independent services are clarified while one compound trade task remains valid', () => {
+  const { getPromptAlert } = load('lib/prompt-guardrails.ts');
+  assert.match(getPromptAlert('I want to apply for a birth certificate and driving license'), /more than one service/i);
+  assert.match(getPromptAlert('Renew my driving license and apply for a birth certificate'), /more than one service/i);
+  assert.equal(getPromptAlert('I want to import clothes and sell them'), null);
+});
+
 test('greetings, gibberish, chatbot chatter, and non-civic topics are rejected upfront without asking for a city', () => {
   const { getPromptAlert } = load('lib/prompt-guardrails.ts');
   // Greetings

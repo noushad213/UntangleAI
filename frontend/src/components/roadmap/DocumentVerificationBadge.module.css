@@ -22,6 +22,17 @@
   border: 1px solid var(--color-danger-200, #fecaca);
 }
 
+.mismatchMessage,
+.unverified {
+  align-items: flex-start;
+  white-space: normal;
+}
+
+.mismatchMessage span,
+.unverified span {
+  min-width: 0;
+}
+
 .unverified {
   background: var(--color-warning-50, #fffbeb);
   color: var(--color-warning-700, #b45309);

@@ -16,13 +16,13 @@ export function RoadmapReviewNotice({ review }: Props) {
       </div>
       <p>{review.status === 'verified' ? `Reviewed by ${review.verifiedBy || 'an authorized reviewer'}.`
         : review.status === 'outdated' ? 'The saved guidance is out of date and needs a fresh source check.'
-          : hasIssues ? 'The sources leave some questions unanswered. The specific gaps are listed below.'
+          : hasIssues ? 'This roadmap is partial. Review the uncovered requirements before relying on it.'
             : 'Official source links are included with each step.'}</p>
       {hasIssues && (
         <div className={styles.issues}>
           {review.missingInformation.length > 0 && (
-            <details>
-              <summary>Details still unconfirmed ({review.missingInformation.length})</summary>
+            <details open={review.status === 'needs_review'}>
+              <summary>Uncovered requirements ({review.missingInformation.length})</summary>
               <ul>{review.missingInformation.map((detail, index) => <li key={`${index}-${detail}`}>{detail}</li>)}</ul>
             </details>
           )}

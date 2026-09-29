@@ -42,7 +42,7 @@ export default async function RoadmapPage({ params }: Props) {
     try {
       currentProcess = (await getGeneratedRoadmap(params.id)) || undefined;
     } catch {
-      currentProcess = undefined;
+      throw new Error('The roadmap service is temporarily unavailable. Refresh this page to try again.');
     }
   }
 

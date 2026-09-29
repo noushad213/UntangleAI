@@ -141,48 +141,64 @@ export function useRoadmapProgress(process: CivicProcess) {
 
       // If document type is identifiable, run OCR verification in background
       if (guessedType && requirementIndex >= 0) {
-        verifyDocumentType(file, file.name, {
-          workflowId: process.id,
-          stepId,
-          requirementIndex,
-        }, true)
-          .then((res) => {
-            setTrackingState((prev) => {
-              const next: RoadmapTrackingState = {
-                ...prev,
-                documents: prev.documents.map((d) => {
-                  if (d.id !== newDoc.id) return d;
-                  return {
-                    ...d,
-                    verificationStatus: res.valid
-                      ? 'verified'
-                      : res.status === 'mismatch'
-                      ? 'mismatch'
-                      : 'unverified',
-                    detectedType: res.detectedDocumentType || undefined,
-                    expectedType: res.expectedDocumentType || guessedType,
-                    verificationMessage: res.message,
-                    verificationConfidence: res.confidence,
-                  };
-                }),
-              };
-              saveTrackingState(process.id, next);
-              return next;
-            });
-          })
-          .catch(() => {
-            // Keep local document intact even if OCR is offline
-            setTrackingState((prev) => {
-              const next: RoadmapTrackingState = {
-                ...prev,
-                documents: prev.documents.map((d) =>
-                  d.id === newDoc.id ? { ...d, verificationStatus: 'unverified' } : d
-                ),
-              };
-              saveTrackingState(process.id, next);
-              return next;
-            });
+        const scanStartedAt = Date.now();
+        try {
+          const res = await verifyDocumentType(file, file.name, {
+            workflowId: process.id,
+            stepId,
+            requirementIndex,
+          }, true);
+          const remainingScanTime = 2000 - (Date.now() - scanStartedAt);
+          if (remainingScanTime > 0) {
+            await new Promise((resolve) => setTimeout(resolve, remainingScanTime));
+          }
+
+          setTrackingState((prev) => {
+            const next: RoadmapTrackingState = {
+              ...prev,
+              documents: prev.documents.map((d) => {
+                if (d.id !== newDoc.id) return d;
+                return {
+                  ...d,
+                  verificationStatus: res.valid
+                    ? 'verified'
+                    : res.status === 'mismatch'
+                    ? 'mismatch'
+                    : 'unverified',
+                  detectedType: res.detectedDocumentType || undefined,
+                  expectedType: res.expectedDocumentType || guessedType,
+                  verificationMessage: res.message,
+                  verificationConfidence: res.confidence,
+                };
+              }),
+            };
+            saveTrackingState(process.id, next);
+            return next;
           });
+        } catch {
+          const remainingScanTime = 2000 - (Date.now() - scanStartedAt);
+          if (remainingScanTime > 0) {
+            await new Promise((resolve) => setTimeout(resolve, remainingScanTime));
+          }
+
+          setTrackingState((prev) => {
+            const next: RoadmapTrackingState = {
+              ...prev,
+              documents: prev.documents.map((d) =>
+                d.id === newDoc.id
+                  ? {
+                      ...d,
+                      verificationStatus: 'unverified',
+                      expectedType: guessedType,
+                      verificationMessage: 'We couldn’t check this document right now. Try again in a moment.',
+                    }
+                  : d
+              ),
+            };
+            saveTrackingState(process.id, next);
+            return next;
+          });
+        }
       }
 
       return newDoc;

@@ -17,15 +17,13 @@ function errorHandler(err, req, res, next) {
     message: err.message,
   });
 
-  const body = { error: { code, message: err.message || "Internal server error" } };
+  const message = statusCode >= 500
+    ? "The civic workflow service is temporarily unavailable. Please try again shortly."
+    : err.message || "Request failed";
+  const body = { error: { code, message } };
   if (err.details && statusCode < 500) {
     body.error.details = err.details;
   }
-  if (process.env.NODE_ENV !== "production" && statusCode >= 500) {
-    // Stack traces only in non-production, never sent to client in prod.
-    body.error.stack = err.stack;
-  }
-
   res.status(statusCode).json(body);
 }
 

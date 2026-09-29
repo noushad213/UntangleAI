@@ -8,7 +8,7 @@ const ts = require('typescript');
 function load(file, mocks = {}) {
   const filename = path.resolve(__dirname, '../src', file);
   const loaded = new Module(filename, module);
-  loaded.require = (id) => id in mocks ? mocks[id] : module.require(id);
+  loaded.require = (id) => id in mocks ? mocks[id] : id.startsWith('./') ? load(path.relative(path.resolve(__dirname, '../src'), path.resolve(path.dirname(filename), id.endsWith('.ts') ? id : id + '.ts')), mocks) : module.require(id);
   loaded._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.React, esModuleInterop: true },
   }).outputText, filename);
@@ -105,5 +105,21 @@ test('missing evidence and outages are both reported without duplicate submissio
       await assert.rejects(generateRoadmap({ query: 'birth certificate', municipalitySlug: 'pune' }, () => {}), /Specific failure reason/);
       assert.equal(calls, expectedCalls);
     }
+  } finally { global.fetch = originalFetch; }
+});
+
+test('generation API rejects multi-service requests before contacting the backend', async () => {
+  const originalFetch = global.fetch;
+  let calls = 0;
+  global.fetch = async () => { calls++; throw new Error('backend should not be called'); };
+  try {
+    const { POST } = load('app/api/v1/generate/route.ts', {
+      'next/server': { NextResponse: { json: (body, options) => ({ ...body, status: options.status }) } },
+      '@/lib/prompt-guardrails': { getPromptAlert: load('lib/prompt-guardrails.ts').getPromptAlert },
+    });
+    const result = await POST({ json: async () => ({ query: 'birth certificate and driving license', municipalitySlug: 'pune' }) });
+    assert.equal(result.status, 422);
+    assert.match(result.error.message, /more than one service/i);
+    assert.equal(calls, 0);
   } finally { global.fetch = originalFetch; }
 });

@@ -106,6 +106,7 @@ test('OCR.Space adapter sends multipart input and returns OCR text without loggi
   assert.equal(request.options.body.get('OCREngine'), '3');
   assert.equal(request.options.body.get('language'), 'auto');
   assert.equal(request.options.body.get('file').name, 'upload.pdf');
+  assert.equal(request.options.body.get('scale'), 'true');
 });
 
 test('OCR.Space adapter fails clearly when the API key is still a placeholder', async () => {

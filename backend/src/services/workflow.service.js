@@ -23,6 +23,8 @@ const { recoverWorkflowDetails, needsDetailsRecovery } = require("./workflow-det
 const { evaluateQueryGuardrail } = require("../utils/civic-query-guardrail");
 
 const MAX_TOTAL_GEMINI_CHUNKS = 10;
+const MAX_EVIDENCE_CHARS_PER_CHUNK = 1800;
+const MAX_LIVE_SEARCHES_PER_WORKFLOW = 5;
 const DEFAULT_WORKFLOW_FRESHNESS_MS = 7 * 24 * 60 * 60 * 1000;
 
 function getMaxSourcesPerWorkflow(env = process.env) {
@@ -453,6 +455,7 @@ async function buildWorkflowFromScratch(
   const processedUrls = new Set();
   const maxSources = getMaxSourcesPerWorkflow();
   const sourcePlan = buildSourcePlan(rawQuery, municipality);
+  let liveSearches = 0;
 
   async function processCandidateUrl(normalizedUrl) {
     const domain = new URL(normalizedUrl).hostname;
@@ -521,7 +524,8 @@ async function buildWorkflowFromScratch(
     sourceLimit = maxSources,
     searchScope = {}
   ) {
-    if (sourceDocs.length >= sourceLimit) return;
+    if (sourceDocs.length >= sourceLimit || liveSearches >= MAX_LIVE_SEARCHES_PER_WORKFLOW) return;
+    liveSearches++;
 
     logger.info(
       "Searching official government sources",
@@ -733,7 +737,7 @@ async function buildWorkflowFromScratch(
       Number(
         process.env
           .MAX_GEMINI_CHUNKS_PER_SOURCE
-      ) || 4;
+      ) || 3;
 
     const issueKeywords = [
       ...(Array.isArray(issue.keywords) ? issue.keywords : []),
@@ -827,7 +831,7 @@ async function buildWorkflowFromScratch(
                   chunk.relevanceScore,
 
                 text:
-                  chunk.text,
+                  String(chunk.text || '').slice(0, MAX_EVIDENCE_CHARS_PER_CHUNK),
               })
             )
         )
@@ -1359,6 +1363,8 @@ async function markWorkflowVerified(
     );
   }
 
+  assertWorkflowIntentCoverage(workflow);
+
   workflow.status =
     "verified";
 
@@ -1371,6 +1377,17 @@ async function markWorkflowVerified(
   await workflow.save();
 
   return workflow;
+}
+
+function assertWorkflowIntentCoverage(workflow) {
+  const uncoveredTradeTasks = findUncoveredTradeTasks(workflow?.title, workflow?.steps || []);
+  if (uncoveredTradeTasks.length > 0) {
+    throw makeError(
+      "VALIDATION_FAILED",
+      "This roadmap still has unresolved resale requirements and cannot be marked verified.",
+      uncoveredTradeTasks
+    );
+  }
 }
 
 /**
@@ -1492,6 +1509,7 @@ module.exports = {
   buildWorkflowFromScratch,
   getCachedWorkflow,
   markWorkflowVerified,
+  assertWorkflowIntentCoverage,
   toGraphJson,
   isWorkflowFresh,
   getMaxSourcesPerWorkflow,
