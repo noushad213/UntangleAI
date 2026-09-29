@@ -17,6 +17,7 @@ Node.js · Express · MongoDB/Mongoose · Google GenAI SDK (Gemini) · Tavily ·
 npm install
 cp .env.example .env   # fill in MONGO_URI, GEMINI_API_KEY, TAVILY_API_KEY
 npm run dev             # or: npm start
+npm run dev:watch       # opt in to source-file restart during development
 npm test                # runs unit tests (no live external calls)
 node src/data/seed.js   # loads 3 sample Maharashtra municipalities + issue catalogs
 ```
@@ -24,6 +25,13 @@ node src/data/seed.js   # loads 3 sample Maharashtra municipalities + issue cata
 PDF sources are supported through the bundled `pdf-parse` dependency. See
 `EXTRACTION_PIPELINE_REPORT.md` for the quality gate, alternate official-document
 fallback, optional browser rendering, and provenance design.
+
+Import/export queries use separate DGFT and Customs searches across India.
+Queries that also mention selling goods include GST and local shop-registration
+searches. Each authority gets a bounded share of the source budget; search and
+extraction use explicit official-domain allowlists with the existing HTTPS,
+DNS, redirect, and evidence checks. Other civic queries retain municipal scope.
+These search topics do not establish which registrations apply to an applicant.
 
 For broader free local extraction, install `tesseract-ocr`, `poppler-utils`, and
 `libreoffice`. The backend can then OCR scanned PDFs/images and normalize common

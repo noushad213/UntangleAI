@@ -136,7 +136,7 @@ export function inferNodeType(
   return 'action';
 }
 
-function mapWorkflow(workflow: BackendWorkflow, municipalityName: string): CivicProcess {
+export function mapWorkflow(workflow: BackendWorkflow, municipalityName: string): CivicProcess {
   const totalNodes = workflow.nodes.length;
   const steps: ProcessStep[] = workflow.nodes.map((node, index) => ({
     id: node.id,
@@ -151,7 +151,7 @@ function mapWorkflow(workflow: BackendWorkflow, municipalityName: string): Civic
     timeEstimate: node.data.deadline || undefined,
     sourceUrl: node.data.officialUrl || '',
     sourceSnippet: node.data.evidence?.find((item) => item.quote)?.quote || undefined,
-    confidence: node.data.isUncertain ? 'low' : 'high',
+    confidence: node.data.isUncertain ? 'low' : 'medium',
     requirements: (node.data.documentsRequired || []).map((title, requirementIndex) => ({
       id: `${node.id}-requirement-${requirementIndex + 1}`,
       stepId: node.id,

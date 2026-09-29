@@ -14,7 +14,8 @@ function getSearchResultLimit(env = process.env) {
  * Builds a focused query. Domain restriction is applied via Tavily's
  * `include_domains`, not by string-stuffing the query.
  */
-function buildQuery(issueLabel, municipalityName) {
+function buildQuery(issueLabel, municipalityName, options = {}) {
+  if (options.jurisdiction === 'national') return `${issueLabel} procedure official India`;
   return `${issueLabel} procedure official ${municipalityName} Maharashtra`;
 }
 
@@ -27,12 +28,12 @@ function buildQuery(issueLabel, municipalityName) {
  * @param {string[]} allowedDomains - restricts search when the municipality has known domains
  * @returns {Promise<Array<{url:string, title:string, snippet:string}>>}
  */
-async function searchGovernmentSources(issueLabel, municipalityName, allowedDomains = []) {
+async function searchGovernmentSources(issueLabel, municipalityName, allowedDomains = [], options = {}) {
   if (!process.env.TAVILY_API_KEY) {
     throw makeError("SEARCH_FAILED", "TAVILY_API_KEY is not configured");
   }
 
-  const query = buildQuery(issueLabel, municipalityName);
+  const query = buildQuery(issueLabel, municipalityName, options);
   const body = {
     api_key: process.env.TAVILY_API_KEY,
     query,
@@ -71,4 +72,4 @@ async function searchGovernmentSources(issueLabel, municipalityName, allowedDoma
   }));
 }
 
-module.exports = { searchGovernmentSources, getSearchResultLimit };
+module.exports = { searchGovernmentSources, getSearchResultLimit, buildQuery };

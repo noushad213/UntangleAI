@@ -46,9 +46,14 @@ npm run test:backend
 From the project root:
 - `npm run dev:frontend` — Start Next.js development server
 - `npm run dev:backend` — Start Express development server
+- `npm run dev:backend:watch` — Restart Express when backend source files change
 - `npm run build:frontend` — Production build for the Next.js app
 - `npm run test:backend` — Run backend tests
 - `npm --prefix frontend test` — Run frontend logic tests
+
+The default backend command keeps running while files are edited, so roadmap
+requests are not interrupted by automatic restarts. Restart it manually after
+backend changes, or use `dev:backend:watch` while developing.
 
 ## Office maps, forms and civic helplines
 

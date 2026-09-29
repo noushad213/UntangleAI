@@ -31,3 +31,14 @@ test("graph JSON includes review and freshness metadata", () => {
   assert.equal(graph.lastRecheckedAt, "2026-09-27T08:00:00.000Z");
   assert.deepEqual(graph.missingInformation, ["Current fee"]);
 });
+
+test('cached import drafts still report omitted resale requirements', () => {
+  const workflow = {
+    _id: 'workflow-1', municipalityId: 'city-1', issueKey: 'trade-import',
+    title: 'import clothes and sell them', status: 'needs_review',
+    steps: [{ stepId: 'iec', title: 'Obtain IEC', description: 'Import goods', dependsOn: [], sourceIds: [] }],
+    conflicts: [], missingInformation: [],
+  };
+  assert.equal(toGraphJson(workflow).missingInformation.length, 2);
+  assert.deepEqual(workflow.missingInformation, []);
+});

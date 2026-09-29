@@ -13,9 +13,13 @@ function createDocumentVerificationController(options = {}) {
         });
       }
 
-      const expectedDocumentType = typeof options.resolveExpectedDocumentType === "function"
-        ? await options.resolveExpectedDocumentType(req)
-        : req.body?.expectedDocumentType;
+      if (typeof options.resolveExpectedDocumentType !== "function") {
+        throw Object.assign(new Error("Document requirement resolution is not configured"), {
+          code: "SERVICE_UNAVAILABLE",
+          statusCode: 503,
+        });
+      }
+      const expectedDocumentType = await options.resolveExpectedDocumentType(req);
       const result = await service.verify({
         file: req.file,
         expectedDocumentType,

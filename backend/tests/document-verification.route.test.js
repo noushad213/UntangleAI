@@ -13,7 +13,9 @@ test("POST /api/documents/verify rejects request without consent", async () => {
     const formData = new FormData();
     const blob = new Blob(["%PDF-1.7\ntest"], { type: "application/pdf" });
     formData.append("document", blob, "test.pdf");
-    formData.append("expectedDocumentType", "pan");
+    formData.append("workflowId", "507f1f77bcf86cd799439011");
+    formData.append("stepId", "step-1");
+    formData.append("requirementIndex", "0");
 
     const res = await fetch(`http://localhost:${port}/api/documents/verify`, {
       method: "POST",
@@ -29,7 +31,7 @@ test("POST /api/documents/verify rejects request without consent", async () => {
   }
 });
 
-test("POST /api/documents/verify rejects unsupported expectedDocumentType", async () => {
+test("POST /api/documents/verify rejects client-controlled document expectations", async () => {
   const app = createApp();
   const server = http.createServer(app);
   await new Promise((resolve) => server.listen(0, resolve));
@@ -39,7 +41,7 @@ test("POST /api/documents/verify rejects unsupported expectedDocumentType", asyn
     const formData = new FormData();
     const blob = new Blob(["%PDF-1.7\ntest"], { type: "application/pdf" });
     formData.append("document", blob, "test.pdf");
-    formData.append("expectedDocumentType", "invalid_type_xyz");
+    formData.append("expectedDocumentType", "pan");
     formData.append("consentToThirdPartyOcr", "true");
 
     const res = await fetch(`http://localhost:${port}/api/documents/verify`, {
@@ -49,7 +51,7 @@ test("POST /api/documents/verify rejects unsupported expectedDocumentType", asyn
     const body = await res.json();
 
     assert.strictEqual(res.status, 400);
-    assert.strictEqual(body.code, "UNSUPPORTED_EXPECTED_DOCUMENT_TYPE");
+    assert.strictEqual(body.code, "INVALID_REQUEST");
     assert.strictEqual(body.valid, false);
   } finally {
     await new Promise((resolve) => server.close(resolve));

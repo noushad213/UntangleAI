@@ -375,6 +375,7 @@ async function extractWorkflow(
 ) {
   const system = [
     "You extract a step-by-step civic procedure ONLY from the supplied official source text.",
+    "Cover each distinct part of the requested task. If a part has no supporting source, identify it in missingInformation instead of silently omitting it. Registration topics in the sources are not automatically obligations for this applicant; preserve eligibility conditions.",
 
     "You must never fabricate fees, deadlines, documents, eligibility, offices, or URLs.",
 

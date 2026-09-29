@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
+    "dev": "node src/server.js",
+    "dev:watch": "node --watch --watch-path=src src/server.js",
     "test": "node --test tests/**/*.test.js",
     "test:filestack:live": "node scripts/filestack-live-smoke.js",
     "seed": "node src/data/seed.js",

@@ -53,19 +53,25 @@ export function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([byteNumbers], { type: mime });
 }
 
-/**
- * Calls backend POST /api/documents/verify with file, expectedDocumentType and citizen consent.
- */
+/** Calls the type checker for a requirement resolved from the stored roadmap. */
+interface StoredRequirementReference {
+  workflowId: string;
+  stepId: string;
+  requirementIndex: number;
+}
+
 export async function verifyDocumentType(
   fileOrBlob: Blob,
   fileName: string,
-  expectedDocumentType: string,
+  requirement: StoredRequirementReference,
   consentToThirdPartyOcr: boolean = true
 ): Promise<VerificationResult> {
   const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
   const formData = new FormData();
   formData.append('document', fileOrBlob, fileName);
-  formData.append('expectedDocumentType', expectedDocumentType);
+  formData.append('workflowId', requirement.workflowId);
+  formData.append('stepId', requirement.stepId);
+  formData.append('requirementIndex', String(requirement.requirementIndex));
   if (consentToThirdPartyOcr) {
     formData.append('consentToThirdPartyOcr', 'true');
   }
@@ -77,6 +83,7 @@ export async function verifyDocumentType(
     });
 
     const data = await response.json();
+    const errorMessage = data?.error?.message;
     return {
       valid: Boolean(data.valid),
       status: (data.status as 'match' | 'mismatch' | 'unverified') || (data.valid ? 'match' : 'error'),
@@ -85,7 +92,7 @@ export async function verifyDocumentType(
       detectedDocumentType: data.detectedDocumentType,
       confidence: data.confidence,
       verificationLevel: data.verificationLevel,
-      message: data.message || (data.valid ? 'Document type verified.' : 'Verification failed.'),
+      message: data.message || errorMessage || (data.valid ? 'Document type verified.' : 'Verification failed.'),
     };
   } catch (error) {
     return {

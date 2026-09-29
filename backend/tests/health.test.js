@@ -2,6 +2,19 @@ const test = require("node:test");
 const assert = require("node:assert");
 const http = require("node:http");
 const { createApp } = require("../src/app");
+const { getReadinessStatus } = require("../src/routes/health.routes");
+
+test("readiness reports missing live-generation and review configuration without exposing values", () => {
+  const status = getReadinessStatus({
+    MONGO_URI: "mongodb://configured",
+    TAVILY_API_KEY: "search-key",
+    GEMINI_API_KEY: "model-key",
+  }, 1);
+  assert.strictEqual(status.generationReady, true);
+  assert.strictEqual(status.reviewReady, false);
+  assert.deepStrictEqual(status.missing, ["ADMIN_API_TOKEN"]);
+  assert.strictEqual(JSON.stringify(status).includes("search-key"), false);
+});
 
 test("GET /api/health returns ok status", async () => {
   const app = createApp();

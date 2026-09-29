@@ -202,12 +202,14 @@ function CanvasInner({
     setNodes,
   ]);
 
-  // Initial viewport positioning for tracking mode
+  const initialTrackingMode = useRef(isTrackingMode).current;
+
+  // Apply the starting camera once; the next effect handles later mode changes.
   useEffect(() => {
-    if (isTrackingMode) {
+    if (initialTrackingMode) {
       setViewport({ x: 20, y: 15, zoom: 0.88 });
     }
-  }, []);
+  }, [initialTrackingMode, setViewport]);
 
   // Smooth layout morph transition via camera viewport & CSS transitions
   const prevTrackingModeRef = useRef<boolean>(isTrackingMode);

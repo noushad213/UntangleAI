@@ -73,30 +73,30 @@ test('uploading one attachment leaves checklist completion unchanged', async () 
   assert.deepEqual(completions, []);
 });
 
-test('temporary generation failure recovers once and returns the resulting roadmap', async () => {
+test('temporary generation failure is not automatically submitted twice', async () => {
   const originalFetch = global.fetch;
   let calls = 0;
   let retryCount = 0;
   global.fetch = async () => {
     calls++;
-    return calls === 1
-      ? { status: 504, ok: false, json: async () => ({ error: { message: 'Taking longer' } }) }
-      : { status: 200, ok: true, json: async () => ({ workflow: { id: 'ready-roadmap' } }) };
+    return { status: 504, ok: false, json: async () => ({ error: { message: 'Taking longer' } }) };
   };
   try {
     const { generateRoadmap } = load('lib/generate-roadmap.ts');
-    const id = await generateRoadmap({ query: 'birth certificate', municipalitySlug: 'pune' }, () => retryCount++);
-    assert.equal(id, 'ready-roadmap');
-    assert.equal(calls, 2);
-    assert.equal(retryCount, 1);
+    await assert.rejects(
+      generateRoadmap({ query: 'birth certificate', municipalitySlug: 'pune' }, () => retryCount++),
+      /Taking longer/
+    );
+    assert.equal(calls, 1);
+    assert.equal(retryCount, 0);
   } finally { global.fetch = originalFetch; }
 });
 
-test('missing evidence is reported without retrying and repeated outages stop after two requests', async () => {
+test('missing evidence and outages are both reported without duplicate submissions', async () => {
   const originalFetch = global.fetch;
   const { generateRoadmap } = load('lib/generate-roadmap.ts');
   try {
-    for (const [status, expectedCalls] of [[422, 1], [503, 2]]) {
+    for (const [status, expectedCalls] of [[422, 1], [503, 1]]) {
       let calls = 0;
       global.fetch = async () => {
         calls++;

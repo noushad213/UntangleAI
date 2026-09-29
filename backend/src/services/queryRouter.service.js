@@ -127,10 +127,7 @@ async function matchCivicQuery(rawQuery, municipalitySlug = null) {
       }
     }
   } catch (err) {
-    logger.warn("CivicQuery lookup skipped due to index/query error", {
-      query: rawQuery,
-      error: err.message,
-    });
+    logger.warn("CivicQuery lookup skipped due to index/query error", { error: err.message });
   }
 
   return null;

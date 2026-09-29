@@ -72,6 +72,43 @@ function validateWorkflow(workflow, validSourceIdStrings) {
   }
 }
 
+function normalizeEvidenceText(value) {
+  return String(value || "").normalize("NFKC").replace(/\s+/g, " ").trim().toLocaleLowerCase("en-IN");
+}
+
+function quoteMatchesText(text, quote) {
+  const normalizedQuote = normalizeEvidenceText(quote);
+  return normalizedQuote.length > 0 && normalizeEvidenceText(text).includes(normalizedQuote);
+}
+
+function groundStepFacts(step) {
+  const evidenceText = (step.evidence || []).map((item) => item?.quote).filter(Boolean).join(" ");
+  const unsupported = [];
+  const grounded = { ...step };
+
+  for (const field of ["fee", "deadline", "eligibility", "office"]) {
+    if (grounded[field] && !quoteMatchesText(evidenceText, grounded[field])) {
+      grounded[field] = null;
+      unsupported.push(field);
+    }
+  }
+
+  if (Array.isArray(grounded.documentsRequired)) {
+    const supportedDocuments = grounded.documentsRequired.filter((document) => quoteMatchesText(evidenceText, document));
+    if (supportedDocuments.length !== grounded.documentsRequired.length) unsupported.push("document requirement");
+    grounded.documentsRequired = supportedDocuments;
+  }
+
+  if (unsupported.length > 0) {
+    grounded.isUncertain = true;
+    const evidenceNote = `Official source text did not directly support: ${unsupported.join(", ")}.`;
+    grounded.uncertaintyNote = grounded.uncertaintyNote
+      ? `${grounded.uncertaintyNote} ${evidenceNote}`
+      : evidenceNote;
+  }
+  return grounded;
+}
+
 /** Returns a stepId involved in a cycle, or null if the graph is acyclic. */
 function findCycle(steps) {
   const graph = new Map(steps.map((s) => [s.stepId, s.dependsOn || []]));
@@ -101,4 +138,4 @@ function findCycle(steps) {
   return null;
 }
 
-module.exports = { validateWorkflow, findCycle };
+module.exports = { validateWorkflow, findCycle, quoteMatchesText, groundStepFacts };

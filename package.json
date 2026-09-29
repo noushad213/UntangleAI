@@ -11,6 +11,7 @@
     "dev": "npm --prefix frontend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
+    "dev:backend:watch": "npm --prefix backend run dev:watch",
     "build:frontend": "npm --prefix frontend run build",
     "typecheck:frontend": "npm --prefix frontend run typecheck",
     "lint:frontend": "npm --prefix frontend run lint",

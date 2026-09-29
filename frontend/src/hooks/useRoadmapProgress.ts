@@ -103,6 +103,9 @@ export function useRoadmapProgress(process: CivicProcess) {
         ? process.steps.flatMap((s) => s.requirements || []).find((r) => r.id === requirementId)
         : undefined;
       const guessedType = guessVerifiableDocumentType(req?.title);
+      const requirementIndex = process.steps
+        .find((step) => step.id === stepId)
+        ?.requirements?.findIndex((requirement) => requirement.id === requirementId) ?? -1;
 
       const newDoc: TrackedDocument = {
         id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
@@ -137,8 +140,12 @@ export function useRoadmapProgress(process: CivicProcess) {
       });
 
       // If document type is identifiable, run OCR verification in background
-      if (guessedType) {
-        verifyDocumentType(file, file.name, guessedType, true)
+      if (guessedType && requirementIndex >= 0) {
+        verifyDocumentType(file, file.name, {
+          workflowId: process.id,
+          stepId,
+          requirementIndex,
+        }, true)
           .then((res) => {
             setTrackingState((prev) => {
               const next: RoadmapTrackingState = {
@@ -185,18 +192,15 @@ export function useRoadmapProgress(process: CivicProcess) {
 
   // Manually verify or re-verify a document
   const verifyDocument = useCallback(
-    async (docId: string, customExpectedType?: string): Promise<VerificationResult | null> => {
+    async (docId: string): Promise<VerificationResult | null> => {
       const doc = trackingState.documents.find((d) => d.id === docId);
       if (!doc || !doc.dataUrl) return null;
 
-      let expectedType = customExpectedType;
-      if (!expectedType && doc.requirementId) {
-        const req = process.steps
-          .flatMap((s) => s.requirements || [])
-          .find((r) => r.id === doc.requirementId);
-        expectedType = guessVerifiableDocumentType(req?.title) || undefined;
-      }
-      if (!expectedType) return null;
+      const step = process.steps.find((item) => item.id === doc.stepId);
+      const requirementIndex = step?.requirements?.findIndex((item) => item.id === doc.requirementId) ?? -1;
+      const requirement = requirementIndex >= 0 ? step?.requirements?.[requirementIndex] : undefined;
+      const expectedType = guessVerifiableDocumentType(requirement?.title) || undefined;
+      if (!expectedType || requirementIndex < 0) return null;
 
       setTrackingState((prev) => {
         const next: RoadmapTrackingState = {
@@ -211,7 +215,11 @@ export function useRoadmapProgress(process: CivicProcess) {
 
       try {
         const blob = dataUrlToBlob(doc.dataUrl);
-        const result = await verifyDocumentType(blob, doc.fileName, expectedType, true);
+        const result = await verifyDocumentType(blob, doc.fileName, {
+          workflowId: process.id,
+          stepId: doc.stepId,
+          requirementIndex,
+        }, true);
 
         setTrackingState((prev) => {
           const next: RoadmapTrackingState = {

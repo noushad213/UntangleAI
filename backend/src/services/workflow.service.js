@@ -4,12 +4,15 @@ const Source = require("../models/Source");
 const { makeError } = require("../utils/errors");
 const {
   validateWorkflow,
+  quoteMatchesText,
+  groundStepFacts,
 } = require("../validators/workflow.validator");
 
 const municipalityService = require("./municipality.service");
 const aiService = require("./ai.service");
 const queryRouterService = require("./queryRouter.service");
 const searchService = require("./search.service");
+const { buildSourcePlan, classifyTradeQuery, findUncoveredTradeTasks } = require("./source-policy");
 const extractionService = require("./extraction.service");
 const {
   selectTopChunks,
@@ -223,7 +226,7 @@ async function resolveWorkflowForQuery(
    * The catalog is optional context only.
    * New civic issues are allowed.
    */
-  let classification = matchCatalogIssue(rawQuery, municipality.issueCatalog || []);
+  let classification = classifyTradeQuery(rawQuery) || matchCatalogIssue(rawQuery, municipality.issueCatalog || []);
 
   if (!classification) {
     classification = await queryRouterService.matchCivicQuery(rawQuery, municipality.slug);
@@ -252,9 +255,6 @@ async function resolveWorkflowForQuery(
     {
       municipality:
         municipality.slug,
-
-      query:
-        rawQuery,
 
       issueKey:
         classification.issueKey,
@@ -452,6 +452,7 @@ async function buildWorkflowFromScratch(
   const sourceDocs = [];
   const processedUrls = new Set();
   const maxSources = getMaxSourcesPerWorkflow();
+  const sourcePlan = buildSourcePlan(rawQuery, municipality);
 
   async function processCandidateUrl(normalizedUrl) {
     const domain = new URL(normalizedUrl).hostname;
@@ -464,7 +465,7 @@ async function buildWorkflowFromScratch(
     ) {
       const extracted = await extractionService.fetchAndExtract(
         normalizedUrl,
-        municipality.allowedDomains
+        sourcePlan.allowedDomains
       );
 
       sourceDoc = await Source.findOneAndUpdate(
@@ -517,7 +518,8 @@ async function buildWorkflowFromScratch(
 
   async function collectSources(
     searchQuery,
-    sourceLimit = maxSources
+    sourceLimit = maxSources,
+    searchScope = {}
   ) {
     if (sourceDocs.length >= sourceLimit) return;
 
@@ -526,7 +528,6 @@ async function buildWorkflowFromScratch(
       {
         municipality: municipality.slug,
         issueKey: issue.issueKey,
-        searchQuery,
       }
     );
 
@@ -534,7 +535,8 @@ async function buildWorkflowFromScratch(
       await searchService.searchGovernmentSources(
         searchQuery,
         municipality.name,
-        municipality.allowedDomains
+        searchScope.allowedDomains || sourcePlan.allowedDomains,
+        { jurisdiction: searchScope.jurisdiction || (sourcePlan.searches.length ? 'national' : 'local') }
       );
 
     logger.info(
@@ -542,7 +544,6 @@ async function buildWorkflowFromScratch(
       {
         municipality: municipality.slug,
         issueKey: issue.issueKey,
-        searchQuery,
         candidateCount: candidates.length,
       }
     );
@@ -682,6 +683,13 @@ async function buildWorkflowFromScratch(
    * ============================================================
    * Executed when local pre-ingested knowledge is absent or insufficient.
    */
+  if (sourcePlan.searches.length) {
+    // Reserve evidence slots for each authority instead of filling them with one topic.
+    for (const scope of sourcePlan.searches) {
+      await collectSources(scope.query, Math.min(maxSources, sourceDocs.length + 1), scope);
+    }
+  }
+
   if (sourceDocs.length === 0) {
     const primarySearchQuery =
       [
@@ -696,8 +704,8 @@ async function buildWorkflowFromScratch(
 
     if (sourceDocs.length === 0) {
       const recoveryQueries = [
-        `${issue.label} application form required documents ${municipality.name}`,
-        `${issue.label} license permit procedure ${municipality.name}`,
+        `${issue.label} application form required documents ${sourcePlan.searches.length ? 'India' : municipality.name}`,
+        `${issue.label} license permit procedure ${sourcePlan.searches.length ? 'India' : municipality.name}`,
       ];
       for (const recoveryQuery of recoveryQueries) {
         await collectSources(recoveryQuery);
@@ -727,12 +735,10 @@ async function buildWorkflowFromScratch(
           .MAX_GEMINI_CHUNKS_PER_SOURCE
       ) || 4;
 
-    const issueKeywords =
-      Array.isArray(
-        issue.keywords
-      )
-        ? issue.keywords
-        : [];
+    const issueKeywords = [
+      ...(Array.isArray(issue.keywords) ? issue.keywords : []),
+      ...(sourcePlan.keywords || []),
+    ];
 
     const rankedSourceChunks =
       sourceDocs.map(
@@ -788,7 +794,7 @@ async function buildWorkflowFromScratch(
         }
       );
 
-    const aiInput =
+    let aiInput =
       rankedSourceChunks
         .flatMap(
           ({
@@ -829,11 +835,19 @@ async function buildWorkflowFromScratch(
           (a, b) =>
             (b.relevanceScore || 0) -
             (a.relevanceScore || 0)
-        )
-        .slice(
-          0,
-          MAX_TOTAL_GEMINI_CHUNKS
         );
+
+    if (sourcePlan.searches.length) {
+      const represented = new Set();
+      const firstPerSource = aiInput.filter((chunk) => {
+        if (represented.has(chunk.sourceId)) return false;
+        represented.add(chunk.sourceId);
+        return true;
+      });
+      const selected = new Set(firstPerSource);
+      aiInput = [...firstPerSource, ...aiInput.filter((chunk) => !selected.has(chunk))];
+    }
+    aiInput = aiInput.slice(0, MAX_TOTAL_GEMINI_CHUNKS);
 
     return {
       aiInput,
@@ -865,9 +879,6 @@ async function buildWorkflowFromScratch(
   logger.info(
     "Selected relevant AI chunks",
     {
-      query:
-        rawQuery,
-
       issueKey:
         issue.issueKey,
 
@@ -882,22 +893,6 @@ async function buildWorkflowFromScratch(
       maxTotalChunks:
         MAX_TOTAL_GEMINI_CHUNKS,
     }
-  );
-
-  console.log(
-    "\n===== AI INPUT ====="
-  );
-
-  console.dir(
-    aiInput,
-    {
-      depth:
-        null,
-    }
-  );
-
-  console.log(
-    "====================\n"
   );
 
   /*
@@ -963,12 +958,13 @@ async function buildWorkflowFromScratch(
           )
         : "";
 
+    const searchLocation = sourcePlan.searches.length ? 'India' : municipality.name;
     const targetedQueries = [
-      `${issue.label} application procedure ${municipality.name}`,
+      `${issue.label} application procedure ${searchLocation}`,
 
-      `${issue.label} how to apply documents application form ${municipality.name}`,
+      `${issue.label} how to apply documents application form ${searchLocation}`,
 
-      `${issue.label} eligibility procedure required documents ${municipality.name}`,
+      `${issue.label} eligibility procedure required documents ${searchLocation}`,
     ];
 
     /*
@@ -979,7 +975,7 @@ async function buildWorkflowFromScratch(
       keywordText.trim()
     ) {
       targetedQueries.push(
-        `${keywordText} application procedure ${municipality.name}`
+        `${keywordText} application procedure ${searchLocation}`
       );
     }
 
@@ -1031,22 +1027,6 @@ async function buildWorkflowFromScratch(
       }
     );
 
-    console.log(
-      "\n===== TARGETED AI INPUT ====="
-    );
-
-    console.dir(
-      aiInput,
-      {
-        depth:
-          null,
-      }
-    );
-
-    console.log(
-      "==============================\n"
-    );
-
     /*
      * ==========================================================
      * STEP 6: AI WORKFLOW EXTRACTION - RETRY
@@ -1066,7 +1046,7 @@ async function buildWorkflowFromScratch(
    */
   extraction = await recoverWorkflowDetails(extraction, {
     issueLabel: issue.label,
-    cityName: municipality.name,
+    cityName: sourcePlan.searches.length ? 'India' : municipality.name,
     collectSources: (query) => collectSources(query, Math.min(maxSources + 2, 10)),
     reextract: (gaps) => aiService.extractWorkflow(
       `${issue.label}. Resolve these source gaps while preserving step IDs and existing facts: ${gaps.join('; ')}. Existing workflow: ${JSON.stringify(extraction)}`,
@@ -1079,7 +1059,7 @@ async function buildWorkflowFromScratch(
           if (!evidence.quote) continue;
           const grounded = sourceDocs.some((source) => (step.sourceIds || []).map(String).includes(String(source._id))
             && (source.chunks?.length ? source.chunks : [{ chunkId: 'legacy-1', text: String(source.extractedText || '').slice(0, 6000) }]).some((chunk) => chunk.chunkId === evidence.chunkId
-              && String(chunk.text || '').replace(/\s+/g, ' ').includes(evidence.quote.replace(/\s+/g, ' '))));
+              && quoteMatchesText(chunk.text, evidence.quote)));
           if (!grounded) throw makeError('VALIDATION_FAILED', 'Recovery evidence does not match the official source text');
         }
       }
@@ -1199,6 +1179,13 @@ async function buildWorkflowFromScratch(
                 return [];
               }
 
+              const quote =
+                typeof item.quote === "string" &&
+                item.quote.length <= 600 &&
+                quoteMatchesText(chunk.text, item.quote)
+                  ? item.quote
+                  : null;
+
               return [
                 {
                   chunkId:
@@ -1212,13 +1199,7 @@ async function buildWorkflowFromScratch(
                     chunk.pageEnd ??
                     null,
 
-                  quote:
-                    typeof item.quote ===
-                      "string" &&
-                    item.quote.length <=
-                      600
-                      ? item.quote
-                      : null,
+                  quote,
                 },
               ];
             }
@@ -1239,7 +1220,7 @@ async function buildWorkflowFromScratch(
             .find(Boolean) ||
           null;
 
-        return {
+        return groundStepFacts({
           ...step,
 
           sourceIds:
@@ -1248,7 +1229,7 @@ async function buildWorkflowFromScratch(
           evidence,
 
           officialUrl,
-        };
+        });
       }
     );
 
@@ -1257,6 +1238,10 @@ async function buildWorkflowFromScratch(
    * STEP 9: BUILD CANDIDATE WORKFLOW
    * ============================================================
    */
+  extraction.missingInformation = [...new Set([
+    ...(extraction.missingInformation || []),
+    ...findUncoveredTradeTasks(rawQuery, groundedSteps),
+  ])];
   const candidateWorkflow = {
     steps:
       groundedSteps,
@@ -1483,7 +1468,10 @@ function toGraphJson(
       workflow.conflicts,
 
     missingInformation:
-      workflow.missingInformation,
+      workflow.status === 'verified' ? workflow.missingInformation : [...new Set([
+        ...(workflow.missingInformation || []),
+        ...findUncoveredTradeTasks(workflow.title, workflow.steps),
+      ])],
 
     verifiedBy:
       workflow.verifiedBy || null,
