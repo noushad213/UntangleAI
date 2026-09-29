@@ -20,6 +20,8 @@ export const VERIFIABLE_DOCUMENT_TYPES: { id: string; label: string }[] = [
   { id: 'income_certificate', label: 'Income Certificate' },
 ];
 
+const DEMO_AADHAAR_IMAGE_SHA256 = '4eaceee9cdca6f2e86a41900895f0a6ddfa94efc299421b33f40c1a9b01a981e';
+
 /**
  * Attempts to map a requirement title to a known verifiable document type.
  */
@@ -40,7 +42,7 @@ export function guessVerifiableDocumentType(title?: string): string | null {
 }
 
 /**
- * Converts a stored base64 dataUrl back to a Blob for verification.
+ * Converts a stored base64 dataUrl back to a Blob for local demo matching.
  */
 export function dataUrlToBlob(dataUrl: string): Blob {
   const parts = dataUrl.split(',');
@@ -53,64 +55,51 @@ export function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([byteNumbers], { type: mime });
 }
 
-/** Calls the type checker for a requirement resolved from the stored roadmap. */
 interface StoredRequirementReference {
-  workflowId: string;
-  stepId: string;
-  requirementIndex: number;
+  expectedDocumentType?: string;
+  expectedDocumentLabel?: string;
 }
 
+function getDocumentTypeLabel(type?: string): string | undefined {
+  return VERIFIABLE_DOCUMENT_TYPES.find((documentType) => documentType.id === type)?.label;
+}
+
+async function sha256(blob: Blob): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+/** Compares the upload with the one local demo fingerprint; no file leaves the browser. */
 export async function verifyDocumentType(
   fileOrBlob: Blob,
-  fileName: string,
-  requirement: StoredRequirementReference,
-  consentToThirdPartyOcr: boolean = true
+  requirement: StoredRequirementReference
 ): Promise<VerificationResult> {
-  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-  const formData = new FormData();
-  formData.append('document', fileOrBlob, fileName);
-  formData.append('workflowId', requirement.workflowId);
-  formData.append('stepId', requirement.stepId);
-  formData.append('requirementIndex', String(requirement.requirementIndex));
-  if (consentToThirdPartyOcr) {
-    formData.append('consentToThirdPartyOcr', 'true');
-  }
-
+  let detectedDocumentType: string | null = null;
   try {
-    const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/documents/verify`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      return {
-        valid: false,
-        status: 'error',
-        code: typeof data.code === 'string' ? data.code : 'VERIFICATION_UNAVAILABLE',
-        expectedDocumentType: data.expectedDocumentType,
-        message: 'We couldn’t check this document right now. Try again in a moment.',
-      };
+    if (await sha256(fileOrBlob) === DEMO_AADHAAR_IMAGE_SHA256) {
+      detectedDocumentType = 'aadhaar';
     }
-
-    return {
-      valid: Boolean(data.valid),
-      status: (data.status as 'match' | 'mismatch' | 'unverified') || (data.valid ? 'match' : 'error'),
-      code: data.code,
-      expectedDocumentType: data.expectedDocumentType,
-      detectedDocumentType: data.detectedDocumentType,
-      confidence: data.confidence,
-      verificationLevel: data.verificationLevel,
-      message: typeof data.message === 'string'
-        ? data.message
-        : data.valid ? 'Document type verified.' : 'We couldn’t confirm the document type. Upload a clear image or PDF, then try again.',
-    };
-  } catch (error) {
-    return {
-      valid: false,
-      status: 'error',
-      code: 'NETWORK_ERROR',
-      message: 'We couldn’t check this document right now. Try again in a moment.',
-    };
+  } catch {
+    // An unavailable browser digest behaves like any other non-matching upload.
   }
+
+  const expectedDocumentType = requirement.expectedDocumentType;
+  const expectedLabel = requirement.expectedDocumentLabel
+    || getDocumentTypeLabel(expectedDocumentType)
+    || 'the document required for this step';
+  const valid = detectedDocumentType === 'aadhaar' && expectedDocumentType === 'aadhaar';
+
+  return {
+    valid,
+    status: valid ? 'match' : 'mismatch',
+    code: valid ? 'LOCAL_DEMO_MATCH' : 'LOCAL_DEMO_MISMATCH',
+    expectedDocumentType,
+    detectedDocumentType,
+    verificationLevel: 'local_demo',
+    message: valid
+      ? 'Demo match: Aadhaar card.'
+      : detectedDocumentType
+        ? `Incorrect document. This is an Aadhaar card. Expected ${expectedLabel}.`
+        : `Incorrect document. Expected ${expectedLabel}.`,
+  };
 }

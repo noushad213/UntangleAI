@@ -37,16 +37,16 @@ export function DocumentVerificationBadge({
   onVerify,
   compact = false,
 }: DocumentVerificationBadgeProps) {
-  const { verificationStatus, detectedType, expectedType, verificationMessage } = document;
-  const mismatchMessage = detectedType && expectedType
+  const { verificationStatus, detectedType, expectedType, verificationMessage, verificationLevel } = document;
+  const mismatchMessage = verificationMessage || (detectedType && expectedType
     ? `This looks like a ${formatDocTypeName(detectedType)}. Upload the required ${formatDocTypeName(expectedType)} instead.`
-    : verificationMessage || 'This document does not match the required type. Upload the correct document.';
+    : 'This document does not match the required type. Upload the correct document.');
 
   if (verificationStatus === 'checking') {
     return (
-      <span className={`${styles.badgeContainer} ${styles.checking}`} title="Verifying document type via OCR...">
+      <span className={`${styles.badgeContainer} ${styles.checking}`} title="Checking the local demo rule">
         <RefreshCw size={11} className={styles.spin} />
-        <span>Verifying document...</span>
+        <span>Checking document...</span>
       </span>
     );
   }
@@ -60,8 +60,8 @@ export function DocumentVerificationBadge({
         <CheckCircle2 size={11} />
         <span>
           {compact
-            ? `Verified: ${formatDocTypeName(detectedType)}`
-            : `Type Verified: ${formatDocTypeName(detectedType)}`}
+            ? `${verificationLevel === 'local_demo' ? 'Demo match' : 'Verified'}: ${formatDocTypeName(detectedType)}`
+            : `${verificationLevel === 'local_demo' ? 'Demo match' : 'Type Verified'}: ${formatDocTypeName(detectedType)}`}
         </span>
       </span>
     );

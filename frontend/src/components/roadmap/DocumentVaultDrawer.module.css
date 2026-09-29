@@ -84,17 +84,18 @@
 
 .scanLine {
   position: absolute;
+  top: 50%;
   left: 8px;
   right: 8px;
   height: 2px;
   background: var(--color-brand-500);
   box-shadow: 0 0 12px var(--color-brand-500);
-  animation: scanDocument 1.7s ease-in-out infinite alternate;
+  animation: scanDocument 2s ease-in-out infinite;
 }
 
 @keyframes scanDocument {
-  from { transform: translateY(-32px); }
-  to { transform: translateY(32px); }
+  0%, 100% { transform: translateY(-32px); }
+  50% { transform: translateY(32px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

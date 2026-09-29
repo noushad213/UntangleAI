@@ -1,5 +1,6 @@
 const Workflow = require("../../../models/Workflow");
 const { makeError } = require("../../../utils/errors");
+const { normalizeDocumentType } = require("../document-types");
 
 function inferExpectedDocumentType(title) {
   if (typeof title !== "string") return null;
@@ -21,6 +22,12 @@ function createExpectedDocumentTypeResolver({ findById = (id) => Workflow.findBy
     const index = Number(requirementIndex);
     if (!workflowId || !stepId || !Number.isInteger(index) || index < 0) {
       throw makeError("INVALID_REQUEST", "Choose a document requirement from a saved roadmap before checking its type");
+    }
+
+    if (!/^[a-f\d]{24}$/i.test(workflowId)) {
+      const localExpectedType = normalizeDocumentType(req.body?.expectedDocumentType);
+      if (localExpectedType) return localExpectedType;
+      throw makeError("INVALID_REQUEST", "Choose a supported document requirement from the roadmap");
     }
 
     const workflow = await findById(workflowId);

@@ -94,18 +94,16 @@ export function useRoadmapProgress(process: CivicProcess) {
     });
   }, [process.id]);
 
-  // Upload and persist document (with auto-OCR verification when requirement type is known)
+  // Store the file locally and run the hardcoded demo check in the browser.
   const uploadDocument = useCallback(
     async (file: File, stepId: string, requirementId?: string): Promise<TrackedDocument> => {
       const base64 = await fileToBase64(file);
 
-      const req = requirementId
+      const requirement = requirementId
         ? process.steps.flatMap((s) => s.requirements || []).find((r) => r.id === requirementId)
         : undefined;
-      const guessedType = guessVerifiableDocumentType(req?.title);
-      const requirementIndex = process.steps
-        .find((step) => step.id === stepId)
-        ?.requirements?.findIndex((requirement) => requirement.id === requirementId) ?? -1;
+      const expectedType = guessVerifiableDocumentType(requirement?.title) || undefined;
+      const expectedLabel = requirement?.title || 'the document required for this step';
 
       const newDoc: TrackedDocument = {
         id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
@@ -118,8 +116,8 @@ export function useRoadmapProgress(process: CivicProcess) {
         uploadedAt: new Date().toISOString(),
         dataUrl: base64,
         status: 'attached_locally',
-        verificationStatus: guessedType ? 'checking' : undefined,
-        expectedType: guessedType || undefined,
+        verificationStatus: 'checking',
+        expectedType,
       };
 
       setTrackingState((prev) => {
@@ -139,69 +137,71 @@ export function useRoadmapProgress(process: CivicProcess) {
         return next;
       });
 
-      // If document type is identifiable, run OCR verification in background
-      if (guessedType && requirementIndex >= 0) {
-        const scanStartedAt = Date.now();
-        try {
-          const res = await verifyDocumentType(file, file.name, {
-            workflowId: process.id,
-            stepId,
-            requirementIndex,
-          }, true);
-          const remainingScanTime = 2000 - (Date.now() - scanStartedAt);
-          if (remainingScanTime > 0) {
-            await new Promise((resolve) => setTimeout(resolve, remainingScanTime));
-          }
+      let resultDocument = newDoc;
+      try {
+        const result = await verifyDocumentType(file, {
+          expectedDocumentType: expectedType,
+          expectedDocumentLabel: expectedLabel,
+        });
+        resultDocument = {
+          ...newDoc,
+          verificationStatus: result.valid ? 'verified' : 'mismatch',
+          detectedType: result.detectedDocumentType,
+          expectedType: result.expectedDocumentType || expectedType,
+          verificationMessage: result.message,
+          verificationConfidence: result.confidence,
+          verificationLevel: result.verificationLevel,
+        };
 
-          setTrackingState((prev) => {
-            const next: RoadmapTrackingState = {
-              ...prev,
-              documents: prev.documents.map((d) => {
-                if (d.id !== newDoc.id) return d;
-                return {
-                  ...d,
-                  verificationStatus: res.valid
-                    ? 'verified'
-                    : res.status === 'mismatch'
-                    ? 'mismatch'
-                    : 'unverified',
-                  detectedType: res.detectedDocumentType || undefined,
-                  expectedType: res.expectedDocumentType || guessedType,
-                  verificationMessage: res.message,
-                  verificationConfidence: res.confidence,
-                };
-              }),
-            };
-            saveTrackingState(process.id, next);
-            return next;
-          });
-        } catch {
-          const remainingScanTime = 2000 - (Date.now() - scanStartedAt);
-          if (remainingScanTime > 0) {
-            await new Promise((resolve) => setTimeout(resolve, remainingScanTime));
-          }
-
-          setTrackingState((prev) => {
-            const next: RoadmapTrackingState = {
-              ...prev,
-              documents: prev.documents.map((d) =>
-                d.id === newDoc.id
-                  ? {
-                      ...d,
-                      verificationStatus: 'unverified',
-                      expectedType: guessedType,
-                      verificationMessage: 'We couldn’t check this document right now. Try again in a moment.',
-                    }
-                  : d
-              ),
-            };
-            saveTrackingState(process.id, next);
-            return next;
-          });
-        }
+        setTrackingState((prev) => {
+          const next: RoadmapTrackingState = {
+            ...prev,
+            documents: prev.documents.map((document) =>
+              document.id === newDoc.id
+                ? {
+                    ...document,
+                    verificationStatus: result.valid ? 'verified' : 'mismatch',
+                    detectedType: result.detectedDocumentType,
+                    expectedType: result.expectedDocumentType || expectedType,
+                    verificationMessage: result.message,
+                    verificationConfidence: result.confidence,
+                    verificationLevel: result.verificationLevel,
+                  }
+                : document
+            ),
+          };
+          saveTrackingState(process.id, next);
+          return next;
+        });
+      } catch {
+        resultDocument = {
+          ...newDoc,
+          verificationStatus: 'mismatch',
+          expectedType,
+          verificationMessage: `Incorrect document. Expected ${expectedLabel}.`,
+          verificationLevel: 'local_demo',
+        };
+        setTrackingState((prev) => {
+          const next: RoadmapTrackingState = {
+            ...prev,
+            documents: prev.documents.map((document) =>
+              document.id === newDoc.id
+                ? {
+                    ...document,
+                    verificationStatus: 'mismatch',
+                    expectedType,
+                    verificationMessage: `Incorrect document. Expected ${expectedLabel}.`,
+                    verificationLevel: 'local_demo',
+                  }
+                : document
+            ),
+          };
+          saveTrackingState(process.id, next);
+          return next;
+        });
       }
 
-      return newDoc;
+      return resultDocument;
     },
     [process.id, process.steps]
   );
@@ -213,10 +213,9 @@ export function useRoadmapProgress(process: CivicProcess) {
       if (!doc || !doc.dataUrl) return null;
 
       const step = process.steps.find((item) => item.id === doc.stepId);
-      const requirementIndex = step?.requirements?.findIndex((item) => item.id === doc.requirementId) ?? -1;
-      const requirement = requirementIndex >= 0 ? step?.requirements?.[requirementIndex] : undefined;
+      const requirement = step?.requirements?.find((item) => item.id === doc.requirementId);
       const expectedType = guessVerifiableDocumentType(requirement?.title) || undefined;
-      if (!expectedType || requirementIndex < 0) return null;
+      const expectedLabel = requirement?.title || 'the document required for this step';
 
       setTrackingState((prev) => {
         const next: RoadmapTrackingState = {
@@ -231,11 +230,10 @@ export function useRoadmapProgress(process: CivicProcess) {
 
       try {
         const blob = dataUrlToBlob(doc.dataUrl);
-        const result = await verifyDocumentType(blob, doc.fileName, {
-          workflowId: process.id,
-          stepId: doc.stepId,
-          requirementIndex,
-        }, true);
+        const result = await verifyDocumentType(blob, {
+          expectedDocumentType: expectedType,
+          expectedDocumentLabel: expectedLabel,
+        });
 
         setTrackingState((prev) => {
           const next: RoadmapTrackingState = {
@@ -244,15 +242,12 @@ export function useRoadmapProgress(process: CivicProcess) {
               if (d.id !== docId) return d;
               return {
                 ...d,
-                verificationStatus: result.valid
-                  ? 'verified'
-                  : result.status === 'mismatch'
-                  ? 'mismatch'
-                  : 'unverified',
+                verificationStatus: result.valid ? 'verified' : 'mismatch',
                 detectedType: result.detectedDocumentType || undefined,
                 expectedType: result.expectedDocumentType || expectedType,
                 verificationMessage: result.message,
                 verificationConfidence: result.confidence,
+                verificationLevel: result.verificationLevel,
               };
             }),
           };

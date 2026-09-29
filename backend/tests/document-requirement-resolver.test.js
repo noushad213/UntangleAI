@@ -29,3 +29,18 @@ test("rejects a client-provided expected type without a stored requirement refer
     (error) => error.code === "INVALID_REQUEST"
   );
 });
+
+test("uses the supported type supplied by a local mock roadmap", async () => {
+  const resolve = createExpectedDocumentTypeResolver({
+    findById: async () => { throw new Error("Local roadmap IDs are not database IDs"); },
+  });
+  const type = await resolve({
+    body: {
+      workflowId: "pvt-ltd-delhi",
+      stepId: "step-dsc",
+      requirementIndex: "0",
+      expectedDocumentType: "pan",
+    },
+  });
+  assert.equal(type, "pan");
+});

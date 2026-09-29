@@ -15,6 +15,7 @@ export interface TrackedDocument {
   expectedType?: string | null;
   verificationMessage?: string;
   verificationConfidence?: number;
+  verificationLevel?: string;
 }
 
 export interface RoadmapTrackingState {

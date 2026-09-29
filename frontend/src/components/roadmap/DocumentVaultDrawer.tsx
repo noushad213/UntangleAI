@@ -10,6 +10,7 @@ import {
   FileText,
   ShieldCheck,
   CheckCircle2,
+  AlertTriangle,
   FileCheck,
   CalendarClock,
   ScanLine,
@@ -87,7 +88,9 @@ export function DocumentVaultDrawer({
   }, [process.steps, requirementDocumentsMap]);
 
   const totalMandatoryDocs = allRequirements.filter((r) => r.isMandatory).length;
-  const uploadedMandatoryDocs = allRequirements.filter((r) => r.isMandatory && !!r.document).length;
+  const uploadedMandatoryDocs = allRequirements.filter(
+    (requirement) => requirement.isMandatory && requirement.document?.verificationStatus === 'verified'
+  ).length;
   const isAllReady = totalMandatoryDocs > 0 && uploadedMandatoryDocs >= totalMandatoryDocs;
 
   const documentsByStep = React.useMemo(() => {
@@ -121,11 +124,16 @@ export function DocumentVaultDrawer({
     const file = e.target.files?.[0];
     if (!file || !activeUploadTarget) return;
 
+    const scanStartedAt = Date.now();
     try {
       setIsUploading(true);
       setScanningFileName(file.name);
       await onUploadDocument(file, activeUploadTarget.stepId, activeUploadTarget.requirementId);
     } finally {
+      const remainingAnimationTime = Math.max(0, 2000 - (Date.now() - scanStartedAt));
+      if (remainingAnimationTime > 0) {
+        await new Promise((resolve) => window.setTimeout(resolve, remainingAnimationTime));
+      }
       setIsUploading(false);
       setScanningFileName(null);
       setActiveUploadTarget(null);
@@ -147,8 +155,8 @@ export function DocumentVaultDrawer({
               <FileText size={48} strokeWidth={1.4} />
               <span className={styles.scanLine} />
             </div>
-            <strong>Scanning your document</strong>
-            <span>Checking {scanningFileName} with OCR…</span>
+            <strong>Checking document type</strong>
+            <span>Comparing {scanningFileName} with the local demo rule…</span>
           </div>
         </div>
       )}
@@ -285,7 +293,11 @@ export function DocumentVaultDrawer({
                   <div className={styles.uploadedFileRow}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 0 }}>
                       <div className={styles.fileNameMeta} title={req.document.fileName}>
-                        <CheckCircle2 size={13} style={{ color: 'var(--color-success-600)', flexShrink: 0 }} />
+                        {req.document.verificationStatus === 'mismatch' ? (
+                          <AlertTriangle size={13} style={{ color: 'var(--color-error-500)', flexShrink: 0 }} />
+                        ) : (
+                          <CheckCircle2 size={13} style={{ color: 'var(--color-success-600)', flexShrink: 0 }} />
+                        )}
                         <span>{req.document.fileName}</span>
                         <span>({formatFileSize(req.document.fileSize)})</span>
                       </div>
@@ -412,13 +424,12 @@ export function DocumentVaultDrawer({
             </div>
           )}
 
-          {/* Privacy & Sandbox Security Guarantee */}
           <div className={styles.privacyBanner}>
             <ShieldCheck size={16} style={{ color: 'var(--color-brand-600)', flexShrink: 0, marginTop: 2 }} />
             <div>
-              <strong>Stored on this device:</strong> Files remain in this browser and are not sent to
-              our servers. Browser storage is not encrypted, so do not add identity documents on a
-              shared or public device.
+              <strong>Local demo check:</strong> Only the supplied Aadhaar image matches this rule. It
+              does not verify document authenticity. Files stay in this browser and are not sent to
+              our servers. Browser storage is not encrypted, so avoid shared or public devices.
             </div>
           </div>
         </div>

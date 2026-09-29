@@ -5,7 +5,7 @@ const ALLOWED_MIME_TYPES = new Set(["application/pdf", "image/jpeg", "image/png"
 
 const uploadDocument = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 4, parts: 5 },
+  limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 5, parts: 6 },
   fileFilter(_req, file, callback) {
     if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
       const error = new Error("Upload a PDF, JPEG, or PNG document");
